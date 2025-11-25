@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0F0F0F;
+  --foreground: #E0E0E0;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Product Card Hover Effects */
+.product-card {
+  @apply bg-surface rounded-xl p-4 border border-transparent transition-all duration-300;
+}
+
+.product-card:hover {
+  @apply -translate-y-2 shadow-[0_12px_32px_rgba(0,255,157,0.25)] border-primary;
+}
+
+.product-card img.default {
+  @apply absolute inset-0 opacity-100 transition-opacity duration-300;
+}
+
+.product-card img.hover {
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+}
+
+.product-card:hover img.default {
+  @apply opacity-0;
+}
+
+.product-card:hover img.hover {
+  @apply opacity-100;
+}
+
+.sold-out {
+  @apply opacity-60 grayscale pointer-events-none;
+}
