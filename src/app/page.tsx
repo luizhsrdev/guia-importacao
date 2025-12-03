@@ -5,6 +5,7 @@ import {
   SignedOut,
   UserButton,
 } from '@clerk/nextjs';
+import AdminLink from '@/components/AdminLink';
 
 export default function Home() {
   return (
@@ -30,7 +31,8 @@ export default function Home() {
             </SignedOut>
 
             <SignedIn>
-              <UserButton afterSignOutUrl="/" />
+              <AdminLink />
+              <UserButton />
             </SignedIn>
           </div>
         </div>
