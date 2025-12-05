@@ -41,16 +41,34 @@ export default function ProductForm({
   ) => {
     setUploading(true);
     try {
-      const url = await uploadImageToCloudinary(file);
-      if (url) {
-        setFormData((prev) => ({ ...prev, [field]: url }));
-      } else {
-        alert('Erro ao fazer upload da imagem');
-      }
+      // Converter arquivo para base64
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+        console.log('Arquivo convertido para base64, enviando...');
+
+        const result = await uploadImageToCloudinary(base64Data);
+
+        if (result.success && result.url) {
+          setFormData((prev) => ({ ...prev, [field]: result.url! }));
+          console.log('Upload concluído com sucesso!');
+        } else {
+          console.error('Erro no upload:', result.error);
+          alert(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`);
+        }
+        setUploading(false);
+      };
+
+      reader.onerror = () => {
+        console.error('Erro ao ler arquivo');
+        alert('Erro ao ler arquivo');
+        setUploading(false);
+      };
     } catch (error) {
       console.error('Erro:', error);
       alert('Erro ao fazer upload da imagem');
-    } finally {
       setUploading(false);
     }
   };
@@ -151,7 +169,7 @@ export default function ProductForm({
       {/* Link Original (Privado) */}
       <div className="bg-danger/10 border border-danger/30 rounded-lg p-4">
         <label className="block text-danger mb-2 font-bold">
-          🔒 Link Original Xianyu (PRIVADO - Admin Only) *
+          Link Original Xianyu (PRIVADO - Admin Only) *
         </label>
         <input
           type="url"
@@ -169,7 +187,7 @@ export default function ProductForm({
           disabled={!formData.original_link}
           className="mt-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          🔗 Verificar Xianyu
+          Verificar Xianyu
         </button>
       </div>
 

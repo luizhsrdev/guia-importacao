@@ -25,7 +25,7 @@ export default function AdminLink() {
       href="/admin"
       className="px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger/90 transition-colors text-sm font-bold"
     >
-      🛠️ Admin
+      Admin
     </Link>
   );
 }

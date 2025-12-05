@@ -152,7 +152,7 @@ export default function ProductsClient({
                     </p>
                     <p>
                       <span className="font-semibold text-danger">
-                        🔒 Original:
+                        PRIVADO - Original:
                       </span>{' '}
                       <a
                         href={product.original_link}
@@ -171,7 +171,7 @@ export default function ProductsClient({
                       onClick={() => handleEdit(product)}
                       className="px-4 py-2 bg-primary text-background rounded-lg hover:bg-primary/90 transition-colors text-sm"
                     >
-                      ✏️ Editar
+                      Editar
                     </button>
                     <button
                       onClick={() =>
@@ -180,8 +180,8 @@ export default function ProductsClient({
                       className="px-4 py-2 bg-surface border border-textSecondary/20 text-textMain rounded-lg hover:bg-surface/80 transition-colors text-sm"
                     >
                       {product.is_sold_out
-                        ? '✅ Marcar Disponível'
-                        : '❌ Marcar Esgotado'}
+                        ? 'Marcar Disponível'
+                        : 'Marcar Esgotado'}
                     </button>
                     <button
                       onClick={() =>
@@ -189,13 +189,13 @@ export default function ProductsClient({
                       }
                       className="px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger/90 transition-colors text-sm"
                     >
-                      🔗 Verificar Xianyu
+                      Verificar Xianyu
                     </button>
                     <button
                       onClick={() => handleDelete(product.id)}
                       className="px-4 py-2 bg-danger/20 text-danger rounded-lg hover:bg-danger/30 transition-colors text-sm ml-auto"
                     >
-                      🗑️ Deletar
+                      Deletar
                     </button>
                   </div>
                 </div>

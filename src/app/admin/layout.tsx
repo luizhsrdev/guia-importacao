@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import AdminNav from '@/components/AdminNav';
 
 export default async function AdminLayout({
   children,
@@ -34,22 +35,9 @@ export default async function AdminLayout({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
               <h1 className="text-2xl font-bold text-primary">
-                🛠️ Painel Admin
+                Painel Admin
               </h1>
-              <nav className="flex gap-4">
-                <Link
-                  href="/admin/products"
-                  className="px-4 py-2 rounded-lg text-textSecondary hover:text-primary hover:bg-surface transition-colors"
-                >
-                  Produtos
-                </Link>
-                <Link
-                  href="/admin/sellers"
-                  className="px-4 py-2 rounded-lg text-textSecondary hover:text-primary hover:bg-surface transition-colors"
-                >
-                  Vendedores
-                </Link>
-              </nav>
+              <AdminNav />
             </div>
             <Link
               href="/"

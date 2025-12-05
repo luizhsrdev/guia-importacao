@@ -1,8 +1,11 @@
-import { getSellers, getNiches } from './actions';
+import { getSellers, getCategories } from './actions';
 import SellersClient from './SellersClient';
 
 export default async function SellersPage() {
-  const [sellers, niches] = await Promise.all([getSellers(), getNiches()]);
+  const [sellers, categories] = await Promise.all([
+    getSellers(),
+    getCategories(),
+  ]);
 
   const goldSellers = sellers.filter((s) => s.status === 'gold');
   const blacklistSellers = sellers.filter((s) => s.status === 'blacklist');
@@ -15,13 +18,12 @@ export default async function SellersPage() {
             Gerenciar Vendedores
           </h2>
           <p className="text-textSecondary">
-            🥇 {goldSellers.length} Gold | ❌ {blacklistSellers.length}{' '}
-            Blacklist
+            Gold: {goldSellers.length} | Blacklist: {blacklistSellers.length}
           </p>
         </div>
       </div>
 
-      <SellersClient sellers={sellers} niches={niches} />
+      <SellersClient sellers={sellers} categories={categories} />
     </div>
   );
 }

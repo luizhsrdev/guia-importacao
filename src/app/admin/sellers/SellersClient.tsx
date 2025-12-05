@@ -2,23 +2,24 @@
 
 import { useState } from 'react';
 import SellerForm from '@/components/SellerForm';
+import ImageLightbox from '@/components/ImageLightbox';
 import { deleteSeller } from './actions';
 import type { SellerFormData } from './actions';
 
 interface Seller extends SellerFormData {
   id: string;
   created_at?: string;
-  seller_niches?: { name: string } | null;
+  seller_categories?: { name: string } | null;
 }
 
 interface SellersClientProps {
   sellers: Seller[];
-  niches: Array<{ id: string; name: string }>;
+  categories: Array<{ id: string; name: string }>;
 }
 
 export default function SellersClient({
   sellers: initialSellers,
-  niches,
+  categories,
 }: SellersClientProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingSeller, setEditingSeller] = useState<Seller | null>(null);
@@ -78,7 +79,7 @@ export default function SellersClient({
           </h3>
           <SellerForm
             seller={editingSeller || undefined}
-            niches={niches}
+            categories={categories}
             onSuccess={handleFormSuccess}
             onCancel={handleCancel}
           />
@@ -105,7 +106,7 @@ export default function SellersClient({
               : 'bg-surface text-textSecondary hover:text-textMain'
           }`}
         >
-          🥇 Gold ({sellers.filter((s) => s.status === 'gold').length})
+          Gold ({sellers.filter((s) => s.status === 'gold').length})
         </button>
         <button
           onClick={() => setFilter('blacklist')}
@@ -115,8 +116,7 @@ export default function SellersClient({
               : 'bg-surface text-textSecondary hover:text-textMain'
           }`}
         >
-          ❌ Blacklist ({sellers.filter((s) => s.status === 'blacklist').length}
-          )
+          Blacklist ({sellers.filter((s) => s.status === 'blacklist').length})
         </button>
       </div>
 
@@ -136,42 +136,78 @@ export default function SellersClient({
                   : 'border-danger/50'
               } hover:shadow-lg transition-all`}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-bold text-textMain">
-                      {seller.name}
-                    </h3>
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-bold ${
-                        seller.status === 'gold'
-                          ? 'bg-primary/20 text-primary'
-                          : 'bg-danger/20 text-danger'
-                      }`}
-                    >
-                      {seller.status === 'gold' ? '🥇 Gold' : '❌ Blacklist'}
-                    </span>
-                  </div>
-                  {seller.seller_niches && (
-                    <p className="text-textSecondary text-sm">
-                      📦 Nicho: {seller.seller_niches.name}
-                    </p>
-                  )}
-                </div>
+              {/* Nome + Status Badge */}
+              <div className="flex items-center gap-3 mb-2">
+                <h3 className="text-xl font-bold text-textMain">
+                  {seller.name}
+                </h3>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-bold ${
+                    seller.status === 'gold'
+                      ? 'bg-primary/20 text-primary'
+                      : 'bg-danger/20 text-danger'
+                  }`}
+                >
+                  {seller.status === 'gold' ? 'Gold' : 'Blacklist'}
+                </span>
               </div>
+
+              {/* Categoria */}
+              {seller.seller_categories && (
+                <p className="text-textSecondary text-sm mb-4">
+                  Categoria: {seller.seller_categories.name}
+                </p>
+              )}
+
+              {/* Link do Perfil (AMBOS) */}
+              {seller.profile_link && (
+                <p className="text-textMain mb-3">
+                  <span className="font-semibold">Perfil:</span>{' '}
+                  <a
+                    href={seller.profile_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {seller.profile_link.substring(0, 50)}...
+                  </a>
+                </p>
+              )}
 
               {/* Conteúdo específico do status */}
               {seller.status === 'gold' ? (
-                <div className="space-y-2 mb-4">
-                  {seller.rating && (
+                <div className="space-y-3 mb-4">
+                  {/* Descrição */}
+                  {seller.notes && (
+                    <div className="p-4 bg-background rounded-lg">
+                      <p className="font-semibold text-primary mb-2">
+                        Descrição:
+                      </p>
+                      <p className="text-textSecondary text-sm">
+                        {seller.notes}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Link de Feedback */}
+                  {seller.feedback_link && (
                     <p className="text-textMain">
-                      <span className="font-semibold">Rating:</span>{' '}
-                      {seller.rating}
+                      <span className="font-semibold">Feedback:</span>{' '}
+                      <a
+                        href={seller.feedback_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {seller.feedback_link.substring(0, 50)}...
+                      </a>
                     </p>
                   )}
+
+                  {/* Link de Afiliado */}
                   {seller.affiliate_link && (
                     <p className="text-textMain">
-                      <span className="font-semibold">Link:</span>{' '}
+                      <span className="font-semibold">Link Afiliado:</span>{' '}
                       <a
                         href={seller.affiliate_link}
                         target="_blank"
@@ -182,53 +218,67 @@ export default function SellersClient({
                       </a>
                     </p>
                   )}
-                  {seller.notes && (
-                    <div className="mt-3 p-3 bg-background rounded-lg">
-                      <p className="text-textSecondary text-sm">
-                        {seller.notes}
-                      </p>
-                    </div>
+
+                  {/* Rating */}
+                  {seller.rating && (
+                    <p className="text-textMain">
+                      <span className="font-semibold">Rating:</span>{' '}
+                      {seller.rating}
+                    </p>
                   )}
                 </div>
               ) : (
                 <div className="space-y-3 mb-4">
+                  {/* Motivo da Blacklist */}
                   {seller.blacklist_reason && (
                     <div className="p-4 bg-danger/10 border border-danger/30 rounded-lg">
-                      <p className="font-semibold text-danger mb-2">
-                        ⚠️ Motivo:
-                      </p>
+                      <p className="font-semibold text-danger mb-2">Motivo:</p>
                       <p className="text-textMain text-sm">
                         {seller.blacklist_reason}
                       </p>
                     </div>
                   )}
-                  {seller.evidence_images &&
-                    seller.evidence_images.length > 0 && (
-                      <div>
-                        <p className="font-semibold text-danger mb-2">
-                          📸 Provas ({seller.evidence_images.length}):
-                        </p>
-                        <div className="grid grid-cols-4 gap-2">
-                          {seller.evidence_images.map((url, index) => (
-                            <a
-                              key={index}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block"
-                            >
-                              <img
-                                src={url}
-                                alt={`Evidence ${index + 1}`}
-                                className="w-full h-24 object-cover rounded-lg hover:opacity-80 transition-opacity"
-                              />
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+
+                  {/* Link de Prova */}
+                  {seller.proof_link && (
+                    <p className="text-textMain">
+                      <span className="font-semibold">Link de Prova:</span>{' '}
+                      <a
+                        href={seller.proof_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-danger hover:underline"
+                      >
+                        {seller.proof_link.substring(0, 50)}...
+                      </a>
+                    </p>
+                  )}
                 </div>
               )}
+
+              {/* IMAGENS (ÚLTIMO ELEMENTO) */}
+              {seller.status === 'gold' && seller.image_url && (
+                <div className="mb-4">
+                  <ImageLightbox
+                    src={seller.image_url}
+                    alt={seller.name}
+                  />
+                </div>
+              )}
+
+              {seller.status === 'blacklist' &&
+                seller.evidence_images &&
+                seller.evidence_images.length > 0 && (
+                  <div className="mb-4">
+                    <p className="font-semibold text-danger mb-2">
+                      Evidências ({seller.evidence_images.length}):
+                    </p>
+                    <ImageLightbox
+                      src={seller.evidence_images}
+                      alt={`${seller.name} - Evidências`}
+                    />
+                  </div>
+                )}
 
               {/* Ações */}
               <div className="flex gap-3">
@@ -236,13 +286,13 @@ export default function SellersClient({
                   onClick={() => handleEdit(seller)}
                   className="px-4 py-2 bg-primary text-background rounded-lg hover:bg-primary/90 transition-colors text-sm"
                 >
-                  ✏️ Editar
+                  Editar
                 </button>
                 <button
                   onClick={() => handleDelete(seller.id)}
                   className="px-4 py-2 bg-danger/20 text-danger rounded-lg hover:bg-danger/30 transition-colors text-sm ml-auto"
                 >
-                  🗑️ Deletar
+                  Deletar
                 </button>
               </div>
             </div>

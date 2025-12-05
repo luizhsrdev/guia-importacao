@@ -18,29 +18,59 @@ export interface ProductFormData {
 
 // Função helper para upload de imagem no Cloudinary
 export async function uploadImageToCloudinary(
-  file: File
-): Promise<string | null> {
+  base64Data: string
+): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    console.log('Iniciando upload no Cloudinary...');
+    console.log('Tamanho do base64:', base64Data.length, 'caracteres');
+    console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
 
-    return new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: 'xianyu-products',
-            resource_type: 'image',
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result?.secure_url || null);
-          }
-        )
-        .end(buffer);
+    // Verificar se as credenciais estão configuradas
+    if (!process.env.CLOUDINARY_CLOUD_NAME ||
+        !process.env.CLOUDINARY_API_KEY ||
+        !process.env.CLOUDINARY_API_SECRET) {
+      console.error('Credenciais do Cloudinary não configuradas!');
+      return {
+        success: false,
+        error: 'Credenciais do Cloudinary não configuradas. Verifique o .env.local'
+      };
+    }
+
+    // Verificar se o base64 está no formato correto
+    if (!base64Data.startsWith('data:image/')) {
+      console.error('Formato de imagem inválido. Deve começar com "data:image/"');
+      return {
+        success: false,
+        error: 'Formato de imagem inválido'
+      };
+    }
+
+    console.log('Credenciais OK, enviando para Cloudinary...');
+
+    const result = await cloudinary.uploader.upload(base64Data, {
+      folder: 'xianyu-products',
+      resource_type: 'image',
+      timeout: 60000, // 60 segundos de timeout
     });
+
+    console.log('Upload concluído com sucesso!');
+    console.log('URL:', result.secure_url);
+    console.log('Tamanho:', result.bytes, 'bytes');
+    console.log('Dimensões:', result.width, 'x', result.height);
+
+    return { success: true, url: result.secure_url };
   } catch (error) {
-    console.error('Erro ao fazer upload:', error);
-    return null;
+    console.error('Erro detalhado ao fazer upload:');
+    console.error('Tipo do erro:', error?.constructor?.name);
+    console.error('Mensagem:', error instanceof Error ? error.message : error);
+    if (error instanceof Error && 'http_code' in error) {
+      console.error('HTTP Code:', (error as any).http_code);
+    }
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : JSON.stringify(error)
+    };
   }
 }
 

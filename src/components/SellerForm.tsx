@@ -7,46 +7,104 @@ import {
   uploadEvidenceImages,
   type SellerFormData,
 } from '@/app/admin/sellers/actions';
+import { uploadImageToCloudinary } from '@/app/admin/products/actions';
 
 interface SellerFormProps {
   seller?: SellerFormData;
-  niches: Array<{ id: string; name: string }>;
+  categories: Array<{ id: string; name: string }>;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
 export default function SellerForm({
   seller,
-  niches,
+  categories,
   onSuccess,
   onCancel,
 }: SellerFormProps) {
   const [formData, setFormData] = useState<SellerFormData>({
     name: seller?.name || '',
     status: seller?.status || 'gold',
-    niche_id: seller?.niche_id || '',
+    category_id: seller?.category_id || '',
     notes: seller?.notes || '',
     rating: seller?.rating || '',
     affiliate_link: seller?.affiliate_link || '',
+    profile_link: seller?.profile_link || '',
+    feedback_link: seller?.feedback_link || '',
+    image_url: seller?.image_url || '',
     blacklist_reason: seller?.blacklist_reason || '',
+    proof_link: seller?.proof_link || '',
     evidence_images: seller?.evidence_images || [],
   });
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Upload de imagem única (para Gold)
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+        console.log('Arquivo convertido para base64, enviando...');
+
+        const result = await uploadImageToCloudinary(base64Data);
+
+        if (result.success && result.url) {
+          setFormData((prev) => ({ ...prev, image_url: result.url! }));
+          console.log('Upload concluído com sucesso!');
+        } else {
+          console.error('Erro no upload:', result.error);
+          alert(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`);
+        }
+        setUploading(false);
+      };
+
+      reader.onerror = () => {
+        console.error('Erro ao ler arquivo');
+        alert('Erro ao ler arquivo');
+        setUploading(false);
+      };
+    } catch (error) {
+      console.error('Erro:', error);
+      alert('Erro ao fazer upload da imagem');
+      setUploading(false);
+    }
+  };
+
   const handleEvidenceUpload = async (files: FileList) => {
     setUploading(true);
     try {
       const fileArray = Array.from(files);
-      const urls = await uploadEvidenceImages(fileArray);
-      if (urls.length > 0) {
+      console.log(`Convertendo ${fileArray.length} arquivos para base64...`);
+
+      // Converter todos os arquivos para base64
+      const base64Promises = fileArray.map((file) => {
+        return new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+        });
+      });
+
+      const base64Array = await Promise.all(base64Promises);
+      console.log('Arquivos convertidos, enviando...');
+
+      const result = await uploadEvidenceImages(base64Array);
+
+      if (result.success && result.urls) {
         setFormData((prev) => ({
           ...prev,
-          evidence_images: [...(prev.evidence_images || []), ...urls],
+          evidence_images: [...(prev.evidence_images || []), ...result.urls!],
         }));
+        console.log(`Upload concluído: ${result.urls.length} imagens`);
       } else {
-        alert('Erro ao fazer upload das imagens');
+        console.error('Erro no upload:', result.error);
+        alert(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`);
       }
     } catch (error) {
       console.error('Erro:', error);
@@ -119,7 +177,7 @@ export default function SellerForm({
               }
               className="accent-primary"
             />
-            <span className="text-primary font-bold">🥇 Lista Dourada</span>
+            <span className="text-primary font-bold">Lista Dourada</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -134,70 +192,85 @@ export default function SellerForm({
               }
               className="accent-danger"
             />
-            <span className="text-danger font-bold">❌ Blacklist</span>
+            <span className="text-danger font-bold">Blacklist</span>
           </label>
         </div>
       </div>
 
-      {/* Nicho */}
+      {/* Categoria */}
       <div>
-        <label className="block text-textMain mb-2">Nicho</label>
+        <label className="block text-textMain mb-2">Categoria</label>
         <select
-          value={formData.niche_id}
+          value={formData.category_id}
           onChange={(e) =>
-            setFormData((prev) => ({ ...prev, niche_id: e.target.value }))
+            setFormData((prev) => ({ ...prev, category_id: e.target.value }))
           }
           className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
         >
-          <option value="">Selecione um nicho</option>
-          {niches.map((niche) => (
-            <option key={niche.id} value={niche.id}>
-              {niche.name}
+          <option value="">Selecione uma categoria</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Campos condicionais para GOLD */}
+      {/* Link do Perfil (AMBOS) */}
+      <div>
+        <label className="block text-textMain mb-2">
+          Link do Perfil (Xianyu)
+        </label>
+        <input
+          type="url"
+          value={formData.profile_link}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              profile_link: e.target.value,
+            }))
+          }
+          placeholder="https://..."
+          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+        />
+        <p className="text-textSecondary text-sm mt-1">
+          {formData.status === 'gold'
+            ? 'Link do perfil do vendedor no Xianyu'
+            : 'Link do perfil do vendedor golpista (usuários premium poderão ver)'}
+        </p>
+      </div>
+
+      {/* Campos específicos GOLD */}
       {formData.status === 'gold' && (
         <>
-          {/* Rating */}
-          <div>
-            <label className="block text-textMain mb-2">Rating</label>
-            <input
-              type="text"
-              value={formData.rating}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, rating: e.target.value }))
-              }
-              placeholder="Ex: 5.0 ⭐"
-              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
-            />
-          </div>
-
-          {/* Link de Afiliado */}
+          {/* Upload de Imagem */}
           <div>
             <label className="block text-textMain mb-2">
-              Link de Afiliado (opcional)
+              Imagem do Vendedor
             </label>
+            {formData.image_url && (
+              <img
+                src={formData.image_url}
+                alt="Preview"
+                className="w-full h-48 object-cover rounded-lg mb-2"
+              />
+            )}
             <input
-              type="url"
-              value={formData.affiliate_link}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  affiliate_link: e.target.value,
-                }))
-              }
-              placeholder="https://..."
-              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleImageUpload(file);
+              }}
+              disabled={uploading}
+              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90"
             />
           </div>
 
-          {/* Notas */}
+          {/* Descrição */}
           <div>
             <label className="block text-textMain mb-2">
-              Notas / Observações
+              Descrição / Observações
             </label>
             <textarea
               value={formData.notes}
@@ -205,20 +278,59 @@ export default function SellerForm({
                 setFormData((prev) => ({ ...prev, notes: e.target.value }))
               }
               rows={4}
-              placeholder="Informações úteis sobre este vendedor..."
+              placeholder="Informações úteis sobre este vendedor confiável..."
               className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
             />
+          </div>
+
+          {/* Link de Feedback */}
+          <div>
+            <label className="block text-textMain mb-2">
+              Link de Feedback
+            </label>
+            <input
+              type="url"
+              value={formData.feedback_link}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  feedback_link: e.target.value,
+                }))
+              }
+              placeholder="https://... (link para avaliações, feedback, etc)"
+              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+            />
+            <p className="text-textSecondary text-sm mt-1">
+              Link para página com feedbacks positivos sobre o vendedor
+            </p>
+          </div>
+
+          {/* Rating */}
+          <div>
+            <label className="block text-textMain mb-2">Rating</label>
+            <select
+              value={formData.rating}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, rating: e.target.value }))
+              }
+              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+            >
+              <option value="">Selecione um rating</option>
+              <option value="5.0 Estrelas">5.0 Estrelas</option>
+              <option value="4.0 Estrelas">4.0 Estrelas</option>
+              <option value="3.0 Estrelas">3.0 Estrelas</option>
+            </select>
           </div>
         </>
       )}
 
-      {/* Campos condicionais para BLACKLIST */}
+      {/* Campos específicos BLACKLIST */}
       {formData.status === 'blacklist' && (
         <>
-          {/* Motivo */}
+          {/* Motivo da Blacklist */}
           <div className="bg-danger/10 border border-danger/30 rounded-lg p-4">
             <label className="block text-danger mb-2 font-bold">
-              ⚠️ Motivo da Blacklist *
+              Motivo da Blacklist *
             </label>
             <textarea
               required
@@ -230,15 +342,37 @@ export default function SellerForm({
                 }))
               }
               rows={4}
-              placeholder="Descreva o motivo pelo qual este vendedor está na blacklist..."
+              placeholder="Descreva detalhadamente o motivo pelo qual este vendedor está na blacklist..."
               className="w-full px-4 py-2 bg-surface border border-danger/50 rounded-lg text-textMain focus:border-danger focus:outline-none"
             />
           </div>
 
-          {/* Upload de Provas */}
+          {/* Link de Prova/Discussão */}
           <div>
             <label className="block text-textMain mb-2">
-              Provas (Imagens) *
+              Link de Prova/Discussão
+            </label>
+            <input
+              type="url"
+              value={formData.proof_link}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  proof_link: e.target.value,
+                }))
+              }
+              placeholder="https://... (link para discussão, post, reclamação, etc)"
+              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+            />
+            <p className="text-textSecondary text-sm mt-1">
+              Link adicional para discussões, posts ou outras provas online
+            </p>
+          </div>
+
+          {/* Upload de Imagens de Evidência */}
+          <div>
+            <label className="block text-textMain mb-2">
+              Imagens de Evidência
             </label>
             <p className="text-textSecondary text-sm mb-2">
               Faça upload de prints/fotos que comprovem o motivo da blacklist
