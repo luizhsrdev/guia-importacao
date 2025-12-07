@@ -6,6 +6,7 @@ import {
   UserButton,
 } from '@clerk/nextjs';
 import AdminLink from '@/components/AdminLink';
+import VendedoresLink from '@/components/VendedoresLink';
 import ProductCard from '@/components/ProductCard';
 import { getPublicProducts } from './actions';
 
@@ -37,6 +38,7 @@ export default async function Home() {
               </SignedOut>
 
               <SignedIn>
+                <VendedoresLink />
                 <AdminLink />
                 <UserButton />
               </SignedIn>
