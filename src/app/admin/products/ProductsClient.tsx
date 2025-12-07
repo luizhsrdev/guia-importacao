@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductForm from '@/components/ProductForm';
 import { deleteProduct, toggleSoldOut } from './actions';
 import type { ProductFormData } from './actions';
@@ -19,13 +19,49 @@ export default function ProductsClient({
   products: initialProducts,
   categories,
 }: ProductsClientProps) {
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState(initialProducts);
 
+  // Fechar modal com ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsModalOpen(false);
+    };
+    if (isModalOpen) {
+      window.addEventListener('keydown', handleEsc);
+    }
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen]);
+
+  // Prevenir scroll quando modal está aberto
+  useEffect(() => {
+    if (isModalOpen) {
+      // Calcular largura da scrollbar
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      // Aplicar padding para compensar
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      // Remover ao fechar
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isModalOpen]);
+
+  const handleNew = () => {
+    setEditingProduct(null);
+    setIsModalOpen(true);
+  };
+
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setShowForm(true);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -52,40 +88,79 @@ export default function ProductsClient({
   };
 
   const handleFormSuccess = () => {
-    setShowForm(false);
+    setIsModalOpen(false);
     setEditingProduct(null);
     window.location.reload(); // Recarregar para pegar novos dados
   };
 
   const handleCancel = () => {
-    setShowForm(false);
+    setIsModalOpen(false);
     setEditingProduct(null);
   };
 
   return (
     <div>
       {/* Botão Adicionar */}
-      {!showForm && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="mb-6 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 transition-colors"
-        >
-          + Adicionar Novo Produto
-        </button>
-      )}
+      <button
+        onClick={handleNew}
+        className="mb-6 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 transition-colors"
+      >
+        + Adicionar Novo Produto
+      </button>
 
-      {/* Formulário */}
-      {showForm && (
-        <div className="mb-8 p-6 bg-surface rounded-xl border border-primary/20">
-          <h3 className="text-xl font-bold text-primary mb-4">
-            {editingProduct ? 'Editar Produto' : 'Novo Produto'}
-          </h3>
-          <ProductForm
-            product={editingProduct || undefined}
-            categories={categories}
-            onSuccess={handleFormSuccess}
-            onCancel={handleCancel}
-          />
+      {/* Modal de Formulário */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-black/70 animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsModalOpen(false);
+              setEditingProduct(null);
+            }
+          }}
+        >
+          <div
+            className="bg-surface border border-zinc-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl animate-scaleIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header do Modal */}
+            <div className="sticky top-0 bg-surface border-b border-zinc-800 px-6 md:px-8 py-4 flex items-center justify-between z-10">
+              <h2 className="text-2xl font-bold text-textMain">
+                {editingProduct ? 'Editar Produto' : 'Novo Produto'}
+              </h2>
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setEditingProduct(null);
+                }}
+                className="text-textSecondary hover:text-textMain transition-colors p-2 rounded-lg hover:bg-zinc-800"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Formulário */}
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)] px-6 md:px-8 py-6 modal-scroll">
+              <ProductForm
+                product={editingProduct || undefined}
+                categories={categories}
+                onSuccess={handleFormSuccess}
+                onCancel={handleCancel}
+              />
+            </div>
+          </div>
         </div>
       )}
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SellerForm from '@/components/SellerForm';
 import ImageLightbox from '@/components/ImageLightbox';
 import { deleteSeller } from './actions';
@@ -21,14 +21,50 @@ export default function SellersClient({
   sellers: initialSellers,
   categories,
 }: SellersClientProps) {
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSeller, setEditingSeller] = useState<Seller | null>(null);
   const [sellers, setSellers] = useState(initialSellers);
   const [filter, setFilter] = useState<'all' | 'gold' | 'blacklist'>('all');
 
+  // Fechar modal com ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsModalOpen(false);
+    };
+    if (isModalOpen) {
+      window.addEventListener('keydown', handleEsc);
+    }
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen]);
+
+  // Prevenir scroll quando modal está aberto
+  useEffect(() => {
+    if (isModalOpen) {
+      // Calcular largura da scrollbar
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      // Aplicar padding para compensar
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      // Remover ao fechar
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isModalOpen]);
+
+  const handleNew = () => {
+    setEditingSeller(null);
+    setIsModalOpen(true);
+  };
+
   const handleEdit = (seller: Seller) => {
     setEditingSeller(seller);
-    setShowForm(true);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -44,13 +80,13 @@ export default function SellersClient({
   };
 
   const handleFormSuccess = () => {
-    setShowForm(false);
+    setIsModalOpen(false);
     setEditingSeller(null);
     window.location.reload();
   };
 
   const handleCancel = () => {
-    setShowForm(false);
+    setIsModalOpen(false);
     setEditingSeller(null);
   };
 
@@ -62,27 +98,66 @@ export default function SellersClient({
   return (
     <div>
       {/* Botão Adicionar */}
-      {!showForm && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="mb-6 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 transition-colors"
-        >
-          + Adicionar Novo Vendedor
-        </button>
-      )}
+      <button
+        onClick={handleNew}
+        className="mb-6 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 transition-colors"
+      >
+        + Adicionar Novo Vendedor
+      </button>
 
-      {/* Formulário */}
-      {showForm && (
-        <div className="mb-8 p-6 bg-surface rounded-xl border border-primary/20">
-          <h3 className="text-xl font-bold text-primary mb-4">
-            {editingSeller ? 'Editar Vendedor' : 'Novo Vendedor'}
-          </h3>
-          <SellerForm
-            seller={editingSeller || undefined}
-            categories={categories}
-            onSuccess={handleFormSuccess}
-            onCancel={handleCancel}
-          />
+      {/* Modal de Formulário */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-black/70 animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsModalOpen(false);
+              setEditingSeller(null);
+            }
+          }}
+        >
+          <div
+            className="bg-surface border border-zinc-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl animate-scaleIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header do Modal */}
+            <div className="sticky top-0 bg-surface border-b border-zinc-800 px-6 md:px-8 py-4 flex items-center justify-between z-10">
+              <h2 className="text-2xl font-bold text-textMain">
+                {editingSeller ? 'Editar Vendedor' : 'Novo Vendedor'}
+              </h2>
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setEditingSeller(null);
+                }}
+                className="text-textSecondary hover:text-textMain transition-colors p-2 rounded-lg hover:bg-zinc-800"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Formulário */}
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)] px-6 md:px-8 py-6 modal-scroll">
+              <SellerForm
+                seller={editingSeller || undefined}
+                categories={categories}
+                onSuccess={handleFormSuccess}
+                onCancel={handleCancel}
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -142,10 +217,10 @@ export default function SellersClient({
                   {seller.name}
                 </h3>
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-bold ${
+                  className={`px-3 py-1 rounded-full text-sm font-medium border ${
                     seller.status === 'gold'
-                      ? 'bg-primary/20 text-primary'
-                      : 'bg-danger/20 text-danger'
+                      ? 'bg-primary/20 text-primary border-primary/30'
+                      : 'bg-red-600/20 text-red-400 border-red-600/30'
                   }`}
                 >
                   {seller.status === 'gold' ? 'Gold' : 'Blacklist'}
@@ -167,7 +242,9 @@ export default function SellersClient({
                     href={seller.profile_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline"
+                    className={`hover:underline ${
+                      seller.status === 'blacklist' ? 'text-danger' : 'text-primary'
+                    }`}
                   >
                     {seller.profile_link.substring(0, 50)}...
                   </a>
@@ -284,7 +361,11 @@ export default function SellersClient({
               <div className="flex gap-3">
                 <button
                   onClick={() => handleEdit(seller)}
-                  className="px-4 py-2 bg-primary text-background rounded-lg hover:bg-primary/90 transition-colors text-sm"
+                  className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                    seller.status === 'blacklist'
+                      ? 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20'
+                      : 'bg-primary text-background hover:bg-primary/90 shadow-lg shadow-primary/20'
+                  }`}
                 >
                   Editar
                 </button>

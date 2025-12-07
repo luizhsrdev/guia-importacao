@@ -100,7 +100,9 @@ export default function ProductForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Título */}
       <div>
-        <label className="block text-textMain mb-2">Título *</label>
+        <label className="block text-sm font-medium text-textSecondary mb-2">
+          Título *
+        </label>
         <input
           type="text"
           required
@@ -108,13 +110,16 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, title: e.target.value }))
           }
-          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          placeholder="Digite o título do produto..."
         />
       </div>
 
       {/* Preço */}
       <div>
-        <label className="block text-textMain mb-2">Preço (CNY) *</label>
+        <label className="block text-sm font-medium text-textSecondary mb-2">
+          Preço (CNY) *
+        </label>
         <input
           type="text"
           required
@@ -123,19 +128,21 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, price_cny: e.target.value }))
           }
           placeholder="Ex: ¥ 299"
-          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
       {/* Categoria */}
       <div>
-        <label className="block text-textMain mb-2">Categoria</label>
+        <label className="block text-sm font-medium text-textSecondary mb-2">
+          Categoria
+        </label>
         <select
           value={formData.category_id}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, category_id: e.target.value }))
           }
-          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         >
           <option value="">Selecione uma categoria</option>
           {categories.map((cat) => (
@@ -148,7 +155,7 @@ export default function ProductForm({
 
       {/* Link de Afiliado */}
       <div>
-        <label className="block text-textMain mb-2">
+        <label className="block text-sm font-medium text-textSecondary mb-2">
           Link de Afiliado (CSSBuy) *
         </label>
         <input
@@ -162,13 +169,13 @@ export default function ProductForm({
             }))
           }
           placeholder="https://..."
-          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
       {/* Link Original (Privado) */}
-      <div className="bg-danger/10 border border-danger/30 rounded-lg p-4">
-        <label className="block text-danger mb-2 font-bold">
+      <div className="bg-red-950/20 border border-red-800 rounded-lg p-4">
+        <label className="block text-sm font-medium text-red-400 mb-2">
           Link Original Xianyu (PRIVADO - Admin Only) *
         </label>
         <input
@@ -179,13 +186,13 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, original_link: e.target.value }))
           }
           placeholder="https://..."
-          className="w-full px-4 py-2 bg-surface border border-danger/50 rounded-lg text-textMain focus:border-danger focus:outline-none"
+          className="w-full px-4 py-3 bg-[#2A2A2A] border border-red-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all"
         />
         <button
           type="button"
           onClick={() => window.open(formData.original_link, '_blank')}
           disabled={!formData.original_link}
-          className="mt-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           Verificar Xianyu
         </button>
@@ -195,7 +202,9 @@ export default function ProductForm({
       <div className="grid grid-cols-2 gap-4">
         {/* Imagem Principal */}
         <div>
-          <label className="block text-textMain mb-2">Imagem Principal</label>
+          <label className="block text-sm font-medium text-textSecondary mb-2">
+            Imagem Principal
+          </label>
           {formData.image_main && (
             <img
               src={formData.image_main}
@@ -211,13 +220,15 @@ export default function ProductForm({
               if (file) handleImageUpload(file, 'image_main');
             }}
             disabled={uploading}
-            className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90"
+            className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
           />
         </div>
 
         {/* Imagem Hover */}
         <div>
-          <label className="block text-textMain mb-2">Imagem Hover</label>
+          <label className="block text-sm font-medium text-textSecondary mb-2">
+            Imagem Hover
+          </label>
           {formData.image_hover && (
             <img
               src={formData.image_hover}
@@ -233,7 +244,7 @@ export default function ProductForm({
               if (file) handleImageUpload(file, 'image_hover');
             }}
             disabled={uploading}
-            className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90"
+            className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
           />
         </div>
       </div>
@@ -247,19 +258,22 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, is_sold_out: e.target.checked }))
           }
-          className="w-5 h-5 accent-danger"
+          className="w-5 h-5 rounded accent-danger cursor-pointer"
         />
-        <label htmlFor="sold_out" className="text-textMain">
+        <label
+          htmlFor="sold_out"
+          className="text-sm font-medium text-textSecondary cursor-pointer"
+        >
           Marcar como esgotado
         </label>
       </div>
 
       {/* Botões */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 pt-4 border-t border-zinc-800">
         <button
           type="submit"
           disabled={saving || uploading}
-          className="flex-1 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary/20"
         >
           {saving
             ? 'Salvando...'
@@ -271,7 +285,7 @@ export default function ProductForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 bg-surface border border-textSecondary/20 text-textMain rounded-lg hover:bg-surface/80 transition-colors"
+            className="px-6 py-3 bg-zinc-800 border border-zinc-700 text-textMain rounded-lg hover:bg-zinc-700 transition-all font-semibold"
           >
             Cancelar
           </button>
@@ -279,7 +293,9 @@ export default function ProductForm({
       </div>
 
       {uploading && (
-        <p className="text-primary text-center">Fazendo upload da imagem...</p>
+        <p className="text-primary text-center text-sm font-medium">
+          Fazendo upload da imagem...
+        </p>
       )}
     </form>
   );

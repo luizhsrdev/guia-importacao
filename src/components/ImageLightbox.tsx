@@ -26,13 +26,18 @@ export default function ImageLightbox({
     };
 
     if (isOpen) {
+      // Calcular largura da scrollbar
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
     };
   }, [isOpen]);
 
@@ -173,37 +178,6 @@ export default function ImageLightbox({
           </div>
         </div>
       )}
-
-      {/* Estilos de animação */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-
-        .animate-scaleIn {
-          animation: scaleIn 0.3s ease-out;
-        }
-      `}</style>
     </>
   );
 }

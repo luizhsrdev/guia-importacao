@@ -148,7 +148,7 @@ export default function SellerForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Nome */}
       <div>
-        <label className="block text-textMain mb-2">Nome do Vendedor *</label>
+        <label className="block text-sm font-medium text-textSecondary mb-2">Nome do Vendedor *</label>
         <input
           type="text"
           required
@@ -156,13 +156,13 @@ export default function SellerForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, name: e.target.value }))
           }
-          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
       {/* Status */}
       <div>
-        <label className="block text-textMain mb-2">Status *</label>
+        <label className="block text-sm font-medium text-textSecondary mb-2">Status *</label>
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -199,13 +199,13 @@ export default function SellerForm({
 
       {/* Categoria */}
       <div>
-        <label className="block text-textMain mb-2">Categoria</label>
+        <label className="block text-sm font-medium text-textSecondary mb-2">Categoria</label>
         <select
           value={formData.category_id}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, category_id: e.target.value }))
           }
-          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         >
           <option value="">Selecione uma categoria</option>
           {categories.map((category) => (
@@ -217,9 +217,22 @@ export default function SellerForm({
       </div>
 
       {/* Link do Perfil (AMBOS) */}
-      <div>
-        <label className="block text-textMain mb-2">
+      <div
+        className={
+          formData.status === 'blacklist'
+            ? 'bg-red-950/20 border border-red-800 rounded-lg p-4'
+            : ''
+        }
+      >
+        <label
+          className={`block text-sm font-medium mb-2 ${
+            formData.status === 'blacklist'
+              ? 'text-red-400'
+              : 'text-textSecondary'
+          }`}
+        >
           Link do Perfil (Xianyu)
+          {formData.status === 'blacklist' && ' *'}
         </label>
         <input
           type="url"
@@ -231,7 +244,11 @@ export default function SellerForm({
             }))
           }
           placeholder="https://..."
-          className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+          className={`w-full px-4 py-3 bg-[#2A2A2A] rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none transition-all ${
+            formData.status === 'blacklist'
+              ? 'border border-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500'
+              : 'border border-zinc-700 focus:ring-1 focus:ring-primary focus:border-primary'
+          }`}
         />
         <p className="text-textSecondary text-sm mt-1">
           {formData.status === 'gold'
@@ -245,7 +262,7 @@ export default function SellerForm({
         <>
           {/* Upload de Imagem */}
           <div>
-            <label className="block text-textMain mb-2">
+            <label className="block text-sm font-medium text-textSecondary mb-2">
               Imagem do Vendedor
             </label>
             {formData.image_url && (
@@ -263,13 +280,13 @@ export default function SellerForm({
                 if (file) handleImageUpload(file);
               }}
               disabled={uploading}
-              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90"
+              className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
             />
           </div>
 
           {/* Descrição */}
           <div>
-            <label className="block text-textMain mb-2">
+            <label className="block text-sm font-medium text-textSecondary mb-2">
               Descrição / Observações
             </label>
             <textarea
@@ -279,13 +296,13 @@ export default function SellerForm({
               }
               rows={4}
               placeholder="Informações úteis sobre este vendedor confiável..."
-              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
           </div>
 
           {/* Link de Feedback */}
           <div>
-            <label className="block text-textMain mb-2">
+            <label className="block text-sm font-medium text-textSecondary mb-2">
               Link de Feedback
             </label>
             <input
@@ -298,7 +315,7 @@ export default function SellerForm({
                 }))
               }
               placeholder="https://... (link para avaliações, feedback, etc)"
-              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
             <p className="text-textSecondary text-sm mt-1">
               Link para página com feedbacks positivos sobre o vendedor
@@ -307,13 +324,13 @@ export default function SellerForm({
 
           {/* Rating */}
           <div>
-            <label className="block text-textMain mb-2">Rating</label>
+            <label className="block text-sm font-medium text-textSecondary mb-2">Rating</label>
             <select
               value={formData.rating}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, rating: e.target.value }))
               }
-              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             >
               <option value="">Selecione um rating</option>
               <option value="5.0 Estrelas">5.0 Estrelas</option>
@@ -328,8 +345,8 @@ export default function SellerForm({
       {formData.status === 'blacklist' && (
         <>
           {/* Motivo da Blacklist */}
-          <div className="bg-danger/10 border border-danger/30 rounded-lg p-4">
-            <label className="block text-danger mb-2 font-bold">
+          <div className="bg-red-950/20 border border-red-800 rounded-lg p-4">
+            <label className="block text-red-400 mb-2 font-medium">
               Motivo da Blacklist *
             </label>
             <textarea
@@ -343,13 +360,13 @@ export default function SellerForm({
               }
               rows={4}
               placeholder="Descreva detalhadamente o motivo pelo qual este vendedor está na blacklist..."
-              className="w-full px-4 py-2 bg-surface border border-danger/50 rounded-lg text-textMain focus:border-danger focus:outline-none"
+              className="w-full px-4 py-3 bg-[#2A2A2A] border border-red-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all"
             />
           </div>
 
           {/* Link de Prova/Discussão */}
           <div>
-            <label className="block text-textMain mb-2">
+            <label className="block text-sm font-medium text-textSecondary mb-2">
               Link de Prova/Discussão
             </label>
             <input
@@ -362,7 +379,7 @@ export default function SellerForm({
                 }))
               }
               placeholder="https://... (link para discussão, post, reclamação, etc)"
-              className="w-full px-4 py-2 bg-surface border border-textSecondary/20 rounded-lg text-textMain focus:border-primary focus:outline-none"
+              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
             <p className="text-textSecondary text-sm mt-1">
               Link adicional para discussões, posts ou outras provas online
@@ -371,7 +388,7 @@ export default function SellerForm({
 
           {/* Upload de Imagens de Evidência */}
           <div>
-            <label className="block text-textMain mb-2">
+            <label className="block text-sm font-medium text-textSecondary mb-2">
               Imagens de Evidência
             </label>
             <p className="text-textSecondary text-sm mb-2">
@@ -410,18 +427,22 @@ export default function SellerForm({
                 if (files && files.length > 0) handleEvidenceUpload(files);
               }}
               disabled={uploading}
-              className="w-full px-4 py-2 bg-surface border border-danger/50 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-danger file:text-white hover:file:bg-danger/90"
+              className="w-full px-4 py-2 bg-[#2A2A2A] border border-red-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer"
             />
           </div>
         </>
       )}
 
       {/* Botões */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 pt-4 border-t border-zinc-800">
         <button
           type="submit"
           disabled={saving || uploading}
-          className="flex-1 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`flex-1 px-6 py-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
+            formData.status === 'blacklist'
+              ? 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20'
+              : 'bg-primary text-background hover:bg-primary/90 shadow-lg shadow-primary/20'
+          }`}
         >
           {saving
             ? 'Salvando...'
@@ -433,7 +454,7 @@ export default function SellerForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 bg-surface border border-textSecondary/20 text-textMain rounded-lg hover:bg-surface/80 transition-colors"
+            className="px-6 py-3 bg-zinc-800 border border-zinc-700 text-textMain rounded-lg hover:bg-zinc-700 transition-all font-semibold"
           >
             Cancelar
           </button>
@@ -441,7 +462,7 @@ export default function SellerForm({
       </div>
 
       {uploading && (
-        <p className="text-primary text-center">
+        <p className="text-primary text-center text-sm font-medium">
           Fazendo upload das imagens...
         </p>
       )}
