@@ -42,3 +42,18 @@ export async function getPublicCategories() {
 
   return data || [];
 }
+
+// Buscar vendedores (para usuários premium)
+export async function getPublicSellers() {
+  const { data, error } = await supabase
+    .from('sellers')
+    .select('*, seller_categories(id, name, slug)')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Erro ao buscar vendedores:', error);
+    return [];
+  }
+
+  return data || [];
+}

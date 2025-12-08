@@ -27,7 +27,6 @@ export default function SellerForm({
     status: seller?.status || 'gold',
     category_id: seller?.category_id || '',
     notes: seller?.notes || '',
-    rating: seller?.rating || '',
     affiliate_link: seller?.affiliate_link || '',
     profile_link: seller?.profile_link || '',
     feedback_link: seller?.feedback_link || '',
@@ -320,23 +319,6 @@ export default function SellerForm({
             <p className="text-textSecondary text-sm mt-1">
               Link para página com feedbacks positivos sobre o vendedor
             </p>
-          </div>
-
-          {/* Rating */}
-          <div>
-            <label className="block text-sm font-medium text-textSecondary mb-2">Rating</label>
-            <select
-              value={formData.rating}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, rating: e.target.value }))
-              }
-              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-            >
-              <option value="">Selecione um rating</option>
-              <option value="5.0 Estrelas">5.0 Estrelas</option>
-              <option value="4.0 Estrelas">4.0 Estrelas</option>
-              <option value="3.0 Estrelas">3.0 Estrelas</option>
-            </select>
           </div>
         </>
       )}

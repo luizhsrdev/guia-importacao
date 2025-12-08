@@ -1,182 +1,125 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ImageLightboxProps {
-  src: string | string[];
+  src: string;
   alt: string;
-  className?: string;
 }
 
-export default function ImageLightbox({
-  src,
-  alt,
-  className = '',
-}: ImageLightboxProps) {
+export default function ImageLightbox({ src, alt }: ImageLightboxProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const images = Array.isArray(src) ? src : [src];
-  const hasMultiple = images.length > 1;
-
-  // Fechar com ESC
+  // Garantir que está no cliente
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
-    };
+    setMounted(true);
+  }, []);
 
+  // Prevenir scroll do body quando modal está aberto
+  useEffect(() => {
     if (isOpen) {
-      // Calcular largura da scrollbar
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-      document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     };
   }, [isOpen]);
 
-  const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  // Fechar com ESC
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
 
-  const openLightbox = (index: number = 0) => {
-    setCurrentIndex(index);
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen]);
+
+  const handleOpen = () => {
+    setIsClosing(false);
     setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsClosing(true);
+    // Aguardar animação de saída antes de remover do DOM
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 200); // Mesma duração da animação
   };
 
   return (
     <>
-      {/* Preview / Thumbnails */}
-      {hasMultiple ? (
-        <div className={`grid grid-cols-3 gap-2 ${className}`}>
-          {images.map((image, index) => (
-            <div
-              key={index}
-              onClick={() => openLightbox(index)}
-              className="relative aspect-square cursor-pointer group overflow-hidden rounded-lg"
-            >
-              <img
-                src={image}
-                alt={`${alt} ${index + 1}`}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className={className}>
-          <img
-            src={images[0]}
-            alt={alt}
-            onClick={() => openLightbox(0)}
-            className="w-full max-w-[300px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
-          />
-        </div>
-      )}
+      {/* Thumbnail clicável */}
+      <img
+        src={src}
+        alt={alt}
+        onClick={handleOpen}
+        className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+      />
 
-      {/* Lightbox Modal */}
-      {isOpen && (
+      {/* Modal via Portal com animações */}
+      {mounted && isOpen && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xl animate-fadeIn"
-          onClick={() => setIsOpen(false)}
+          className={`
+            fixed inset-0 z-[99999] flex items-center justify-center backdrop-blur-xl bg-black/80
+            ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}
+          `}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={handleClose}
         >
-          {/* Container da imagem */}
+          {/* Botão Fechar */}
+          <button
+            onClick={handleClose}
+            className={`
+              absolute top-4 right-4 z-[100000] text-white hover:text-white/80 transition-all
+              ${isClosing ? 'opacity-0' : 'opacity-100'}
+            `}
+            aria-label="Fechar"
+            style={{
+              fontSize: '48px',
+              lineHeight: '48px',
+              width: '48px',
+              height: '48px',
+              transition: 'opacity 200ms'
+            }}
+          >
+            ×
+          </button>
+
+          {/* Container da Imagem com Zoom */}
           <div
-            className="relative max-w-[90vw] max-h-[90vh] animate-scaleIn"
+            className={`
+              relative flex items-center justify-center p-8
+              ${isClosing
+                ? 'animate-zoom-out-95'
+                : 'animate-zoom-in-95'
+              }
+            `}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Imagem */}
             <img
-              src={images[currentIndex]}
+              src={src}
               alt={alt}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              className="max-w-[85vw] max-h-[85vh] object-contain rounded-xl shadow-2xl"
+              style={{ display: 'block' }}
             />
-
-            {/* Botão fechar */}
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute -top-12 right-0 w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
-              aria-label="Fechar"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            {/* Navegação (múltiplas imagens) */}
-            {hasMultiple && (
-              <>
-                {/* Botão anterior */}
-                <button
-                  onClick={handlePrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-sm"
-                  aria-label="Anterior"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-
-                {/* Botão próximo */}
-                <button
-                  onClick={handleNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-sm"
-                  aria-label="Próximo"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-
-                {/* Indicador de posição */}
-                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white text-sm">
-                  {currentIndex + 1} / {images.length}
-                </div>
-              </>
-            )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

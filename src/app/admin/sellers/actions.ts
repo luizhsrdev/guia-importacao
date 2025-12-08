@@ -10,7 +10,6 @@ export interface SellerFormData {
   status: 'gold' | 'blacklist';
   category_id?: string; // Renomeado de niche_id
   notes?: string; // Descrição (usado para ambos)
-  rating?: string;
   affiliate_link?: string;
   profile_link?: string; // Link do perfil Xianyu (ambos)
   feedback_link?: string; // Link de feedback (apenas Gold)
@@ -122,7 +121,6 @@ export async function createSeller(formData: SellerFormData) {
     status: formData.status,
     category_id: formData.category_id || null,
     notes: formData.notes || null,
-    rating: formData.rating || null,
     affiliate_link: formData.affiliate_link || null,
     profile_link: formData.profile_link || null,
     feedback_link: formData.feedback_link || null,
@@ -154,7 +152,6 @@ export async function updateSeller(formData: SellerFormData) {
       status: formData.status,
       category_id: formData.category_id || null,
       notes: formData.notes || null,
-      rating: formData.rating || null,
       affiliate_link: formData.affiliate_link || null,
       profile_link: formData.profile_link || null,
       feedback_link: formData.feedback_link || null,

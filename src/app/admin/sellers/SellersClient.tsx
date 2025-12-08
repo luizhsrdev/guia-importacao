@@ -295,14 +295,6 @@ export default function SellersClient({
                       </a>
                     </p>
                   )}
-
-                  {/* Rating */}
-                  {seller.rating && (
-                    <p className="text-textMain">
-                      <span className="font-semibold">Rating:</span>{' '}
-                      {seller.rating}
-                    </p>
-                  )}
                 </div>
               ) : (
                 <div className="space-y-3 mb-4">
@@ -350,10 +342,15 @@ export default function SellersClient({
                     <p className="font-semibold text-danger mb-2">
                       Evidências ({seller.evidence_images.length}):
                     </p>
-                    <ImageLightbox
-                      src={seller.evidence_images}
-                      alt={`${seller.name} - Evidências`}
-                    />
+                    <div className="grid grid-cols-3 gap-2">
+                      {seller.evidence_images.map((img, index) => (
+                        <ImageLightbox
+                          key={index}
+                          src={img}
+                          alt={`${seller.name} - Prova ${index + 1}`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
 

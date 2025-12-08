@@ -216,27 +216,35 @@ export default function ProductsClient({
                   <div className="space-y-1 text-sm text-textSecondary mb-4">
                     <p>
                       <span className="font-semibold">Afiliado:</span>{' '}
-                      <a
-                        href={product.affiliate_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {product.affiliate_link.substring(0, 50)}...
-                      </a>
+                      {product.affiliate_link ? (
+                        <a
+                          href={product.affiliate_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {product.affiliate_link.substring(0, 50)}...
+                        </a>
+                      ) : (
+                        <span className="text-textSecondary italic">Não cadastrado</span>
+                      )}
                     </p>
                     <p>
                       <span className="font-semibold text-danger">
                         PRIVADO - Original:
                       </span>{' '}
-                      <a
-                        href={product.original_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-danger hover:underline"
-                      >
-                        {product.original_link.substring(0, 50)}...
-                      </a>
+                      {product.original_link ? (
+                        <a
+                          href={product.original_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-danger hover:underline"
+                        >
+                          {product.original_link.substring(0, 50)}...
+                        </a>
+                      ) : (
+                        <span className="text-textSecondary italic">Não cadastrado</span>
+                      )}
                     </p>
                   </div>
 
