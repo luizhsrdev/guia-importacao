@@ -1,7 +1,7 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import cloudinary from '@/lib/cloudinary';
 
 export interface SellerFormData {
@@ -136,6 +136,7 @@ export async function createSeller(formData: SellerFormData) {
   }
 
   revalidatePath('/admin/sellers');
+  revalidateTag('sellers'); // Invalida cache da home
   return { success: true };
 }
 
@@ -168,6 +169,7 @@ export async function updateSeller(formData: SellerFormData) {
   }
 
   revalidatePath('/admin/sellers');
+  revalidateTag('sellers'); // Invalida cache da home
   return { success: true };
 }
 
@@ -181,6 +183,7 @@ export async function deleteSeller(id: string) {
   }
 
   revalidatePath('/admin/sellers');
+  revalidateTag('sellers'); // Invalida cache da home
   return { success: true };
 }
 
