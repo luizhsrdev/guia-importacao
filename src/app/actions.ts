@@ -19,7 +19,17 @@ export const getPublicProducts = unstable_cache(
   async () => {
     const { data, error } = await supabase
       .from('products')
-      .select('id, title, price_cny, affiliate_link, is_sold_out, image_main, image_hover, category_id')
+      .select(`
+        id,
+        title,
+        price_cny,
+        affiliate_link,
+        is_sold_out,
+        image_main,
+        image_hover,
+        category_id,
+        category:product_categories(name, slug)
+      `)
       .order('created_at', { ascending: false });
 
     if (error) {

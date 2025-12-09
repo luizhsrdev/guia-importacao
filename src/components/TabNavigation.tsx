@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useRef, useEffect, useState } from 'react';
 
 interface Tab {
   id: string;
@@ -12,43 +11,28 @@ interface Tab {
 const tabs: Tab[] = [
   { id: 'produtos', label: 'Produtos', isPremium: false },
   { id: 'vendedores', label: 'Vendedores', isPremium: true },
-  // Futuras abas (comentadas por enquanto):
-  // { id: 'planilhas', label: 'Planilhas', isPremium: true },
-  // { id: 'grupos', label: 'Grupos', isPremium: true },
-  // { id: 'ajuda', label: 'Ajuda', isPremium: true },
 ];
 
 interface TabNavigationProps {
   onTabChange: (tabId: string) => void;
   activeTab: string;
+  userStatus: {
+    isAuthenticated: boolean;
+    isPremium: boolean;
+    isAdmin: boolean;
+  };
 }
 
 export default function TabNavigation({
   onTabChange,
   activeTab,
+  userStatus,
 }: TabNavigationProps) {
-  const { user, isLoaded } = useUser();
-
-  const [userPremium, setUserPremium] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
-  // Verificar status premium
-  useEffect(() => {
-    if (!isLoaded || !user) return;
-
-    fetch('/api/check-premium', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id }),
-    })
-      .then((res) => res.json())
-      .then((data) => setUserPremium(data.isPremium || data.isAdmin))
-      .catch(() => setUserPremium(false));
-  }, [user, isLoaded]);
-
-  // Atualizar posição do indicador animado
+  // Atualizar posição do indicador
   useEffect(() => {
     const activeTabElement = tabRefs.current[activeTab];
     if (activeTabElement) {
@@ -64,20 +48,27 @@ export default function TabNavigation({
       return;
     }
 
-    // Se não estiver logado, redireciona para login
-    if (!user) {
+    // Se não estiver logado, redireciona
+    if (!userStatus.isAuthenticated) {
       window.location.href = '/sign-in';
       return;
     }
 
-    // Se for premium/admin, muda direto
-    if (userPremium) {
+    // Se for premium/admin, muda direto (SEM DELAY!)
+    if (userStatus.isPremium || userStatus.isAdmin) {
       onTabChange(tab.id);
       return;
     }
 
     // Se não for premium, abre modal
     setShowModal(true);
+  };
+
+  // Determinar se deve mostrar cadeado (CALCULADO NO SERVIDOR)
+  const shouldShowLock = (tab: Tab) => {
+    if (!tab.isPremium) return false;
+    if (!userStatus.isAuthenticated) return true;
+    return !(userStatus.isPremium || userStatus.isAdmin);
   };
 
   const handleUpgrade = () => {
@@ -94,12 +85,11 @@ export default function TabNavigation({
 
   return (
     <>
-      {/* Carrossel de Abas */}
       <div className="relative border-b border-zinc-800 mb-8">
-        <div className="flex gap-2 relative overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 relative">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
-            const isLocked = tab.isPremium && !userPremium && user;
+            const showLock = shouldShowLock(tab);
 
             return (
               <button
@@ -120,15 +110,15 @@ export default function TabNavigation({
                 <span className="flex items-center gap-2">
                   {tab.label}
 
-                  {/* Badge Premium */}
+                  {/* Badge Premium (PRÉ-CALCULADO - SEM FLASH!) */}
                   {tab.isPremium && (
                     <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
                       Premium
                     </span>
                   )}
 
-                  {/* Cadeado visual */}
-                  {isLocked && (
+                  {/* Cadeado (PRÉ-CALCULADO - SEM FLASH!) */}
+                  {showLock && (
                     <svg
                       className="w-3 h-3"
                       fill="currentColor"
@@ -146,7 +136,7 @@ export default function TabNavigation({
             );
           })}
 
-          {/* Indicador animado (sublinhado) estilo Apple */}
+          {/* Indicador animado */}
           <div
             className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
             style={{
@@ -160,11 +150,11 @@ export default function TabNavigation({
       {/* Modal Premium */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-black/70 animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-black/80 animate-in fade-in duration-200"
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-surface border border-zinc-800 rounded-xl max-w-2xl w-full p-8 shadow-2xl animate-scaleIn"
+            className="bg-surface border border-zinc-800 rounded-xl max-w-2xl w-full p-8 shadow-2xl animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

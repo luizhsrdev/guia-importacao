@@ -78,7 +78,10 @@ export async function uploadImageToCloudinary(
 export async function getProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select(`
+      *,
+      category:product_categories(id, name, slug)
+    `)
     .order('created_at', { ascending: false });
 
   if (error) {

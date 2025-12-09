@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import {
   createProduct,
   updateProduct,
@@ -39,7 +40,20 @@ export default function ProductForm({
     file: File,
     field: 'image_main' | 'image_hover'
   ) => {
+    // Validar tamanho do arquivo ANTES de converter
+    const maxSizeMB = 5;
+    const fileSizeMB = file.size / (1024 * 1024);
+
+    if (fileSizeMB > maxSizeMB) {
+      toast.error(
+        `Imagem muito grande (${fileSizeMB.toFixed(1)}MB). Máximo: ${maxSizeMB}MB`,
+        { duration: 5000 }
+      );
+      return;
+    }
+
     setUploading(true);
+
     try {
       // Converter arquivo para base64
       const reader = new FileReader();
@@ -47,28 +61,54 @@ export default function ProductForm({
 
       reader.onload = async () => {
         const base64Data = reader.result as string;
+
+        // Validar tamanho do base64
+        const base64SizeBytes = (base64Data.length * 3) / 4;
+        const base64SizeMB = base64SizeBytes / (1024 * 1024);
+
+        if (base64SizeMB > maxSizeMB) {
+          toast.error(
+            `Base64 muito grande (${base64SizeMB.toFixed(1)}MB). Máximo: ${maxSizeMB}MB`,
+            { duration: 5000 }
+          );
+          setUploading(false);
+          return;
+        }
+
         console.log('Arquivo convertido para base64, enviando...');
 
         const result = await uploadImageToCloudinary(base64Data);
 
         if (result.success && result.url) {
           setFormData((prev) => ({ ...prev, [field]: result.url! }));
+          toast.success('Imagem enviada com sucesso!', { duration: 3000 });
           console.log('Upload concluído com sucesso!');
         } else {
           console.error('Erro no upload:', result.error);
-          alert(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`);
+          toast.error(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`, {
+            duration: 5000,
+          });
         }
         setUploading(false);
       };
 
       reader.onerror = () => {
         console.error('Erro ao ler arquivo');
-        alert('Erro ao ler arquivo');
+        toast.error('Erro ao ler arquivo', { duration: 4000 });
         setUploading(false);
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro:', error);
-      alert('Erro ao fazer upload da imagem');
+
+      // Detectar erro 413 (Payload Too Large)
+      if (error.message?.includes('413') || error.message?.includes('1 MB limit')) {
+        toast.error(
+          'Imagem muito grande! Reduza o tamanho e tente novamente.',
+          { duration: 6000 }
+        );
+      } else {
+        toast.error('Erro ao fazer upload da imagem', { duration: 5000 });
+      }
       setUploading(false);
     }
   };
@@ -83,14 +123,26 @@ export default function ProductForm({
         : await createProduct(formData);
 
       if (result.success) {
-        alert('Produto salvo com sucesso!');
+        toast.success(
+          product?.id ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!',
+          { duration: 3000 }
+        );
         onSuccess?.();
       } else {
-        alert('Erro ao salvar produto: ' + result.error);
+        toast.error('Erro ao salvar produto: ' + result.error, { duration: 5000 });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro:', error);
-      alert('Erro ao salvar produto');
+
+      // Detectar erro 413 (Payload Too Large)
+      if (error.message?.includes('413') || error.message?.includes('1 MB limit')) {
+        toast.error(
+          'Dados muito grandes! Reduza o tamanho das imagens e tente novamente.',
+          { duration: 6000 }
+        );
+      } else {
+        toast.error('Erro ao salvar produto', { duration: 5000 });
+      }
     } finally {
       setSaving(false);
     }
@@ -203,7 +255,7 @@ export default function ProductForm({
         {/* Imagem Principal */}
         <div>
           <label className="block text-sm font-medium text-textSecondary mb-2">
-            Imagem Principal
+            Imagem Principal <span className="text-xs text-zinc-500">(Máx: 5MB)</span>
           </label>
           {formData.image_main && (
             <img
@@ -227,7 +279,7 @@ export default function ProductForm({
         {/* Imagem Hover */}
         <div>
           <label className="block text-sm font-medium text-textSecondary mb-2">
-            Imagem Hover
+            Imagem Hover <span className="text-xs text-zinc-500">(Máx: 5MB)</span>
           </label>
           {formData.image_hover && (
             <img

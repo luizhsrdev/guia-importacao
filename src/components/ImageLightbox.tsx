@@ -6,9 +6,14 @@ import { createPortal } from 'react-dom';
 interface ImageLightboxProps {
   src: string;
   alt: string;
+  thumbnailClassName?: string;
 }
 
-export default function ImageLightbox({ src, alt }: ImageLightboxProps) {
+export default function ImageLightbox({
+  src,
+  alt,
+  thumbnailClassName = "w-full h-32 object-cover rounded-lg"
+}: ImageLightboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -68,7 +73,7 @@ export default function ImageLightbox({ src, alt }: ImageLightboxProps) {
         src={src}
         alt={alt}
         onClick={handleOpen}
-        className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+        className={`${thumbnailClassName} cursor-pointer hover:opacity-80 transition-opacity`}
       />
 
       {/* Modal via Portal com animações */}

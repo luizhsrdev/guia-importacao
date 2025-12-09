@@ -33,36 +33,48 @@ export default function SellerCard({ seller }: SellerCardProps) {
           : 'border-red-600/30 hover:border-red-600 hover:shadow-lg hover:shadow-red-600/20'
       }`}
     >
-      {/* Header: Nome + Badge */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-textMain mb-2">
+      {/* LINHA 1: Nome + Categoria + Badge */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xl font-bold text-textMain mb-1 truncate">
             {seller.name}
           </h3>
-          <span
-            className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-              isGold
-                ? 'bg-primary/20 text-primary border border-primary/30'
-                : 'bg-red-600/20 text-red-400 border border-red-600/30'
-            }`}
-          >
-            {isGold ? 'Lista Dourada' : 'Blacklist'}
-          </span>
+
+          {/* Categoria */}
+          {seller.seller_categories && (
+            <div className="text-sm text-textSecondary">
+              {seller.seller_categories.name}
+            </div>
+          )}
         </div>
+
+        {/* Badge Gold/Blacklist */}
+        <span
+          className={`inline-block px-3 py-1 rounded-full text-sm font-medium ml-4 whitespace-nowrap ${
+            isGold
+              ? 'bg-primary/20 text-primary border border-primary/30'
+              : 'bg-red-600/20 text-red-400 border border-red-600/30'
+          }`}
+        >
+          {isGold ? 'Lista Dourada' : 'Blacklist'}
+        </span>
       </div>
 
-      {/* Categoria */}
-      {seller.seller_categories && (
-        <div className="text-sm text-textSecondary mb-4">
-          <span className="font-medium">Categoria:</span>{' '}
-          {seller.seller_categories.name}
+      {/* FOTO DO VENDEDOR (quadrada, centralizada) */}
+      {seller.image_url && (
+        <div className="mb-4">
+          <ImageLightbox
+            src={seller.image_url}
+            alt={seller.name}
+            thumbnailClassName="w-full aspect-square object-cover rounded-lg"
+          />
         </div>
       )}
 
-      {/* Conteúdo condicional Gold/Blacklist */}
+      {/* CONTEÚDO CONDICIONAL (Gold vs Blacklist) */}
       {isGold ? (
         <>
-          {/* Descrição em quadrado destacado (igual ao Blacklist) */}
+          {/* Descrição Gold */}
           {seller.notes && (
             <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-4">
               <h4 className="text-primary font-medium mb-2">Descrição:</h4>
@@ -72,8 +84,8 @@ export default function SellerCard({ seller }: SellerCardProps) {
             </div>
           )}
 
-          {/* Links */}
-          <div className="flex flex-col gap-2 mb-4">
+          {/* Links Gold */}
+          <div className="flex flex-col gap-2">
             {seller.profile_link && (
               <a
                 href={seller.profile_link}
@@ -110,44 +122,29 @@ export default function SellerCard({ seller }: SellerCardProps) {
         </>
       ) : (
         <>
-          {/* Motivo do golpe */}
+          {/* Motivo Blacklist */}
           {seller.blacklist_reason && (
             <div className="bg-red-950/20 border border-red-800 rounded-lg p-4 mb-4">
-              <h4 className="text-danger font-semibold mb-2 flex items-center gap-2">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
-                Motivo da Blacklist:
-              </h4>
+              <h4 className="text-red-400 font-medium mb-2">Motivo:</h4>
               <p className="text-textSecondary text-sm leading-relaxed">
                 {seller.blacklist_reason}
               </p>
             </div>
           )}
 
-          {/* Link do perfil (cuidado) */}
+          {/* Link Blacklist */}
           {seller.profile_link && (
             <a
               href={seller.profile_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-red-600/20 text-danger border border-red-600/30 px-4 py-2 rounded-lg text-center font-medium hover:bg-red-600/30 transition-all mb-4"
+              className="block bg-red-600/20 text-red-400 border border-red-600/30 px-4 py-2 rounded-lg text-center font-medium hover:bg-red-600/30 transition-all mb-4"
             >
               Ver Perfil (Cuidado!)
             </a>
           )}
 
-          {/* Link de prova */}
+          {/* Link de prova adicional */}
           {seller.proof_link && (
             <a
               href={seller.proof_link}
@@ -158,51 +155,27 @@ export default function SellerCard({ seller }: SellerCardProps) {
               Ver Link de Prova
             </a>
           )}
+
+          {/* Provas Blacklist */}
+          {seller.evidence_images && seller.evidence_images.length > 0 && (
+            <div className="mt-4">
+              <h4 className="text-textSecondary text-sm font-medium mb-2">
+                Provas do Golpe:
+              </h4>
+              <div className="grid grid-cols-3 gap-2">
+                {seller.evidence_images.map((img, index) => (
+                  <ImageLightbox
+                    key={index}
+                    src={img}
+                    alt={`Prova ${index + 1}`}
+                    thumbnailClassName="w-full aspect-square object-cover rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
-
-      {/* FOTO PRINCIPAL (última, antes de provas) */}
-      {seller.image_url && (
-        <div className="mt-4">
-          <h4 className="text-textSecondary text-sm font-medium mb-2">
-            Foto do Vendedor:
-          </h4>
-          <ImageLightbox src={seller.image_url} alt={seller.name} />
-        </div>
-      )}
-
-      {/* PROVAS (apenas Blacklist) */}
-      {!isGold &&
-        seller.evidence_images &&
-        seller.evidence_images.length > 0 && (
-          <div className="mt-4">
-            <h4 className="text-danger text-sm font-semibold mb-2 flex items-center gap-2">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              Evidências do Golpe ({seller.evidence_images.length}):
-            </h4>
-            <div className="grid grid-cols-3 gap-2">
-              {seller.evidence_images.map((img, index) => (
-                <ImageLightbox
-                  key={index}
-                  src={img}
-                  alt={`${seller.name} - Prova ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
     </div>
   );
 }

@@ -215,6 +215,33 @@ export default function SellerForm({
         </select>
       </div>
 
+      {/* FOTO DO VENDEDOR (PARA AMBOS - GOLD E BLACKLIST) */}
+      <div>
+        <label className="block text-sm font-medium text-textSecondary mb-2">
+          Foto do Vendedor (Quadrada - Máx: 5MB)
+        </label>
+        {formData.image_url && (
+          <img
+            src={formData.image_url}
+            alt="Preview"
+            className="w-32 h-32 aspect-square object-cover rounded-lg mb-2"
+          />
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleImageUpload(file);
+          }}
+          disabled={uploading}
+          className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
+        />
+        <p className="text-textSecondary text-sm mt-1">
+          Foto do perfil do vendedor (formato quadrado recomendado)
+        </p>
+      </div>
+
       {/* Link do Perfil (AMBOS) */}
       <div
         className={
@@ -259,30 +286,6 @@ export default function SellerForm({
       {/* Campos específicos GOLD */}
       {formData.status === 'gold' && (
         <>
-          {/* Upload de Imagem */}
-          <div>
-            <label className="block text-sm font-medium text-textSecondary mb-2">
-              Imagem do Vendedor
-            </label>
-            {formData.image_url && (
-              <img
-                src={formData.image_url}
-                alt="Preview"
-                className="w-full h-48 object-cover rounded-lg mb-2"
-              />
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleImageUpload(file);
-              }}
-              disabled={uploading}
-              className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
-            />
-          </div>
-
           {/* Descrição */}
           <div>
             <label className="block text-sm font-medium text-textSecondary mb-2">

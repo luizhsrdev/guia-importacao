@@ -8,9 +8,18 @@ import SellerCard from '@/components/SellerCard';
 interface HomeClientProps {
   initialProducts: any[];
   initialSellers: any[];
+  userStatus: {
+    isAuthenticated: boolean;
+    isPremium: boolean;
+    isAdmin: boolean;
+  };
 }
 
-export default function HomeClient({ initialProducts, initialSellers }: HomeClientProps) {
+export default function HomeClient({
+  initialProducts,
+  initialSellers,
+  userStatus,
+}: HomeClientProps) {
   const [activeTab, setActiveTab] = useState('produtos');
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
 
@@ -26,7 +35,11 @@ export default function HomeClient({ initialProducts, initialSellers }: HomeClie
     <>
       {/* Navegação por Abas */}
       <div className="max-w-7xl mx-auto px-8 pt-8">
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          userStatus={userStatus}
+        />
       </div>
 
       {/* Conteúdo Dinâmico */}
@@ -61,6 +74,7 @@ export default function HomeClient({ initialProducts, initialSellers }: HomeClie
                     image_hover={product.image_hover}
                     affiliate_link={product.affiliate_link}
                     is_sold_out={product.is_sold_out}
+                    category={product.category}
                   />
                 ))}
               </div>

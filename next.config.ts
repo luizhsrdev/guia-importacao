@@ -1,10 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverActions: {
-    bodySizeLimit: '10mb', // Aumenta para 10MB
+  images: {
+    domains: ['res.cloudinary.com'],
   },
-  // ... outras configs existentes
+  
+  // Aumentar limite de Server Actions para 10MB
+  serverActions: {
+    bodySizeLimit: '10mb',
+  },
 };
 
 export default nextConfig;

@@ -8,6 +8,10 @@ interface ProductCardProps {
   image_hover?: string;
   affiliate_link: string;
   is_sold_out: boolean;
+  category?: {
+    name: string;
+    slug?: string;
+  } | null;
 }
 
 export default function ProductCard({
@@ -17,6 +21,7 @@ export default function ProductCard({
   image_hover,
   affiliate_link,
   is_sold_out,
+  category,
 }: ProductCardProps) {
   return (
     <a
@@ -41,6 +46,13 @@ export default function ProductCard({
             alt={`${title} - hover`}
             className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           />
+        )}
+
+        {/* Badge de Categoria */}
+        {category && (
+          <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-textMain border border-primary/20">
+            {category.name}
+          </div>
         )}
 
         {/* Badge de Esgotado */}

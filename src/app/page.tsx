@@ -9,6 +9,7 @@ import {
 import AdminLink from '@/components/AdminLink';
 import HomeClient from './HomeClient';
 import { getPublicProducts, getPublicSellers } from './actions';
+import { getCurrentUserStatus } from '@/lib/user-server';
 
 // Skeleton Loader Component
 function HomePageSkeleton() {
@@ -40,13 +41,20 @@ function HomePageSkeleton() {
 
 // Componente que busca dados (Server Component)
 async function HomeContent() {
-  // Buscar dados em paralelo (mais rápido)
-  const [products, sellers] = await Promise.all([
+  // Buscar TUDO em paralelo (mais rápido!)
+  const [products, sellers, userStatus] = await Promise.all([
     getPublicProducts(),
     getPublicSellers(),
+    getCurrentUserStatus(),
   ]);
 
-  return <HomeClient initialProducts={products} initialSellers={sellers} />;
+  return (
+    <HomeClient
+      initialProducts={products}
+      initialSellers={sellers}
+      userStatus={userStatus}
+    />
+  );
 }
 
 // Página Principal (Server Component)
@@ -94,3 +102,4 @@ export default function Home() {
 
 // Configurações de cache
 export const revalidate = 60; // Revalidar a cada 60 segundos
+export const dynamic = 'force-dynamic'; // Sempre buscar userStatus atualizado
