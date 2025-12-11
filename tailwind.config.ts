@@ -19,6 +19,9 @@ const config: Config = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      zIndex: {
+        '60': '60',
+      },
       keyframes: {
         fadeIn: {
           from: { opacity: '0' },

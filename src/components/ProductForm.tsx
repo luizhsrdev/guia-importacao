@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   createProduct,
@@ -31,6 +31,11 @@ export default function ProductForm({
     is_sold_out: product?.is_sold_out || false,
     image_main: product?.image_main || '',
     image_hover: product?.image_hover || '',
+    condition: product?.condition || 'Seminovo',
+    has_box: product?.has_box !== false,
+    has_charger: product?.has_charger !== false,
+    has_warranty: product?.has_warranty === true,
+    observations: product?.observations || '',
   });
 
   const [uploading, setUploading] = useState(false);
@@ -203,6 +208,82 @@ export default function ProductForm({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Condição */}
+      <div>
+        <label className="block text-textMain font-medium mb-2">
+          Condição do Produto
+        </label>
+        <select
+          value={formData.condition}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, condition: e.target.value }))
+          }
+          className="w-full bg-[#2A2A2A] border border-zinc-700 rounded-lg p-3 text-textMain focus:outline-none focus:border-primary"
+        >
+          <option value="Lacrado">Lacrado</option>
+          <option value="Seminovo">Seminovo</option>
+          <option value="Usado">Usado</option>
+          <option value="Aberto">Aberto (Nunca Usado)</option>
+          <option value="Com Defeito">Com Defeito</option>
+        </select>
+      </div>
+
+      {/* Checkboxes de Detalhes */}
+      <div className="grid grid-cols-3 gap-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.has_box}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, has_box: e.target.checked }))
+            }
+            className="w-4 h-4 accent-primary"
+          />
+          <span className="text-textMain text-sm">Com caixa original</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.has_charger}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, has_charger: e.target.checked }))
+            }
+            className="w-4 h-4 accent-primary"
+          />
+          <span className="text-textMain text-sm">Com carregador</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.has_warranty}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, has_warranty: e.target.checked }))
+            }
+            className="w-4 h-4 accent-primary"
+          />
+          <span className="text-textMain text-sm">Com garantia</span>
+        </label>
+      </div>
+
+      {/* Observações */}
+      <div>
+        <label className="block text-textMain font-medium mb-2">
+          Observações Detalhadas
+          <span className="text-textSecondary text-sm ml-2">
+            (Ex: 19 ciclos de bateria, 100% saúde, arranhões na tampa)
+          </span>
+        </label>
+        <textarea
+          value={formData.observations}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, observations: e.target.value }))
+          }
+          rows={3}
+          className="w-full bg-[#2A2A2A] border border-zinc-700 rounded-lg p-3 text-textMain focus:outline-none focus:border-primary resize-none"
+          placeholder="Detalhes importantes sobre o estado do produto..."
+        />
       </div>
 
       {/* Link de Afiliado */}

@@ -14,6 +14,11 @@ export interface ProductFormData {
   is_sold_out: boolean;
   image_main?: string;
   image_hover?: string;
+  condition?: string;
+  has_box?: boolean;
+  has_charger?: boolean;
+  has_warranty?: boolean;
+  observations?: string;
 }
 
 // Função helper para upload de imagem no Cloudinary
@@ -119,6 +124,11 @@ export async function createProduct(formData: ProductFormData) {
     is_sold_out: formData.is_sold_out,
     image_main: formData.image_main || null,
     image_hover: formData.image_hover || null,
+    condition: formData.condition || 'Seminovo',
+    has_box: formData.has_box !== false,
+    has_charger: formData.has_charger !== false,
+    has_warranty: formData.has_warranty === true,
+    observations: formData.observations || null,
   });
 
   if (error) {
@@ -148,6 +158,11 @@ export async function updateProduct(formData: ProductFormData) {
       is_sold_out: formData.is_sold_out,
       image_main: formData.image_main || null,
       image_hover: formData.image_hover || null,
+      condition: formData.condition || 'Seminovo',
+      has_box: formData.has_box !== false,
+      has_charger: formData.has_charger !== false,
+      has_warranty: formData.has_warranty === true,
+      observations: formData.observations || null,
     })
     .eq('id', formData.id);
 

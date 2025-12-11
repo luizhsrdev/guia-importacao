@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TabNavigation from '@/components/TabNavigation';
 import ProductCard from '@/components/ProductCard';
 import SellerCard from '@/components/SellerCard';
+import ProductFilters from '@/components/ProductFilters';
 
 interface HomeClientProps {
   initialProducts: any[];
@@ -13,15 +14,56 @@ interface HomeClientProps {
     isPremium: boolean;
     isAdmin: boolean;
   };
+  categories: Array<{ id: string; name: string }>;
 }
 
 export default function HomeClient({
   initialProducts,
   initialSellers,
   userStatus,
+  categories,
 }: HomeClientProps) {
   const [activeTab, setActiveTab] = useState('produtos');
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
+
+  // Estado dos filtros de produtos
+  const [filters, setFilters] = useState({
+    search: '',
+    categories: [] as string[],
+    priceMin: null as number | null,
+    priceMax: null as number | null,
+  });
+
+  // Filtrar produtos
+  const filteredProducts = initialProducts.filter((product) => {
+    // Filtro de busca
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      if (!product.title.toLowerCase().includes(searchLower)) {
+        return false;
+      }
+    }
+
+    // Filtro de categorias
+    if (filters.categories.length > 0) {
+      if (!product.category_id || !filters.categories.includes(product.category_id)) {
+        return false;
+      }
+    }
+
+    // Filtro de preço
+    if (filters.priceMin !== null || filters.priceMax !== null) {
+      const price = parseFloat(product.price_cny.replace(/[^0-9.]/g, ''));
+      if (filters.priceMin !== null && price < filters.priceMin) {
+        return false;
+      }
+      if (filters.priceMax !== null && price > filters.priceMax) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   const filteredSellers = initialSellers.filter((s) => {
     if (filterSellers === 'all') return true;
@@ -48,15 +90,24 @@ export default function HomeClient({
         {activeTab === 'produtos' && (
           <div className="animate-in fade-in duration-300">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-textMain mb-2">
-                Produtos Curados
+              <h2 className="text-3xl font-bold text-textMain mb-2">
+                Produtos Selecionados
               </h2>
-              <p className="text-textSecondary">
-                {initialProducts.length} produto(s) disponíveis
+              <p className="text-textSecondary text-sm mb-6 max-w-3xl">
+                Nossa equipe verifica diariamente vendedores na Xianyu e seleciona apenas aqueles com histórico comprovado de honestidade e boas avaliações. Você compra com mais segurança.
+              </p>
+              <p className="text-textSecondary text-sm">
+                {filteredProducts.length} de {initialProducts.length} produto(s)
               </p>
             </div>
 
-            {initialProducts.length === 0 ? (
+            {/* Filtros */}
+            <ProductFilters
+              categories={categories}
+              onFilterChange={setFilters}
+            />
+
+            {filteredProducts.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-textSecondary text-lg">
                   Nenhum produto disponível no momento.
@@ -64,7 +115,7 @@ export default function HomeClient({
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {initialProducts.map((product) => (
+                {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     id={product.id}
@@ -75,6 +126,13 @@ export default function HomeClient({
                     affiliate_link={product.affiliate_link}
                     is_sold_out={product.is_sold_out}
                     category={product.category}
+                    condition={product.condition}
+                    observations={product.observations}
+                    original_link={product.original_link}
+                    has_box={product.has_box}
+                    has_charger={product.has_charger}
+                    has_warranty={product.has_warranty}
+                    isPremium={userStatus.isPremium}
                   />
                 ))}
               </div>

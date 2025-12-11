@@ -6,7 +6,7 @@ INSERT INTO seller_categories (name, slug) VALUES
   ('Áudio', 'audio'),
   ('Celulares', 'celulares'),
   ('Consoles', 'consoles'),
-  ('Iphones', 'iphones'),
+  ('iPhones', 'iphones'),
   ('Mac Minis', 'mac-minis'),
   ('Macbooks', 'macbooks'),
   ('Notebooks', 'notebooks'),

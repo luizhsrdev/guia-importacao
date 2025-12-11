@@ -48,15 +48,11 @@ export default function VendedoresLink() {
   };
 
   const handleUpgrade = () => {
-    alert('Sucesso! Em breve você será redirecionado para o pagamento.');
-    setShowModal(false);
+    window.location.href = '/premium';
   };
 
   const handleDecline = () => {
     setShowModal(false);
-    setTimeout(() => {
-      alert('Não, prefiro correr riscos.');
-    }, 100);
   };
 
   return (
@@ -78,11 +74,11 @@ export default function VendedoresLink() {
       {/* Modal Premium */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-black/70 animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/70 animate-fadeIn"
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-surface border border-zinc-800 rounded-xl max-w-2xl w-full p-8 shadow-2xl animate-scaleIn"
+            className="bg-surface border border-zinc-700 rounded-xl max-w-2xl w-full p-8 shadow-2xl animate-scaleIn"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

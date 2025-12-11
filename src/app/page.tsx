@@ -10,6 +10,7 @@ import AdminLink from '@/components/AdminLink';
 import HomeClient from './HomeClient';
 import { getPublicProducts, getPublicSellers } from './actions';
 import { getCurrentUserStatus } from '@/lib/user-server';
+import { getCategories } from '@/app/admin/products/actions';
 
 // Skeleton Loader Component
 function HomePageSkeleton() {
@@ -42,10 +43,11 @@ function HomePageSkeleton() {
 // Componente que busca dados (Server Component)
 async function HomeContent() {
   // Buscar TUDO em paralelo (mais rápido!)
-  const [products, sellers, userStatus] = await Promise.all([
+  const [products, sellers, userStatus, categories] = await Promise.all([
     getPublicProducts(),
     getPublicSellers(),
     getCurrentUserStatus(),
+    getCategories(),
   ]);
 
   return (
@@ -53,6 +55,7 @@ async function HomeContent() {
       initialProducts={products}
       initialSellers={sellers}
       userStatus={userStatus}
+      categories={categories}
     />
   );
 }
