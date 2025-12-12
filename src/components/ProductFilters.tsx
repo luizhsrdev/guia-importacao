@@ -24,7 +24,6 @@ export default function ProductFilters({
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fechar dropdown ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -74,11 +73,11 @@ export default function ProductFilters({
     });
   };
 
+  const hasFilters = search || selectedCategories.length > 0 || priceMin || priceMax;
+
   return (
     <div className="mb-6 space-y-4">
-      {/* Linha 1: Busca + Botões */}
       <div className="flex gap-3">
-        {/* Barra de Busca */}
         <div className="flex-1 relative">
           <input
             type="text"
@@ -86,10 +85,10 @@ export default function ProductFilters({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full bg-surface border border-zinc-700 rounded-lg pl-10 pr-4 py-3 text-textMain focus:outline-none focus:border-primary"
+            className="w-full h-11 bg-surface border border-border rounded-xl pl-11 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:bg-surface-elevated transition-all duration-150"
           />
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -103,39 +102,41 @@ export default function ProductFilters({
           </svg>
         </div>
 
-        {/* Botão Buscar */}
         <button
           onClick={handleSearch}
-          className="px-8 py-3 bg-primary text-background font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
+          className="h-11 px-6 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-hover transition-colors duration-150"
         >
           Buscar
         </button>
 
-        {/* Botão Limpar Filtros */}
-        <button
-          onClick={handleClearFilters}
-          className="px-6 py-3 bg-zinc-800 text-textMain rounded-lg border border-zinc-700 hover:bg-zinc-700 transition-colors whitespace-nowrap"
-        >
-          Limpar Filtros
-        </button>
+        {hasFilters && (
+          <button
+            onClick={handleClearFilters}
+            className="h-11 px-4 text-text-secondary hover:text-text-primary rounded-xl text-sm font-medium bg-surface border border-border hover:bg-surface-elevated transition-all duration-150"
+          >
+            Limpar
+          </button>
+        )}
       </div>
 
-      {/* Linha 2: Filtros (Categorias, Preço, etc) */}
-      <div className="flex gap-3">
-        {/* Dropdown de Categorias */}
+      <div className="flex gap-3 items-center">
         <div className="relative" ref={categoryDropdownRef}>
           <button
             onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-            className="px-4 py-3 bg-surface border border-zinc-700 rounded-lg text-textMain hover:border-primary transition-colors flex items-center gap-2"
+            className={`h-10 px-4 rounded-xl text-sm font-medium transition-all duration-150 flex items-center gap-2 ${
+              selectedCategories.length > 0
+                ? 'bg-primary text-white'
+                : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated'
+            }`}
           >
             Categorias
             {selectedCategories.length > 0 && (
-              <span className="px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs">
+              <span className="w-5 h-5 rounded-md bg-white/20 text-white text-xs flex items-center justify-center font-semibold">
                 {selectedCategories.length}
               </span>
             )}
             <svg
-              className={`w-4 h-4 transition-transform ${
+              className={`w-4 h-4 transition-transform duration-150 ${
                 categoryDropdownOpen ? 'rotate-180' : ''
               }`}
               fill="none"
@@ -152,13 +153,12 @@ export default function ProductFilters({
           </button>
 
           {categoryDropdownOpen && (
-            <div className="absolute z-50 mt-2 bg-surface border border-zinc-700 rounded-lg shadow-xl p-3 min-w-[200px] max-h-[300px] overflow-y-auto origin-top animate-dropdown">
+            <div className="absolute z-50 mt-2 bg-surface border border-border rounded-xl p-2 min-w-[200px] max-h-[280px] overflow-y-auto modal-scroll">
               {categories.map((cat) => (
                 <label
                   key={cat.id}
-                  className="flex items-center gap-2 py-2 px-2 cursor-pointer hover:bg-zinc-800 rounded transition-colors"
+                  className="flex items-center gap-3 py-2.5 px-3 cursor-pointer hover:bg-surface-elevated rounded-lg transition-colors duration-100"
                 >
-                  {/* Checkbox customizado */}
                   <div className="relative flex items-center">
                     <input
                       type="checkbox"
@@ -166,48 +166,48 @@ export default function ProductFilters({
                       onChange={(e) => handleCategoryToggle(cat.id, e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-5 h-5 border-2 border-zinc-600 rounded peer-checked:bg-primary peer-checked:border-primary transition-all duration-200 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-border rounded-md peer-checked:bg-primary peer-checked:border-primary transition-all duration-150 flex items-center justify-center">
                       {selectedCategories.includes(cat.id) && (
-                        <svg className="w-3 h-3 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
                     </div>
                   </div>
-                  <span className="text-textMain text-sm">{cat.name}</span>
+                  <span className="text-text-primary text-sm">{cat.name}</span>
                 </label>
               ))}
             </div>
           )}
         </div>
 
-        {/* Filtro de Preço (opcional, se quiser adicionar depois) */}
-      </div>
-
-      {/* Linha 3: Filtros Ativos (Pills) */}
-      {selectedCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedCategories.map((id) => {
-            const cat = categories.find((c) => c.id === id);
-            return (
-              cat && (
-                <span
-                  key={id}
-                  className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm border border-primary/30 flex items-center gap-2"
-                >
-                  {cat.name}
-                  <button
-                    onClick={() => handleCategoryToggle(id, false)}
-                    className="hover:text-primary/80"
+        {selectedCategories.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {selectedCategories.map((id) => {
+              const cat = categories.find((c) => c.id === id);
+              return (
+                cat && (
+                  <span
+                    key={id}
+                    className="inline-flex items-center gap-1.5 h-8 px-3 bg-surface-elevated rounded-lg text-sm text-text-primary"
                   >
-                    ×
-                  </button>
-                </span>
-              )
-            );
-          })}
-        </div>
-      )}
+                    {cat.name}
+                    <button
+                      onClick={() => handleCategoryToggle(id, false)}
+                      className="text-text-muted hover:text-text-primary transition-colors"
+                      aria-label={`Remover ${cat.name}`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                )
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { FeatureItem } from './FeatureItem';
 
 interface Tab {
   id: string;
@@ -8,7 +9,7 @@ interface Tab {
   isPremium: boolean;
 }
 
-const tabs: Tab[] = [
+const TABS: Tab[] = [
   { id: 'produtos', label: 'Produtos', isPremium: false },
   { id: 'vendedores', label: 'Vendedores', isPremium: true },
 ];
@@ -29,42 +30,26 @@ export default function TabNavigation({
   userStatus,
 }: TabNavigationProps) {
   const [showModal, setShowModal] = useState(false);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
-  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
-
-  // Atualizar posição do indicador
-  useEffect(() => {
-    const activeTabElement = tabRefs.current[activeTab];
-    if (activeTabElement) {
-      const { offsetLeft, offsetWidth } = activeTabElement;
-      setIndicatorStyle({ left: offsetLeft, width: offsetWidth });
-    }
-  }, [activeTab]);
 
   const handleTabClick = (tab: Tab) => {
-    // Se for aba gratuita, muda direto
     if (!tab.isPremium) {
       onTabChange(tab.id);
       return;
     }
 
-    // Se não estiver logado, redireciona
     if (!userStatus.isAuthenticated) {
       window.location.href = '/sign-in';
       return;
     }
 
-    // Se for premium/admin, muda direto (SEM DELAY!)
     if (userStatus.isPremium || userStatus.isAdmin) {
       onTabChange(tab.id);
       return;
     }
 
-    // Se não for premium, abre modal
     setShowModal(true);
   };
 
-  // Determinar se deve mostrar cadeado (CALCULADO NO SERVIDOR)
   const shouldShowLock = (tab: Tab) => {
     if (!tab.isPremium) return false;
     if (!userStatus.isAuthenticated) return true;
@@ -75,48 +60,38 @@ export default function TabNavigation({
     window.location.href = '/premium';
   };
 
-  const handleDecline = () => {
-    setShowModal(false);
-  };
-
   return (
     <>
-      <div className="relative border-b border-zinc-800 mb-8">
+      <nav className="relative" role="tablist">
         <div className="flex gap-2 relative">
-          {tabs.map((tab) => {
+          {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             const showLock = shouldShowLock(tab);
 
             return (
               <button
                 key={tab.id}
-                ref={(el) => {
-                  tabRefs.current[tab.id] = el;
-                }}
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => handleTabClick(tab)}
-                className={`
-                  relative px-6 py-4 font-medium transition-all duration-300 whitespace-nowrap
-                  ${
-                    isActive
-                      ? 'text-primary'
-                      : 'text-textSecondary hover:text-textMain'
-                  }
-                `}
+                className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                  isActive
+                    ? 'bg-primary text-white'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface'
+                }`}
               >
                 <span className="flex items-center gap-2">
                   {tab.label}
 
-                  {/* Badge Premium (PRÉ-CALCULADO - SEM FLASH!) */}
-                  {tab.isPremium && (
-                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-                      Premium
+                  {tab.isPremium && !userStatus.isPremium && !userStatus.isAdmin && (
+                    <span className="tag-gold">
+                      Pro
                     </span>
                   )}
 
-                  {/* Cadeado (PRÉ-CALCULADO - SEM FLASH!) */}
                   {showLock && (
                     <svg
-                      className="w-3 h-3"
+                      className="w-3.5 h-3.5 text-text-muted"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -131,181 +106,67 @@ export default function TabNavigation({
               </button>
             );
           })}
-
-          {/* Indicador animado */}
-          <div
-            className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
-            style={{
-              left: `${indicatorStyle.left}px`,
-              width: `${indicatorStyle.width}px`,
-            }}
-          />
         </div>
-      </div>
+      </nav>
 
-      {/* Modal Premium */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/70 animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 animate-fadeIn"
           onClick={() => setShowModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="premium-modal-title"
         >
           <div
-            className="bg-surface border border-zinc-700 rounded-xl max-w-2xl w-full p-8 shadow-2xl animate-scaleIn"
+            className="bg-surface border border-border rounded-2xl max-w-md w-full p-8 animate-scaleIn"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="text-center mb-6">
-              <div className="inline-block bg-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
-                Conteúdo Premium
-              </div>
-              <h2 className="text-3xl font-bold text-textMain mb-3">
-                Acesso à Lista de Vendedores
+            <div className="text-center mb-8">
+              <span className="tag-gold mb-4 inline-block">
+                Premium
+              </span>
+              <h2 id="premium-modal-title" className="text-2xl font-semibold text-text-primary mb-2">
+                Lista de Vendedores
               </h2>
-              <p className="text-textSecondary text-lg">
-                Proteja seus investimentos com informações exclusivas
+              <p className="text-text-secondary">
+                Acesso a vendedores verificados e blacklist
               </p>
             </div>
 
-            {/* Benefícios */}
-            <div className="bg-background rounded-lg p-6 mb-6 space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-textMain font-semibold mb-1">
-                    Lista Dourada de Fornecedores
-                  </h3>
-                  <p className="text-textSecondary text-sm">
-                    Vendedores testados e aprovados pela comunidade
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-textMain font-semibold mb-1">
-                    Blacklist de Golpistas
-                  </h3>
-                  <p className="text-textSecondary text-sm">
-                    Lista atualizada com provas documentadas
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-textMain font-semibold mb-1">
-                    Avaliações Reais
-                  </h3>
-                  <p className="text-textSecondary text-sm">
-                    Acesso a perfis e histórico detalhado
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-textMain font-semibold mb-1">
-                    Acesso Vitalício
-                  </h3>
-                  <p className="text-textSecondary text-sm">
-                    Pague uma vez, acesso permanente
-                  </p>
-                </div>
-              </div>
+            <div className="bg-surface-elevated rounded-xl p-5 mb-8 space-y-4">
+              <FeatureItem text="Vendedores verificados pela comunidade" />
+              <FeatureItem text="Blacklist com provas documentadas" />
+              <FeatureItem text="Avaliações e feedbacks reais" />
+              <FeatureItem text="Acesso vitalício" />
             </div>
 
-            {/* Preço */}
-            <div className="text-center mb-6 p-6 bg-primary/10 border border-primary/30 rounded-lg">
-              <div className="text-textSecondary text-sm mb-2">
-                Acesso Vitalício por apenas
-              </div>
-              <div className="text-4xl font-bold text-primary mb-2">
+            <div className="text-center py-5 px-6 bg-amber-500 rounded-xl mb-8">
+              <p className="text-amber-900/70 text-xs mb-1 uppercase tracking-wide font-medium">
+                Pagamento único
+              </p>
+              <p className="text-3xl font-bold text-white">
                 R$ 89,90
-              </div>
-              <div className="text-textSecondary text-sm">
-                Pagamento único via PIX
-              </div>
+              </p>
             </div>
 
-            {/* Botões */}
-            <div className="flex flex-col gap-3">
+            <div className="space-y-3">
               <button
                 onClick={handleUpgrade}
-                className="w-full bg-primary text-background px-6 py-4 rounded-lg font-bold text-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                className="w-full bg-primary text-white font-semibold py-3.5 px-6 rounded-xl hover:bg-primary-hover transition-colors duration-150"
               >
-                Quero Ter Acesso Seguro
+                Quero ter acesso
               </button>
 
               <button
-                onClick={handleDecline}
-                className="w-full bg-zinc-800 border border-zinc-700 text-textSecondary px-6 py-3 rounded-lg font-medium hover:bg-zinc-700 transition-all"
+                onClick={() => setShowModal(false)}
+                className="w-full text-text-secondary font-medium py-3 px-6 rounded-xl hover:text-text-primary hover:bg-surface-elevated transition-colors duration-150"
               >
-                Não, Prefiro Continuar no Plano Gratuito
+                Agora não
               </button>
             </div>
 
-            <p className="text-center text-textSecondary text-xs mt-6">
-              Garantia de 7 dias: Se não ficar satisfeito, devolvemos 100% do
-              valor
+            <p className="text-center text-text-muted text-xs mt-5">
+              Garantia de 7 dias ou seu dinheiro de volta
             </p>
           </div>
         </div>
