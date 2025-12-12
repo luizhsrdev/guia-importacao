@@ -12,6 +12,12 @@ export interface PublicProduct {
   image_main: string;
   image_hover?: string;
   category_id?: string;
+  condition?: string;
+  has_box?: boolean;
+  has_charger?: boolean;
+  has_warranty?: boolean;
+  observations?: string;
+  original_link?: string;
 }
 
 // Buscar produtos públicos (SEM original_link) com cache
@@ -24,10 +30,16 @@ export const getPublicProducts = unstable_cache(
         title,
         price_cny,
         affiliate_link,
+        original_link,
         is_sold_out,
         image_main,
         image_hover,
         category_id,
+        condition,
+        has_box,
+        has_charger,
+        has_warranty,
+        observations,
         category:product_categories(name, slug)
       `)
       .order('created_at', { ascending: false });
