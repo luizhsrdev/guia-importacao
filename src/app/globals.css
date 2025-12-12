@@ -3,77 +3,237 @@
 @tailwind utilities;
 
 :root {
-  --background: #0F0F0F;
-  --foreground: #E0E0E0;
+  --background: #FAFAFA;
+  --background-secondary: #F4F4F5;
+  --surface: #FFFFFF;
+  --surface-elevated: #F4F4F5;
+  --surface-overlay: #E4E4E7;
+  --primary: #10B981;
+  --primary-hover: #0EA472;
+  --accent-gold: #D97706;
+  --accent-blue: #3B82F6;
+  --danger: #EF4444;
+  --text-primary: #18181B;
+  --text-secondary: #52525B;
+  --text-tertiary: #71717A;
+  --text-muted: #A1A1AA;
+  --border: #D4D4D8;
+  --border-subtle: #E4E4E7;
+  --border-emphasis: #A1A1AA;
+}
+
+.dark {
+  --background: #18181B;
+  --background-secondary: #1C1C1F;
+  --surface: #212125;
+  --surface-elevated: #27272A;
+  --surface-overlay: #2E2E32;
+  --primary: #10B981;
+  --primary-hover: #0EA472;
+  --accent-gold: #FBBF24;
+  --accent-blue: #60A5FA;
+  --danger: #F87171;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #71717A;
+  --text-muted: #52525B;
+  --border: #3F3F46;
+  --border-subtle: #2E2E32;
+  --border-emphasis: #52525B;
 }
 
 body {
-  color: var(--foreground);
+  color: var(--text-primary);
   background: var(--background);
   font-family: 'Inter', system-ui, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  .font-logo {
+    font-family: var(--font-logo), system-ui, sans-serif;
+  }
 }
 
-/* Product Card Hover Effects */
-.product-card {
-  @apply bg-surface rounded-xl p-4 border border-transparent transition-all duration-300;
+@layer components {
+  .glass {
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    @apply backdrop-blur-md border border-white/[0.06];
+  }
+
+  .glass-strong {
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    @apply backdrop-blur-xl border border-white/[0.08];
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center font-medium transition-all duration-150;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary hover:bg-primary-hover;
+    color: white;
+    @apply active:scale-[0.98] active:opacity-90;
+  }
+
+  .btn-secondary {
+    @apply btn bg-surface-elevated text-text-primary border border-border;
+    @apply hover:bg-surface-overlay hover:border-border-emphasis;
+    @apply active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-text-secondary;
+    @apply hover:bg-surface hover:text-text-primary;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-500 text-white hover:bg-red-600;
+    @apply active:scale-[0.98];
+  }
+
+  .input-field {
+    @apply w-full bg-surface border border-border rounded-lg px-3 py-2.5;
+    @apply text-sm text-text-primary placeholder:text-text-muted;
+    @apply focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20;
+    @apply transition-colors duration-150;
+  }
+
+  .card {
+    @apply bg-surface rounded-xl border border-border;
+    @apply transition-all duration-150;
+  }
+
+  .card-interactive {
+    @apply card cursor-pointer;
+    @apply hover:border-border-emphasis hover:bg-surface-elevated;
+    @apply active:scale-[0.995];
+  }
+
+  .card-elevated {
+    @apply bg-surface-elevated rounded-xl border border-border shadow-elevation-2;
+  }
+
+  .tag {
+    @apply inline-flex items-center h-6 px-2.5 rounded-md text-[11px] font-semibold uppercase tracking-wide border;
+  }
+
+  .tag-primary {
+    @apply tag text-white bg-emerald-600 border-emerald-500;
+  }
+
+  .tag-gold {
+    @apply tag text-white bg-amber-600 border-amber-500;
+  }
+
+  .tag-danger {
+    @apply tag text-white bg-red-600 border-red-500;
+  }
+
+  .tag-blue {
+    @apply tag text-white bg-sky-600 border-sky-500;
+  }
+
+  .tag-neutral {
+    @apply tag text-white bg-zinc-600 border-zinc-500;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 h-6 px-2.5 rounded-md text-[11px] font-semibold uppercase tracking-wide border;
+  }
+
+  .badge-primary {
+    @apply badge text-white bg-emerald-600 border-emerald-500;
+  }
+
+  .badge-gold {
+    @apply badge text-white bg-amber-600 border-amber-500;
+  }
+
+  .badge-danger {
+    @apply badge text-white bg-red-600 border-red-500;
+  }
+
+  .badge-blue {
+    @apply badge text-white bg-sky-600 border-sky-500;
+  }
+
+  .badge-neutral {
+    @apply badge text-white bg-zinc-600 border-zinc-500;
+  }
+
+  .link {
+    @apply text-primary hover:text-primary-hover transition-colors duration-150;
+    @apply underline-offset-4 hover:underline;
+  }
+
+  .divider {
+    @apply h-px bg-border;
+  }
+
+  .skeleton {
+    @apply bg-surface-elevated animate-pulse rounded-lg;
+  }
+
+  .shimmer {
+    @apply bg-gradient-to-r from-surface via-surface-elevated to-surface;
+    @apply bg-[length:200%_100%] animate-shimmer;
+  }
+
+  .section-title {
+    @apply text-xl font-semibold text-text-primary tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply text-sm text-text-secondary leading-relaxed;
+  }
 }
 
-.product-card:hover {
-  @apply -translate-y-2 shadow-[0_12px_32px_rgba(0,255,157,0.25)] border-primary;
-}
-
-.product-card img.default {
-  @apply absolute inset-0 opacity-100 transition-opacity duration-300;
-}
-
-.product-card img.hover {
-  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
-}
-
-.product-card:hover img.default {
-  @apply opacity-0;
-}
-
-.product-card:hover img.hover {
-  @apply opacity-100;
-}
-
-.sold-out {
-  @apply opacity-60 grayscale pointer-events-none;
-}
-
-/* Custom Scrollbar Dark Theme */
 .modal-scroll::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .modal-scroll::-webkit-scrollbar-track {
-  background: #18181b; /* zinc-900 */
-  border-radius: 4px;
+  background: transparent;
 }
 
 .modal-scroll::-webkit-scrollbar-thumb {
-  background: #3f3f46; /* zinc-700 */
-  border-radius: 4px;
+  background: var(--border-emphasis);
+  border-radius: 3px;
 }
 
 .modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: #52525b; /* zinc-600 */
+  background: var(--text-tertiary);
 }
 
-/* Firefox */
 .modal-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #3f3f46 #18181b;
+  scrollbar-color: var(--border-emphasis) transparent;
 }
 
-/* Hide scrollbar for horizontal tabs */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -83,12 +243,10 @@ body {
   scrollbar-width: none;
 }
 
-/* Garantir que modais via Portal funcionem corretamente */
 #__next {
   position: relative;
 }
 
-/* Animações para Modais */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -97,7 +255,7 @@ body {
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.97);
   }
   to {
     opacity: 1;
@@ -106,12 +264,8 @@ body {
 }
 
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @keyframes scaleOut {
@@ -121,59 +275,26 @@ body {
   }
   to {
     opacity: 0;
-    transform: scale(0.95);
-  }
-}
-
-/* Animação dropdown (estilo Apple) */
-@keyframes dropdown {
-  from {
-    opacity: 0;
-    transform: scaleY(0.95) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: scaleY(1) translateY(0);
-  }
-}
-
-/* Animação de expansão do input de cotação (estilo Apple) */
-@keyframes expand {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
+    transform: scale(0.97);
   }
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.15s ease-out;
 }
 
 .animate-scaleIn {
-  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scaleIn 0.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .animate-fadeOut {
-  animation: fadeOut 0.2s ease-out forwards;
+  animation: fadeOut 0.1s ease-in forwards;
 }
 
 .animate-scaleOut {
-  animation: scaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: scaleOut 0.15s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
-.animate-dropdown {
-  animation: dropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.animate-expand {
-  animation: expand 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Remover spinner de input number */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -184,7 +305,6 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Esconder checkbox nativo mas manter acessibilidade */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -195,4 +315,21 @@ input[type="number"] {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+@supports not (backdrop-filter: blur(12px)) {
+  .glass,
+  .glass-strong {
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
