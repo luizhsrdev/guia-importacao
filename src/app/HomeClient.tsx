@@ -1,23 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import TabNavigation from '@/components/TabNavigation';
 import ProductCard from '@/components/ProductCard';
 import SellerCard from '@/components/SellerCard';
 import ProductFilters from '@/components/ProductFilters';
+import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
-interface HomeClientProps {
-  initialProducts: any[];
-  initialSellers: any[];
-  userStatus: {
-    isAuthenticated: boolean;
-    isPremium: boolean;
-    isAdmin: boolean;
-  };
-  categories: Array<{ id: string; name: string }>;
+interface ProductFiltersState {
+  search: string;
+  categories: string[];
+  priceMin: number | null;
+  priceMax: number | null;
 }
 
-export default function HomeClient({
+const INITIAL_FILTERS: ProductFiltersState = {
+  search: '',
+  categories: [],
+  priceMin: null,
+  priceMax: null,
+};
+
+interface HomeClientProps {
+  initialProducts: PublicProduct[];
+  initialSellers: Seller[];
+  userStatus: UserStatus;
+  categories: Category[];
+}
+
+export function HomeClient({
   initialProducts,
   initialSellers,
   userStatus,
@@ -25,14 +36,7 @@ export default function HomeClient({
 }: HomeClientProps) {
   const [activeTab, setActiveTab] = useState('produtos');
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
-
-  // Estado dos filtros de produtos
-  const [filters, setFilters] = useState({
-    search: '',
-    categories: [] as string[],
-    priceMin: null as number | null,
-    priceMax: null as number | null,
-  });
+  const [filters, setFilters] = useState<ProductFiltersState>(INITIAL_FILTERS);
 
   // Filtrar produtos
   const filteredProducts = initialProducts.filter((product) => {
