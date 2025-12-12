@@ -27,71 +27,58 @@ export default function SellerCard({ seller }: SellerCardProps) {
 
   return (
     <div
-      className={`bg-surface rounded-xl p-6 border-2 transition-all hover:scale-[1.02] ${
+      className={`bg-surface rounded-2xl p-6 border transition-all duration-150 ${
         isGold
-          ? 'border-primary/30 hover:border-primary hover:shadow-lg hover:shadow-primary/20'
-          : 'border-red-600/30 hover:border-red-600 hover:shadow-lg hover:shadow-red-600/20'
+          ? 'border-border hover:border-amber-500/40'
+          : 'border-border hover:border-red-500/40'
       }`}
     >
-      {/* LINHA 1: Nome + Categoria + Badge */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between gap-3 mb-5">
         <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-bold text-textMain mb-1 truncate">
+          <h3 className="text-lg font-semibold text-text-primary mb-1 truncate">
             {seller.name}
           </h3>
 
-          {/* Categoria */}
           {seller.seller_categories && (
-            <div className="text-sm text-textSecondary">
+            <p className="text-sm text-text-secondary">
               {seller.seller_categories.name}
-            </div>
+            </p>
           )}
         </div>
 
-        {/* Badge Gold/Blacklist */}
-        <span
-          className={`inline-block px-3 py-1 rounded-full text-sm font-medium ml-4 whitespace-nowrap ${
-            isGold
-              ? 'bg-primary/20 text-primary border border-primary/30'
-              : 'bg-red-600/20 text-red-400 border border-red-600/30'
-          }`}
-        >
-          {isGold ? 'Lista Dourada' : 'Blacklist'}
+        <span className={isGold ? 'badge-gold' : 'badge-danger'}>
+          {isGold ? 'Verificado' : 'Blacklist'}
         </span>
       </div>
 
-      {/* FOTO DO VENDEDOR (quadrada, centralizada) */}
       {seller.image_url && (
-        <div className="mb-4">
+        <div className="mb-5">
           <ImageLightbox
             src={seller.image_url}
             alt={seller.name}
-            thumbnailClassName="w-full aspect-square object-cover rounded-lg"
+            thumbnailClassName="w-full aspect-square object-cover rounded-xl"
           />
         </div>
       )}
 
-      {/* CONTEÚDO CONDICIONAL (Gold vs Blacklist) */}
       {isGold ? (
         <>
-          {/* Descrição Gold */}
           {seller.notes && (
-            <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-4">
-              <h4 className="text-primary font-medium mb-2">Descrição:</h4>
-              <p className="text-textSecondary text-sm leading-relaxed">
+            <div className="bg-surface-elevated rounded-xl p-4 mb-5">
+              <h4 className="text-amber-400 text-sm font-medium mb-2">Sobre o vendedor</h4>
+              <p className="text-text-secondary text-sm leading-relaxed">
                 {seller.notes}
               </p>
             </div>
           )}
 
-          {/* Links Gold */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {seller.profile_link && (
               <a
                 href={seller.profile_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-primary/20 text-primary border border-primary/30 px-4 py-2 rounded-lg text-center font-medium hover:bg-primary/30 transition-all"
+                className="flex items-center justify-center h-11 px-4 bg-surface-elevated text-text-primary rounded-xl text-sm font-medium border border-border hover:bg-surface-overlay transition-colors"
               >
                 Ver Perfil
               </a>
@@ -102,7 +89,7 @@ export default function SellerCard({ seller }: SellerCardProps) {
                 href={seller.feedback_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-zinc-800 text-textMain border border-zinc-700 px-4 py-2 rounded-lg text-center font-medium hover:bg-zinc-700 transition-all"
+                className="flex items-center justify-center h-11 px-4 bg-surface-elevated text-text-secondary rounded-xl text-sm font-medium border border-border hover:bg-surface-overlay transition-colors"
               >
                 Ver Avaliações
               </a>
@@ -113,7 +100,7 @@ export default function SellerCard({ seller }: SellerCardProps) {
                 href={seller.affiliate_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-primary text-background px-4 py-2 rounded-lg text-center font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                className="flex items-center justify-center h-11 px-4 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-hover transition-colors"
               >
                 Acessar Loja
               </a>
@@ -122,52 +109,48 @@ export default function SellerCard({ seller }: SellerCardProps) {
         </>
       ) : (
         <>
-          {/* Motivo Blacklist */}
           {seller.blacklist_reason && (
-            <div className="bg-red-950/20 border border-red-800 rounded-lg p-4 mb-4">
-              <h4 className="text-red-400 font-medium mb-2">Motivo:</h4>
-              <p className="text-textSecondary text-sm leading-relaxed">
+            <div className="bg-red-500/10 rounded-xl p-4 mb-5">
+              <h4 className="text-red-400 text-sm font-medium mb-2">Motivo da denúncia</h4>
+              <p className="text-text-secondary text-sm leading-relaxed">
                 {seller.blacklist_reason}
               </p>
             </div>
           )}
 
-          {/* Link Blacklist */}
           {seller.profile_link && (
             <a
               href={seller.profile_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-red-600/20 text-red-400 border border-red-600/30 px-4 py-2 rounded-lg text-center font-medium hover:bg-red-600/30 transition-all mb-4"
+              className="flex items-center justify-center h-11 px-4 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors mb-3"
             >
               Ver Perfil (Cuidado!)
             </a>
           )}
 
-          {/* Link de prova adicional */}
           {seller.proof_link && (
             <a
               href={seller.proof_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-zinc-800 text-textMain border border-zinc-700 px-4 py-2 rounded-lg text-center font-medium hover:bg-zinc-700 transition-all mb-4"
+              className="flex items-center justify-center h-11 px-4 bg-surface-elevated text-text-primary rounded-xl text-sm font-medium border border-border hover:bg-surface-overlay transition-colors mb-4"
             >
-              Ver Link de Prova
+              Ver Comprovante
             </a>
           )}
 
-          {/* Provas Blacklist */}
           {seller.evidence_images && seller.evidence_images.length > 0 && (
-            <div className="mt-4">
-              <h4 className="text-textSecondary text-sm font-medium mb-2">
-                Provas do Golpe:
+            <div className="mt-5">
+              <h4 className="text-text-secondary text-sm font-medium mb-3">
+                Evidências ({seller.evidence_images.length})
               </h4>
               <div className="grid grid-cols-3 gap-2">
                 {seller.evidence_images.map((img, index) => (
                   <ImageLightbox
                     key={index}
                     src={img}
-                    alt={`Prova ${index + 1}`}
+                    alt={`Evidência ${index + 1}`}
                     thumbnailClassName="w-full aspect-square object-cover rounded-lg"
                   />
                 ))}
