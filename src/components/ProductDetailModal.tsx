@@ -3,24 +3,35 @@
 import { useEffect, useRef, useState } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
+interface CategoryLike {
+  name: string;
+  slug?: string;
+}
+
+function getCategoryName(category: CategoryLike | CategoryLike[] | null | undefined): string | null {
+  if (!category) return null;
+  if (Array.isArray(category)) return category[0]?.name ?? null;
+  return category.name;
+}
+
 interface ProductDetailModalProps {
   product: {
     id: string;
     title: string;
     price_cny: string;
     image_main: string;
-    category?: { name: string; slug?: string } | null;
+    category?: CategoryLike | CategoryLike[] | null;
     condition?: string;
     has_box?: boolean;
     has_charger?: boolean;
     has_warranty?: boolean;
     observations?: string;
     affiliate_link: string;
-    original_link: string;
+    original_link?: string;
   };
   isOpen: boolean;
   onClose: () => void;
-  onRequestUpgrade: () => void; // Callback para abrir popup premium
+  onRequestUpgrade: () => void;
   isPremium: boolean;
 }
 
@@ -142,10 +153,10 @@ export default function ProductDetailModal({
 
             {/* 2. CATEGORIA + CONDIÇÃO */}
             <div className="space-y-2">
-              {product.category && (
+              {getCategoryName(product.category) && (
                 <div className="flex items-center gap-2">
                   <span className="text-textSecondary text-sm">Categoria:</span>
-                  <span className="text-textMain font-medium">{product.category.name}</span>
+                  <span className="text-textMain font-medium">{getCategoryName(product.category)}</span>
                 </div>
               )}
 
