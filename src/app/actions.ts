@@ -2,25 +2,8 @@
 
 import { supabase } from '@/lib/supabase';
 import { unstable_cache } from 'next/cache';
+import { CacheTag } from '@/types';
 
-export interface PublicProduct {
-  id: string;
-  title: string;
-  price_cny: string;
-  affiliate_link: string;
-  is_sold_out: boolean;
-  image_main: string;
-  image_hover?: string;
-  category_id?: string;
-  condition?: string;
-  has_box?: boolean;
-  has_charger?: boolean;
-  has_warranty?: boolean;
-  observations?: string;
-  original_link?: string;
-}
-
-// Buscar produtos públicos (SEM original_link) com cache
 export const getPublicProducts = unstable_cache(
   async () => {
     const { data, error } = await supabase
@@ -40,7 +23,7 @@ export const getPublicProducts = unstable_cache(
         has_charger,
         has_warranty,
         observations,
-        category:product_categories(name, slug)
+        category:product_categories(id, name, slug)
       `)
       .order('created_at', { ascending: false });
 
@@ -49,16 +32,15 @@ export const getPublicProducts = unstable_cache(
       return [];
     }
 
-    return data || [];
+    return data ?? [];
   },
   ['public-products-list'],
   {
-    revalidate: 300, // 5 minutos
-    tags: ['products'],
+    revalidate: 300,
+    tags: [CacheTag.PRODUCTS],
   }
 );
 
-// Buscar categorias de produtos
 export async function getPublicCategories() {
   const { data, error } = await supabase
     .from('product_categories')
@@ -73,7 +55,6 @@ export async function getPublicCategories() {
   return data || [];
 }
 
-// Buscar vendedores (para usuários premium) com cache
 export const getPublicSellers = unstable_cache(
   async () => {
     const { data, error } = await supabase
@@ -86,11 +67,11 @@ export const getPublicSellers = unstable_cache(
       return [];
     }
 
-    return data || [];
+    return data ?? [];
   },
   ['public-sellers-list'],
   {
-    revalidate: 300, // 5 minutos
-    tags: ['sellers'],
+    revalidate: 300,
+    tags: [CacheTag.SELLERS],
   }
 );
