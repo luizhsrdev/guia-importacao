@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ProductDetailModalProps {
@@ -33,15 +33,22 @@ export default function ProductDetailModal({
 }: ProductDetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const { formatPrice, currency } = useCurrency();
+  const [isClosing, setIsClosing] = useState(false);
 
   // Fechar com ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        setIsClosing(true);
+        setTimeout(() => {
+          setIsClosing(false);
+          onClose();
+        }, 200);
+      }
     };
     if (isOpen) {
       document.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden'; // Bloquear scroll
+      document.body.style.overflow = 'hidden';
     }
     return () => {
       document.removeEventListener('keydown', handleEsc);
@@ -49,39 +56,52 @@ export default function ProductDetailModal({
     };
   }, [isOpen, onClose]);
 
+  // Função de fechar com animação
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  };
+
   // Fechar ao clicar fora
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
+      handleClose();
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
 
   const handleViewSeller = () => {
     if (isPremium) {
       window.open(product.original_link, '_blank');
     } else {
-      onRequestUpgrade(); // Abre popup premium
+      handleClose();
+      setTimeout(() => {
+        onRequestUpgrade();
+      }, 250);
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4
-                 bg-black/70 backdrop-blur-sm animate-fadeIn"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4
+                  bg-black/70 backdrop-blur-sm
+                  ${isClosing ? 'animate-fadeOut' : 'animate-fadeIn'}`}
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className="relative bg-surface rounded-xl border border-zinc-700 shadow-2xl
-                   w-full max-w-4xl
-                   max-md:h-screen max-md:rounded-none max-md:overflow-y-auto
-                   animate-scaleIn"
+        className={`relative bg-surface rounded-xl border border-zinc-700 shadow-2xl
+                    w-full max-w-4xl
+                    max-md:h-screen max-md:rounded-none max-md:overflow-y-auto
+                    ${isClosing ? 'animate-scaleOut' : 'animate-scaleIn'}`}
       >
         {/* Botão X - Canto Superior Direito */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 z-10 text-textSecondary hover:text-textMain
                      transition-colors bg-zinc-900/80 rounded-full p-2"
         >

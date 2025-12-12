@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface PremiumUpgradeModalProps {
   isOpen: boolean;
@@ -14,11 +14,18 @@ export default function PremiumUpgradeModal({
   onUpgrade,
 }: PremiumUpgradeModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Fechar com ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        setIsClosing(true);
+        setTimeout(() => {
+          setIsClosing(false);
+          onClose();
+        }, 200);
+      }
     };
     if (isOpen) {
       document.addEventListener('keydown', handleEsc);
@@ -30,26 +37,36 @@ export default function PremiumUpgradeModal({
     };
   }, [isOpen, onClose]);
 
+  // Função de fechar com animação
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  };
+
   // Fechar ao clicar fora
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
+      handleClose();
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
 
   return (
     <div
-      className="fixed inset-0 z-60 flex items-center justify-center p-4
-                 bg-black/70 backdrop-blur-sm animate-fadeIn"
+      className={`fixed inset-0 z-60 flex items-center justify-center p-4
+                  bg-black/70 backdrop-blur-sm
+                  ${isClosing ? 'animate-fadeOut' : 'animate-fadeIn'}`}
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className="bg-surface rounded-xl border border-zinc-700 shadow-2xl
-                   w-full max-w-md p-8
-                   animate-scaleIn"
+        className={`bg-surface rounded-xl border border-zinc-700 shadow-2xl
+                    w-full max-w-md p-8
+                    ${isClosing ? 'animate-scaleOut' : 'animate-scaleIn'}`}
       >
         {/* Header */}
         <div className="text-center mb-6">
@@ -130,7 +147,7 @@ export default function PremiumUpgradeModal({
           </button>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-full bg-transparent text-textSecondary font-medium py-3 px-6 rounded-lg
                        border border-zinc-700 hover:bg-zinc-800 hover:text-textMain transition-colors"
           >
