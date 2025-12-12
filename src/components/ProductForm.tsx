@@ -102,11 +102,13 @@ export default function ProductForm({
         toast.error('Erro ao ler arquivo', { duration: 4000 });
         setUploading(false);
       };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro:', error);
 
-      // Detectar erro 413 (Payload Too Large)
-      if (error.message?.includes('413') || error.message?.includes('1 MB limit')) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      const isPayloadTooLarge = errorMessage.includes('413') || errorMessage.includes('1 MB limit');
+
+      if (isPayloadTooLarge) {
         toast.error(
           'Imagem muito grande! Reduza o tamanho e tente novamente.',
           { duration: 6000 }
@@ -136,11 +138,13 @@ export default function ProductForm({
       } else {
         toast.error('Erro ao salvar produto: ' + result.error, { duration: 5000 });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro:', error);
 
-      // Detectar erro 413 (Payload Too Large)
-      if (error.message?.includes('413') || error.message?.includes('1 MB limit')) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      const isPayloadTooLarge = errorMessage.includes('413') || errorMessage.includes('1 MB limit');
+
+      if (isPayloadTooLarge) {
         toast.error(
           'Dados muito grandes! Reduza o tamanho das imagens e tente novamente.',
           { duration: 6000 }
