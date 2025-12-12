@@ -1,11 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Outfit } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from 'react-hot-toast';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-logo',
+  weight: ['600', '700'],
+});
 
 export const metadata: Metadata = {
   title: 'Guia Importação Xianyu',
@@ -19,36 +26,37 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="pt-BR">
-        <body className={inter.className}>
-          <CurrencyProvider>
-            {children}
+      <html lang="pt-BR" suppressHydrationWarning>
+        <body className={`${inter.className} ${outfit.variable}`}>
+          <ThemeProvider>
+            <CurrencyProvider>
+              {children}
 
-            {/* Toast Container */}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#1A1A1A',
-                  color: '#E0E0E0',
-                  border: '1px solid #333',
-                },
-                success: {
-                  iconTheme: {
-                    primary: '#00ff9d',
-                    secondary: '#0F0F0F',
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: 'var(--surface)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
                   },
-                },
-                error: {
-                  iconTheme: {
-                    primary: '#FF455F',
-                    secondary: '#0F0F0F',
+                  success: {
+                    iconTheme: {
+                      primary: '#10B981',
+                      secondary: 'var(--surface)',
+                    },
                   },
-                },
-              }}
-            />
-          </CurrencyProvider>
+                  error: {
+                    iconTheme: {
+                      primary: '#EF4444',
+                      secondary: 'var(--surface)',
+                    },
+                  },
+                }}
+              />
+            </CurrencyProvider>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
