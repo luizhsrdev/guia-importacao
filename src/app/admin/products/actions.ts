@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import cloudinary from '@/lib/cloudinary';
+import { CacheTag } from '@/types';
 
 export interface ProductFormData {
   id?: string;
@@ -68,8 +69,10 @@ export async function uploadImageToCloudinary(
     console.error('Erro detalhado ao fazer upload:');
     console.error('Tipo do erro:', error?.constructor?.name);
     console.error('Mensagem:', error instanceof Error ? error.message : error);
-    if (error instanceof Error && 'http_code' in error) {
-      console.error('HTTP Code:', (error as any).http_code);
+
+    const errorWithHttpCode = error as { http_code?: number };
+    if (errorWithHttpCode.http_code) {
+      console.error('HTTP Code:', errorWithHttpCode.http_code);
     }
 
     return {
@@ -137,7 +140,7 @@ export async function createProduct(formData: ProductFormData) {
   }
 
   revalidatePath('/admin/products');
-  revalidateTag('products'); // Invalida cache da home
+  revalidateTag(CacheTag.PRODUCTS);
   return { success: true };
 }
 
@@ -172,7 +175,7 @@ export async function updateProduct(formData: ProductFormData) {
   }
 
   revalidatePath('/admin/products');
-  revalidateTag('products'); // Invalida cache da home
+  revalidateTag(CacheTag.PRODUCTS);
   return { success: true };
 }
 
@@ -186,7 +189,7 @@ export async function deleteProduct(id: string) {
   }
 
   revalidatePath('/admin/products');
-  revalidateTag('products'); // Invalida cache da home
+  revalidateTag(CacheTag.PRODUCTS);
   return { success: true };
 }
 
