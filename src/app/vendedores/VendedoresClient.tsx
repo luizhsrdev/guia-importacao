@@ -40,10 +40,9 @@ export default function VendedoresClient({ sellers }: VendedoresClientProps) {
 
   return (
     <div>
-      {/* Botão Voltar */}
       <button
         onClick={() => router.push('/')}
-        className="flex items-center gap-2 text-textSecondary hover:text-primary transition-colors mb-6"
+        className="flex items-center gap-2 text-text-secondary hover:text-primary transition-colors mb-6"
       >
         <svg
           className="w-5 h-5"
@@ -61,45 +60,43 @@ export default function VendedoresClient({ sellers }: VendedoresClientProps) {
         Voltar para Produtos
       </button>
 
-      {/* Filtros */}
       <div className="flex gap-3 mb-8 flex-wrap">
         <button
           onClick={() => setFilter('all')}
-          className={`px-6 py-3 rounded-lg font-medium transition-all ${
+          className={`px-6 py-3 rounded-md font-medium transition-all ${
             filter === 'all'
-              ? 'bg-primary text-background shadow-lg shadow-primary/20'
-              : 'bg-surface text-textSecondary hover:text-textMain hover:bg-surface/80 border border-zinc-800'
+              ? 'btn-primary'
+              : 'btn-secondary'
           }`}
         >
           Todos ({sellers.length})
         </button>
         <button
           onClick={() => setFilter('gold')}
-          className={`px-6 py-3 rounded-lg font-medium transition-all ${
+          className={`px-6 py-3 rounded-md font-medium transition-all ${
             filter === 'gold'
-              ? 'bg-primary text-background shadow-lg shadow-primary/20'
-              : 'bg-surface text-textSecondary hover:text-textMain hover:bg-surface/80 border border-zinc-800'
+              ? 'bg-accent-gold text-background'
+              : 'btn-secondary'
           }`}
         >
           Lista Dourada ({goldCount})
         </button>
         <button
           onClick={() => setFilter('blacklist')}
-          className={`px-6 py-3 rounded-lg font-medium transition-all ${
+          className={`px-6 py-3 rounded-md font-medium transition-all ${
             filter === 'blacklist'
-              ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
-              : 'bg-surface text-textSecondary hover:text-textMain hover:bg-surface/80 border border-zinc-800'
+              ? 'btn-danger'
+              : 'btn-secondary'
           }`}
         >
           Blacklist ({blacklistCount})
         </button>
       </div>
 
-      {/* Grid de vendedores */}
       {filteredSellers.length === 0 ? (
-        <div className="text-center py-16 bg-surface rounded-xl border border-zinc-800">
+        <div className="text-center py-16 bg-surface rounded-lg border border-border">
           <svg
-            className="w-16 h-16 mx-auto mb-4 text-textSecondary opacity-50"
+            className="w-16 h-16 mx-auto mb-4 text-text-tertiary opacity-50"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -111,7 +108,7 @@ export default function VendedoresClient({ sellers }: VendedoresClientProps) {
               d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
             />
           </svg>
-          <p className="text-textSecondary text-lg">
+          <p className="text-text-secondary text-lg">
             Nenhum vendedor encontrado nesta categoria.
           </p>
         </div>
@@ -123,11 +120,10 @@ export default function VendedoresClient({ sellers }: VendedoresClientProps) {
         </div>
       )}
 
-      {/* Disclaimer */}
-      <div className="mt-12 p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-        <h3 className="text-textMain font-semibold mb-2 flex items-center gap-2">
+      <div className="mt-12 p-6 bg-surface-elevated border border-border rounded-lg">
+        <h3 className="text-text-primary font-semibold mb-2 flex items-center gap-2">
           <svg
-            className="w-5 h-5 text-primary"
+            className="w-5 h-5 text-accent-blue"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -141,11 +137,11 @@ export default function VendedoresClient({ sellers }: VendedoresClientProps) {
           </svg>
           Aviso Importante
         </h3>
-        <p className="text-textSecondary text-sm leading-relaxed">
+        <p className="text-text-secondary text-sm leading-relaxed">
           Esta lista é baseada em experiências relatadas pela comunidade e nossa
-          análise. A <strong>Lista Dourada</strong> contém vendedores com
+          análise. A <span className="text-accent-gold font-medium">Lista Dourada</span> contém vendedores com
           histórico positivo, mas sempre faça sua própria pesquisa antes de
-          comprar. A <strong>Blacklist</strong> lista vendedores reportados por
+          comprar. A <span className="text-danger font-medium">Blacklist</span> lista vendedores reportados por
           práticas fraudulentas - evite completamente estes perfis.
         </p>
       </div>
