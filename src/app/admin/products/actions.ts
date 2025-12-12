@@ -27,57 +27,34 @@ export async function uploadImageToCloudinary(
   base64Data: string
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    console.log('Iniciando upload no Cloudinary...');
-    console.log('Tamanho do base64:', base64Data.length, 'caracteres');
-    console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
-
-    // Verificar se as credenciais estão configuradas
     if (!process.env.CLOUDINARY_CLOUD_NAME ||
         !process.env.CLOUDINARY_API_KEY ||
         !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Credenciais do Cloudinary não configuradas!');
       return {
         success: false,
-        error: 'Credenciais do Cloudinary não configuradas. Verifique o .env.local'
+        error: 'Credenciais do Cloudinary não configuradas'
       };
     }
 
-    // Verificar se o base64 está no formato correto
     if (!base64Data.startsWith('data:image/')) {
-      console.error('Formato de imagem inválido. Deve começar com "data:image/"');
       return {
         success: false,
         error: 'Formato de imagem inválido'
       };
     }
 
-    console.log('Credenciais OK, enviando para Cloudinary...');
-
     const result = await cloudinary.uploader.upload(base64Data, {
       folder: 'xianyu-products',
       resource_type: 'image',
-      timeout: 60000, // 60 segundos de timeout
+      timeout: 60000,
     });
-
-    console.log('Upload concluído com sucesso!');
-    console.log('URL:', result.secure_url);
-    console.log('Tamanho:', result.bytes, 'bytes');
-    console.log('Dimensões:', result.width, 'x', result.height);
 
     return { success: true, url: result.secure_url };
   } catch (error) {
-    console.error('Erro detalhado ao fazer upload:');
-    console.error('Tipo do erro:', error?.constructor?.name);
-    console.error('Mensagem:', error instanceof Error ? error.message : error);
-
-    const errorWithHttpCode = error as { http_code?: number };
-    if (errorWithHttpCode.http_code) {
-      console.error('HTTP Code:', errorWithHttpCode.http_code);
-    }
-
+    console.error('Erro ao fazer upload:', error instanceof Error ? error.message : error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : JSON.stringify(error)
+      error: error instanceof Error ? error.message : 'Erro ao fazer upload'
     };
   }
 }
