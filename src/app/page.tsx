@@ -7,7 +7,9 @@ import {
   UserButton,
 } from '@clerk/nextjs';
 import { AdminLink } from '@/components/AdminLink';
+import { Logo } from '@/components/Logo';
 import CurrencyToggle from '@/components/CurrencyToggle';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { HomeClient } from './HomeClient';
 import { getPublicProducts, getPublicSellers } from './actions';
 import { getCurrentUserStatus } from '@/lib/user-server';
@@ -15,21 +17,21 @@ import { getCategories } from '@/app/admin/products/actions';
 
 function HomePageSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-8 pt-8 pb-16">
+    <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
       <div className="animate-pulse">
-        <div className="flex gap-4 mb-8 border-b border-zinc-800 pb-4">
-          <div className="h-12 w-32 bg-zinc-800 rounded-lg"></div>
-          <div className="h-12 w-32 bg-zinc-800 rounded-lg"></div>
+        <div className="flex gap-4 mb-8 border-b border-border pb-4">
+          <div className="h-10 w-28 skeleton rounded-md"></div>
+          <div className="h-10 w-28 skeleton rounded-md"></div>
         </div>
 
         <div className="mb-8">
-          <div className="h-8 w-64 bg-zinc-800 rounded mb-2"></div>
-          <div className="h-4 w-48 bg-zinc-800 rounded"></div>
+          <div className="h-7 w-56 skeleton rounded-md mb-3"></div>
+          <div className="h-4 w-40 skeleton rounded-md"></div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-surface rounded-xl h-72 border border-zinc-800"></div>
+            <div key={i} className="skeleton rounded-lg h-72"></div>
           ))}
         </div>
       </div>
@@ -58,25 +60,24 @@ async function HomeContent() {
 export default function Home() {
   return (
     <main className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-sm border-b border-primary/20">
-        <div className="max-w-7xl mx-auto px-8 py-4">
+      <header className="sticky top-0 z-40 glass-strong border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-primary">
-              Planilha do Sena
-            </h1>
+            <Logo size="md" />
 
-            <div className="flex gap-4 items-center">
+            <div className="flex gap-3 items-center">
               <CurrencyToggle />
+              <ThemeToggle />
 
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className="px-6 py-2 bg-surface border border-primary text-primary rounded-lg hover:bg-primary hover:text-background transition-colors text-sm">
-                    Sign In
+                  <button className="btn-ghost px-4 py-2 rounded-md text-sm">
+                    Entrar
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button className="px-6 py-2 bg-primary text-background rounded-lg hover:bg-primary/90 transition-colors text-sm font-bold">
-                    Sign Up
+                  <button className="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                    Criar Conta
                   </button>
                 </SignUpButton>
               </SignedOut>
@@ -98,4 +99,3 @@ export default function Home() {
 }
 
 export const revalidate = 60;
-export const dynamic = 'force-dynamic';
