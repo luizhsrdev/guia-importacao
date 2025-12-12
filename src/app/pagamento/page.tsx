@@ -35,7 +35,7 @@ export default async function PagamentoPage() {
         <div className="bg-surface border border-zinc-800 rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-textSecondary">Acesso Vitalício</span>
-            <span className="text-3xl font-bold text-primary">R$ 9,90</span>
+            <span className="text-3xl font-bold text-primary">R$ 89,90</span>
           </div>
 
           <ul className="space-y-3 mb-6">

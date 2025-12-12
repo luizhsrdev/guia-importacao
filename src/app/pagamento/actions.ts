@@ -8,7 +8,7 @@ import { revalidateTag } from 'next/cache';
 import { CacheTag } from '@/types';
 import type { CreatePixResult } from '@/types';
 
-const PREMIUM_PRICE_BRL = 9.90;
+const PREMIUM_PRICE_BRL = 89.90;
 const PAYMENT_EXPIRATION_MINUTES = 30;
 
 export async function createPixPayment(): Promise<CreatePixResult> {
