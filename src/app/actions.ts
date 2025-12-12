@@ -3,6 +3,37 @@
 import { supabase } from '@/lib/supabase';
 import { unstable_cache } from 'next/cache';
 import { CacheTag } from '@/types';
+import { getCurrentUserStatus } from '@/lib/user-server';
+
+interface GetOriginalLinkResult {
+  success: boolean;
+  originalLink?: string;
+  error?: string;
+}
+
+export async function getProductOriginalLink(productId: string): Promise<GetOriginalLinkResult> {
+  const userStatus = await getCurrentUserStatus();
+
+  if (!userStatus.isAuthenticated) {
+    return { success: false, error: 'Não autenticado' };
+  }
+
+  if (!userStatus.isPremium && !userStatus.isAdmin) {
+    return { success: false, error: 'Acesso premium necessário' };
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('original_link')
+    .eq('id', productId)
+    .single();
+
+  if (error || !data) {
+    return { success: false, error: 'Produto não encontrado' };
+  }
+
+  return { success: true, originalLink: data.original_link };
+}
 
 export const getPublicProducts = unstable_cache(
   async () => {
@@ -13,7 +44,6 @@ export const getPublicProducts = unstable_cache(
         title,
         price_cny,
         affiliate_link,
-        original_link,
         is_sold_out,
         image_main,
         image_hover,
