@@ -26,9 +26,7 @@ export interface Product extends ProductBase {
   original_link: string;
 }
 
-export interface PublicProduct extends ProductBase {
-  original_link?: string;
-}
+export type PublicProduct = ProductBase;
 
 export type SellerStatus = 'gold' | 'blacklist';
 
