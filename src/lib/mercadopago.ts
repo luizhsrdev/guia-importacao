@@ -1,8 +1,17 @@
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
 
-// Cliente do Mercado Pago
+const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
+  accessToken: accessToken ?? '',
+  options: {
+    timeout: 10000,
+  },
 });
 
-export const preference = new Preference(client);
+export const mercadoPagoPayment = new Payment(client);
+export const mercadoPagoPreference = new Preference(client);
+
+export function isMercadoPagoConfigured(): boolean {
+  return Boolean(accessToken);
+}
