@@ -58,4 +58,67 @@ export interface UserStatus {
 export const enum CacheTag {
   PRODUCTS = 'products',
   SELLERS = 'sellers',
+  PAYMENTS = 'payments',
+}
+
+export type PaymentStatus = 'pending' | 'approved' | 'rejected' | 'refunded';
+
+export interface Payment {
+  id: string;
+  clerk_user_id: string;
+  mercadopago_id: string | null;
+  amount: number;
+  status: PaymentStatus;
+  idempotency_key: string;
+  created_at: string;
+  approved_at: string | null;
+}
+
+export interface ProcessedWebhook {
+  id: string;
+  webhook_id: string;
+  type: string;
+  action: string | null;
+  processed_at: string;
+}
+
+export interface CreatePixResult {
+  success: boolean;
+  qrCode?: string;
+  qrCodeBase64?: string;
+  copyPaste?: string;
+  paymentId?: string;
+  expirationDate?: string;
+  error?: string;
+}
+
+export interface MercadoPagoWebhookPayload {
+  action: string;
+  api_version: string;
+  data: { id: string };
+  date_created: string;
+  id: number;
+  live_mode: boolean;
+  type: string;
+  user_id: string;
+}
+
+export interface ImportCalculationInput {
+  productPriceCny: number;
+  shippingCny: number;
+  exchangeRateCnyToBrl: number;
+  serviceFeePercent: number;
+  productValueUsd: number;
+  isRemessaConforme: boolean;
+}
+
+export interface ImportCalculationResult {
+  productBrl: number;
+  shippingBrl: number;
+  serviceFee: number;
+  subtotal: number;
+  iof: number;
+  icms: number;
+  importTax: number;
+  totalBrl: number;
 }
