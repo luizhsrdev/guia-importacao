@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Business Model:**
 - Free: Product catalog with CSSBuy affiliate links (commission revenue)
-- Premium (R$ 9,90 one-time PIX): Access to Gold/Blacklist seller directories
+- Premium (R$ 89,90 one-time PIX): Access to Gold/Blacklist seller directories
 
 ## Critical Security Rules
 
