@@ -4,17 +4,11 @@ import { useState, useEffect } from 'react';
 import SellerForm from '@/components/SellerForm';
 import ImageLightbox from '@/components/ImageLightbox';
 import { deleteSeller } from './actions';
-import type { SellerFormData } from './actions';
-
-interface Seller extends SellerFormData {
-  id: string;
-  created_at?: string;
-  seller_categories?: { name: string } | null;
-}
+import type { Seller, Category } from '@/types';
 
 interface SellersClientProps {
   sellers: Seller[];
-  categories: Array<{ id: string; name: string }>;
+  categories: Category[];
 }
 
 export default function SellersClient({
