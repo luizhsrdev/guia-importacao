@@ -3,12 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import ProductsClient from './products/ProductsClient';
 import SellersClient from './sellers/SellersClient';
+import type { Product, Seller, Category } from '@/types';
 
 interface AdminClientProps {
-  products: any[];
-  sellers: any[];
-  productCategories: any[];
-  sellerCategories: any[];
+  products: Product[];
+  sellers: Seller[];
+  productCategories: Category[];
+  sellerCategories: Category[];
 }
 
 export default function AdminClient({
