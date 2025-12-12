@@ -15,7 +15,7 @@ Usuários brasileiros compram da China (Xianyu + CSSBuy) mas:
 
 ### Solução Freemium
 **Gratuito:** Lista de produtos com links de afiliado CSSBuy (receita por comissão).
-**Premium (R$ 9,90 vitalício - PIX):** Acesso a:
+**Premium (R$ 89,90 vitalício - PIX):** Acesso a:
 - 🥇 Lista Dourada de vendedores confiáveis
 - ❌ Blacklist de golpistas (com provas)
 
@@ -81,11 +81,11 @@ CREATE POLICY "admin_full_access" ON products FOR ALL USING ((SELECT is_admin FR
 
 text
 
-### 3.3 product_categories
+### 3.3 product_categories EVITE EMOJIS
 id UUID PRIMARY KEY
 name TEXT
 slug TEXT UNIQUE
-icon_emoji TEXT
+
 
 text
 

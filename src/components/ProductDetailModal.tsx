@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ProductDetailModalProps {
   product: {
@@ -31,6 +32,7 @@ export default function ProductDetailModal({
   isPremium
 }: ProductDetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const { formatPrice, currency } = useCurrency();
 
   // Fechar com ESC
   useEffect(() => {
@@ -90,9 +92,9 @@ export default function ProductDetailModal({
 
         {/* Layout Horizontal - Desktop / Vertical - Mobile */}
         <div className="grid md:grid-cols-2 gap-0">
-          {/* Coluna Esquerda - Imagem */}
+          {/* Coluna Esquerda - Imagem QUADRADA */}
           <div className="flex items-center justify-center p-6 bg-zinc-900/30">
-            <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-zinc-900 max-w-xs shadow-lg">
+            <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-900 max-w-sm shadow-lg">
               <img
                 src={product.image_main}
                 alt={product.title}
@@ -108,22 +110,17 @@ export default function ProductDetailModal({
               <h3 className="text-2xl font-bold text-textMain mb-2 line-clamp-2">
                 {product.title}
               </h3>
-              <p className="text-3xl font-bold text-primary">{product.price_cny}</p>
+              <p className="text-3xl font-bold text-primary">
+                {formatPrice(product.price_cny)}
+              </p>
+              {currency === 'BRL' && (
+                <p className="text-sm text-textSecondary mt-1">
+                  ¥ {product.price_cny}
+                </p>
+              )}
             </div>
 
-            {/* 2. DESCRIÇÃO (Observações) */}
-            {product.observations && (
-              <div className="bg-zinc-900/50 rounded-lg p-3">
-                <h4 className="text-textSecondary text-xs uppercase tracking-wide mb-2">
-                  Descrição
-                </h4>
-                <p className="text-textMain text-sm leading-relaxed">
-                  {product.observations}
-                </p>
-              </div>
-            )}
-
-            {/* 3. CATEGORIA + CONDIÇÃO */}
+            {/* 2. CATEGORIA + CONDIÇÃO */}
             <div className="space-y-2">
               {product.category && (
                 <div className="flex items-center gap-2">
@@ -146,12 +143,27 @@ export default function ProductDetailModal({
               )}
             </div>
 
-            {/* 4. CHECKBOXES (Sem emojis) */}
-            <div className="bg-zinc-900/50 rounded-lg p-3 space-y-1.5 text-sm text-textMain">
-              <div>{product.has_box ? 'Com' : 'Sem'} caixa original</div>
-              <div>{product.has_charger ? 'Com' : 'Sem'} carregador</div>
-              <div>{product.has_warranty ? 'Com' : 'Sem'} garantia</div>
-            </div>
+            {/* 3. ACOMPANHA (só se tiver algum item) */}
+            {(product.has_box || product.has_charger || product.has_warranty) && (
+              <div className="bg-zinc-900/50 rounded-lg p-3">
+                <h4 className="text-textSecondary text-sm font-medium mb-2">Acompanha:</h4>
+                <ul className="space-y-1 text-sm text-textMain">
+                  {product.has_box && <li>-  Caixa original</li>}
+                  {product.has_charger && <li>-  Carregador</li>}
+                  {product.has_warranty && <li>-  Garantia</li>}
+                </ul>
+              </div>
+            )}
+
+            {/* 4. DESCRIÇÃO (se existir) */}
+            {product.observations && (
+              <div className="bg-zinc-900/50 rounded-lg p-3">
+                <h4 className="text-textSecondary text-sm font-medium mb-2">Descrição:</h4>
+                <p className="text-textMain text-sm leading-relaxed whitespace-pre-wrap">
+                  {product.observations}
+                </p>
+              </div>
+            )}
 
             {/* 5. BOTÕES */}
             <div className="flex flex-col gap-3 pt-2">

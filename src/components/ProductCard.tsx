@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import ProductDetailModal from './ProductDetailModal';
 import PremiumUpgradeModal from './PremiumUpgradeModal';
 
@@ -44,6 +45,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const { formatPrice } = useCurrency();
 
   return (
     <>
@@ -108,7 +110,7 @@ export default function ProductCard({
               {observations.length > 50 ? '...' : ''}
             </p>
           )}
-          <p className="text-primary font-bold text-lg">{price_cny}</p>
+          <p className="text-primary font-bold text-lg">{formatPrice(price_cny)}</p>
         </div>
 
         {/* Indicador de Link Externo */}

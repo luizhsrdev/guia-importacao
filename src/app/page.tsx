@@ -7,6 +7,7 @@ import {
   UserButton,
 } from '@clerk/nextjs';
 import AdminLink from '@/components/AdminLink';
+import CurrencyToggle from '@/components/CurrencyToggle';
 import HomeClient from './HomeClient';
 import { getPublicProducts, getPublicSellers } from './actions';
 import { getCurrentUserStatus } from '@/lib/user-server';
@@ -73,6 +74,8 @@ export default function Home() {
             </h1>
 
             <div className="flex gap-4 items-center">
+              <CurrencyToggle />
+
               <SignedOut>
                 <SignInButton mode="modal">
                   <button className="px-6 py-2 bg-surface border border-primary text-primary rounded-lg hover:bg-primary hover:text-background transition-colors text-sm">
