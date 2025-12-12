@@ -3,16 +3,11 @@
 import { useState, useEffect } from 'react';
 import ProductForm from '@/components/ProductForm';
 import { deleteProduct, toggleSoldOut } from './actions';
-import type { ProductFormData } from './actions';
-
-interface Product extends ProductFormData {
-  id: string;
-  created_at?: string;
-}
+import type { Product, Category } from '@/types';
 
 interface ProductsClientProps {
   products: Product[];
-  categories: Array<{ id: string; name: string }>;
+  categories: Category[];
 }
 
 export default function ProductsClient({
