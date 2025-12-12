@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
 interface ImageLightboxProps {
@@ -18,12 +18,18 @@ export default function ImageLightbox({
   const [isClosing, setIsClosing] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Garantir que está no cliente
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Prevenir scroll do body quando modal está aberto
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 200);
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -40,7 +46,6 @@ export default function ImageLightbox({
     };
   }, [isOpen]);
 
-  // Fechar com ESC
   useEffect(() => {
     if (!isOpen) return;
 
@@ -50,20 +55,11 @@ export default function ImageLightbox({
 
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   const handleOpen = () => {
     setIsClosing(false);
     setIsOpen(true);
-  };
-
-  const handleClose = () => {
-    setIsClosing(true);
-    // Aguardar animação de saída antes de remover do DOM
-    setTimeout(() => {
-      setIsOpen(false);
-      setIsClosing(false);
-    }, 200); // Mesma duração da animação
   };
 
   return (

@@ -21,12 +21,19 @@ interface ProductCardProps {
   category?: CategoryLike | CategoryLike[] | null;
   condition?: string;
   observations?: string;
-  original_link?: string;
   has_box?: boolean;
   has_charger?: boolean;
   has_warranty?: boolean;
   isPremium: boolean;
 }
+
+const CONDITION_STYLES = {
+  Lacrado: 'tag-primary',
+  Seminovo: 'tag-blue',
+  Usado: 'tag-gold',
+  Aberto: 'tag-neutral',
+  'Com Defeito': 'tag-danger',
+} as const;
 
 export default function ProductCard({
   id,
@@ -39,7 +46,6 @@ export default function ProductCard({
   category,
   condition,
   observations,
-  original_link,
   has_box,
   has_charger,
   has_warranty,
@@ -49,91 +55,66 @@ export default function ProductCard({
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const { formatPrice } = useCurrency();
 
+  const conditionStyle = condition
+    ? CONDITION_STYLES[condition as keyof typeof CONDITION_STYLES] ?? 'tag-neutral'
+    : null;
+
   return (
     <>
-      {/* Card - Ao clicar abre modal */}
-      <div
+      <article
         onClick={() => setDetailModalOpen(true)}
-        className="group relative block bg-surface rounded-xl overflow-hidden border border-textSecondary/20 hover:border-primary/50 transition-all hover:shadow-xl cursor-pointer"
+        className="group relative bg-surface rounded-2xl overflow-hidden border border-border cursor-pointer transition-all duration-150 hover:border-border-emphasis"
       >
-        {/* Container da Imagem com Hover Effect */}
-        <div className="relative aspect-square overflow-hidden bg-background">
-          {/* Imagem principal (sempre visível) */}
+        <div className="relative aspect-square overflow-hidden bg-surface-elevated">
           <img
             src={image_main}
             alt={title}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+            draggable={false}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 select-none"
           />
 
-          {/* Imagem hover (aparece no hover) */}
           {image_hover && (
             <img
               src={image_hover}
-              alt={`${title} - hover`}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              alt=""
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none"
             />
           )}
 
-          {/* Badge de Condição */}
-          {condition && (
-            <div
-              className={`absolute top-2 left-2 px-3 py-1 rounded-full text-xs font-medium ${
-                condition === 'Lacrado'
-                  ? 'bg-primary/20 text-primary border border-primary/30'
-                  : condition === 'Seminovo'
-                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                  : condition === 'Usado'
-                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                  : 'bg-zinc-700/80 text-textSecondary border border-zinc-600'
-              }`}
-            >
+          {condition && conditionStyle && (
+            <div className={`absolute top-2.5 left-2.5 ${conditionStyle}`}>
               {condition}
             </div>
           )}
 
-          {/* Badge de Esgotado */}
           {is_sold_out && (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <span className="px-6 py-3 bg-danger text-white font-bold text-lg rounded-lg">
-                ESGOTADO
+            <div className="absolute inset-0 bg-background/90 flex items-center justify-center">
+              <span className="tag-danger">
+                Esgotado
               </span>
             </div>
           )}
+
         </div>
 
-        {/* Info do Produto */}
         <div className="p-4">
-          <h3 className="text-textMain font-semibold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="text-text-primary font-medium mb-1.5 line-clamp-2 text-sm leading-snug">
             {title}
           </h3>
+
           {observations && (
-            <p className="text-xs text-textSecondary truncate mb-2">
-              {observations.substring(0, 50)}
-              {observations.length > 50 ? '...' : ''}
+            <p className="text-xs text-text-muted line-clamp-1 mb-2">
+              {observations}
             </p>
           )}
-          <p className="text-primary font-bold text-lg">{formatPrice(price_cny)}</p>
-        </div>
 
-        {/* Indicador de Link Externo */}
-        <div className="absolute top-3 right-3 w-8 h-8 bg-primary/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <svg
-            className="w-4 h-4 text-background"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-            />
-          </svg>
+          <p className="text-primary font-semibold text-lg tabular-nums">
+            {formatPrice(price_cny)}
+          </p>
         </div>
-      </div>
+      </article>
 
-      {/* Modal de Detalhes */}
       <ProductDetailModal
         product={{
           id,
@@ -147,22 +128,18 @@ export default function ProductCard({
           has_warranty,
           observations,
           affiliate_link,
-          original_link,
         }}
         isOpen={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
         onRequestUpgrade={() => {
-          // NÃO fecha o modal de produto - apenas abre upgrade (sobrepõe)
           setUpgradeModalOpen(true);
         }}
         isPremium={isPremium}
       />
 
-      {/* Modal de Upgrade Premium */}
       <PremiumUpgradeModal
         isOpen={upgradeModalOpen}
         onClose={() => {
-          // Apenas fecha o upgrade - produto já está aberto
           setUpgradeModalOpen(false);
         }}
         onUpgrade={() => {
