@@ -5,6 +5,11 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import ProductDetailModal from './ProductDetailModal';
 import PremiumUpgradeModal from './PremiumUpgradeModal';
 
+interface CategoryLike {
+  name: string;
+  slug?: string;
+}
+
 interface ProductCardProps {
   id: string;
   title: string;
@@ -13,13 +18,10 @@ interface ProductCardProps {
   image_hover?: string;
   affiliate_link: string;
   is_sold_out: boolean;
-  category?: {
-    name: string;
-    slug?: string;
-  } | null;
+  category?: CategoryLike | CategoryLike[] | null;
   condition?: string;
   observations?: string;
-  original_link: string;
+  original_link?: string;
   has_box?: boolean;
   has_charger?: boolean;
   has_warranty?: boolean;
