@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import cloudinary from '@/lib/cloudinary';
+import { CacheTag } from '@/types';
 
 export interface SellerFormData {
   id?: string;
@@ -136,7 +137,7 @@ export async function createSeller(formData: SellerFormData) {
   }
 
   revalidatePath('/admin/sellers');
-  revalidateTag('sellers'); // Invalida cache da home
+  revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
 
@@ -169,7 +170,7 @@ export async function updateSeller(formData: SellerFormData) {
   }
 
   revalidatePath('/admin/sellers');
-  revalidateTag('sellers'); // Invalida cache da home
+  revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
 
@@ -183,7 +184,7 @@ export async function deleteSeller(id: string) {
   }
 
   revalidatePath('/admin/sellers');
-  revalidateTag('sellers'); // Invalida cache da home
+  revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
 
