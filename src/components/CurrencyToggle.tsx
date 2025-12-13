@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { NEUMORPHIC_ELEVATED } from '@/lib/constants';
 
 const ANIMATION_DELAY_MS = 50;
 
@@ -51,7 +50,7 @@ export function CurrencyToggle() {
     <div className="flex items-center gap-2">
       <button
         onClick={handleToggle}
-        className={`group relative flex items-center gap-2 h-10 px-4 bg-surface dark:bg-surface-elevated rounded-xl transition-all duration-200 overflow-hidden ${NEUMORPHIC_ELEVATED.base} ${NEUMORPHIC_ELEVATED.hover} ${NEUMORPHIC_ELEVATED.active}`}
+        className="group relative flex items-center gap-2 h-10 px-4 rounded-xl overflow-hidden neu-elevated"
       >
         <span className="text-text-tertiary text-xs font-medium">Moeda</span>
         <div className="relative w-8 h-5 flex items-center justify-center overflow-hidden">
@@ -84,14 +83,8 @@ export function CurrencyToggle() {
             : 'max-w-0 opacity-0 -translate-x-4'
         }`}
       >
-        <div className="relative">
-          <div
-            className={`transition-all duration-250 ease-out ${
-              isEditingRate
-                ? 'opacity-0 scale-95 pointer-events-none absolute'
-                : 'opacity-100 scale-100'
-            }`}
-          >
+        <div>
+          {!isEditingRate ? (
             <button
               onClick={() => {
                 setIsEditingRate(true);
@@ -115,16 +108,9 @@ export function CurrencyToggle() {
                 />
               </svg>
             </button>
-          </div>
-
-          <div
-            className={`flex items-center gap-2 transition-all duration-250 ease-out ${
-              isEditingRate
-                ? 'opacity-100 scale-100 translate-x-0'
-                : 'opacity-0 scale-95 translate-x-2 pointer-events-none absolute top-0 left-0'
-            }`}
-          >
-            <div className="flex items-center gap-1 h-10 px-3 bg-surface border border-primary rounded-xl ring-[3px] ring-primary/20 transition-all duration-200">
+          ) : (
+            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 h-10 px-3 bg-surface border border-primary rounded-xl transition-all duration-200">
               <span className="text-text-tertiary text-xs">R$</span>
               <input
                 ref={inputRef}
@@ -155,7 +141,8 @@ export function CurrencyToggle() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
