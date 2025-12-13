@@ -27,20 +27,20 @@ export default function SellerCard({ seller }: SellerCardProps) {
 
   return (
     <div
-      className={`bg-surface rounded-2xl p-6 border transition-all duration-150 ${
+      className={`bg-surface rounded-xl sm:rounded-2xl p-4 sm:p-6 border transition-all duration-150 ${
         isGold
           ? 'border-border hover:border-amber-500/40'
           : 'border-border hover:border-red-500/40'
       }`}
     >
-      <div className="flex items-start justify-between gap-3 mb-5">
+      <div className="flex items-start justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-text-primary mb-1 truncate">
+          <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-0.5 sm:mb-1 truncate">
             {seller.name}
           </h3>
 
           {seller.seller_categories && (
-            <p className="text-sm text-text-secondary">
+            <p className="text-xs sm:text-sm text-text-secondary">
               {seller.seller_categories.name}
             </p>
           )}
@@ -52,11 +52,11 @@ export default function SellerCard({ seller }: SellerCardProps) {
       </div>
 
       {seller.image_url && (
-        <div className="mb-5">
+        <div className="mb-4 sm:mb-5">
           <ImageLightbox
             src={seller.image_url}
             alt={seller.name}
-            thumbnailClassName="w-full aspect-square object-cover rounded-xl"
+            thumbnailClassName="w-full aspect-square object-cover rounded-lg sm:rounded-xl"
           />
         </div>
       )}
@@ -64,21 +64,21 @@ export default function SellerCard({ seller }: SellerCardProps) {
       {isGold ? (
         <>
           {seller.notes && (
-            <div className="bg-surface-elevated rounded-xl p-4 mb-5">
-              <h4 className="text-amber-400 text-sm font-medium mb-2">Sobre o vendedor</h4>
-              <p className="text-text-secondary text-sm leading-relaxed">
+            <div className="bg-surface-elevated rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
+              <h4 className="text-amber-400 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">Sobre o vendedor</h4>
+              <p className="text-text-secondary text-xs sm:text-sm leading-relaxed">
                 {seller.notes}
               </p>
             </div>
           )}
 
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2 sm:gap-2.5">
             {seller.profile_link && (
               <a
                 href={seller.profile_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center h-11 px-4 bg-surface-elevated text-text-primary rounded-xl text-sm font-medium border border-border hover:bg-surface-overlay transition-colors"
+                className="flex items-center justify-center h-10 sm:h-11 px-4 bg-surface-elevated text-text-primary rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-border hover:bg-surface-overlay transition-colors"
               >
                 Ver Perfil
               </a>
@@ -89,7 +89,7 @@ export default function SellerCard({ seller }: SellerCardProps) {
                 href={seller.feedback_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center h-11 px-4 bg-surface-elevated text-text-secondary rounded-xl text-sm font-medium border border-border hover:bg-surface-overlay transition-colors"
+                className="flex items-center justify-center h-10 sm:h-11 px-4 bg-surface-elevated text-text-secondary rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-border hover:bg-surface-overlay transition-colors"
               >
                 Ver Avaliações
               </a>
@@ -100,7 +100,7 @@ export default function SellerCard({ seller }: SellerCardProps) {
                 href={seller.affiliate_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center h-11 px-4 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-hover transition-colors"
+                className="flex items-center justify-center h-10 sm:h-11 px-4 bg-primary text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary-hover transition-colors"
               >
                 Acessar Loja
               </a>
@@ -110,9 +110,9 @@ export default function SellerCard({ seller }: SellerCardProps) {
       ) : (
         <>
           {seller.blacklist_reason && (
-            <div className="bg-red-500/10 rounded-xl p-4 mb-5">
-              <h4 className="text-red-400 text-sm font-medium mb-2">Motivo da denúncia</h4>
-              <p className="text-text-secondary text-sm leading-relaxed">
+            <div className="bg-red-500/10 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
+              <h4 className="text-red-400 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">Motivo da denúncia</h4>
+              <p className="text-text-secondary text-xs sm:text-sm leading-relaxed">
                 {seller.blacklist_reason}
               </p>
             </div>
@@ -123,7 +123,7 @@ export default function SellerCard({ seller }: SellerCardProps) {
               href={seller.profile_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center h-11 px-4 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors mb-3"
+              className="flex items-center justify-center h-10 sm:h-11 px-4 bg-red-500 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold hover:bg-red-600 transition-colors mb-2 sm:mb-3"
             >
               Ver Perfil (Cuidado!)
             </a>
@@ -134,24 +134,24 @@ export default function SellerCard({ seller }: SellerCardProps) {
               href={seller.proof_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center h-11 px-4 bg-surface-elevated text-text-primary rounded-xl text-sm font-medium border border-border hover:bg-surface-overlay transition-colors mb-4"
+              className="flex items-center justify-center h-10 sm:h-11 px-4 bg-surface-elevated text-text-primary rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-border hover:bg-surface-overlay transition-colors mb-3 sm:mb-4"
             >
               Ver Comprovante
             </a>
           )}
 
           {seller.evidence_images && seller.evidence_images.length > 0 && (
-            <div className="mt-5">
-              <h4 className="text-text-secondary text-sm font-medium mb-3">
+            <div className="mt-4 sm:mt-5">
+              <h4 className="text-text-secondary text-xs sm:text-sm font-medium mb-2 sm:mb-3">
                 Evidências ({seller.evidence_images.length})
               </h4>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {seller.evidence_images.map((img, index) => (
                   <ImageLightbox
                     key={index}
                     src={img}
                     alt={`Evidência ${index + 1}`}
-                    thumbnailClassName="w-full aspect-square object-cover rounded-lg"
+                    thumbnailClassName="w-full aspect-square object-cover rounded-md sm:rounded-lg"
                   />
                 ))}
               </div>
