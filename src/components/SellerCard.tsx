@@ -27,10 +27,10 @@ export default function SellerCard({ seller }: SellerCardProps) {
 
   return (
     <div
-      className={`bg-surface rounded-xl sm:rounded-2xl p-4 sm:p-6 border transition-all duration-150 ${
+      className={`bg-surface rounded-2xl p-5 sm:p-6 border shadow-sm transition-all duration-300 ${
         isGold
-          ? 'border-border hover:border-amber-500/40'
-          : 'border-border hover:border-red-500/40'
+          ? 'border-amber-500/20 hover:border-amber-500/50 hover:shadow-glow-gold'
+          : 'border-red-500/20 hover:border-red-500/50 hover:shadow-glow-danger'
       }`}
     >
       <div className="flex items-start justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
