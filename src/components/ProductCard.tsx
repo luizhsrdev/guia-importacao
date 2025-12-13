@@ -98,18 +98,18 @@ export default function ProductCard({
 
         </div>
 
-        <div className="p-4">
-          <h3 className="text-text-primary font-medium mb-1.5 line-clamp-2 text-sm leading-snug">
+        <div className="p-3 sm:p-4">
+          <h3 className="text-text-primary font-medium mb-1 sm:mb-1.5 line-clamp-2 text-xs sm:text-sm leading-snug">
             {title}
           </h3>
 
           {observations && (
-            <p className="text-xs text-text-muted line-clamp-1 mb-2">
+            <p className="text-[11px] sm:text-xs text-text-muted line-clamp-1 mb-1.5 sm:mb-2 hidden sm:block">
               {observations}
             </p>
           )}
 
-          <p className="text-primary font-semibold text-lg tabular-nums">
+          <p className="text-primary font-semibold text-base sm:text-lg tabular-nums">
             {formatPrice(price_cny)}
           </p>
         </div>
