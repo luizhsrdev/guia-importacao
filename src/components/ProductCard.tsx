@@ -63,53 +63,58 @@ export default function ProductCard({
     <>
       <article
         onClick={() => setDetailModalOpen(true)}
-        className="group relative bg-surface rounded-2xl overflow-hidden border border-border cursor-pointer transition-all duration-150 hover:border-border-emphasis"
+        className="group relative bg-surface rounded-2xl overflow-hidden border border-border cursor-pointer shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-border-emphasis transition-all duration-300"
       >
         <div className="relative aspect-square overflow-hidden bg-surface-elevated">
           <img
             src={image_main}
             alt={title}
+            loading="lazy"
+            decoding="async"
             draggable={false}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 select-none"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 select-none"
           />
 
           {image_hover && (
             <img
               src={image_hover}
               alt=""
+              loading="lazy"
+              decoding="async"
               draggable={false}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 select-none"
             />
           )}
 
           {condition && conditionStyle && (
-            <div className={`absolute top-2.5 left-2.5 ${conditionStyle}`}>
+            <div className={`absolute top-3 left-3 ${conditionStyle}`}>
               {condition}
             </div>
           )}
 
           {is_sold_out && (
-            <div className="absolute inset-0 bg-background/90 flex items-center justify-center">
+            <div className="absolute inset-0 bg-background/95 backdrop-blur-sm flex items-center justify-center">
               <span className="tag-danger">
                 Esgotado
               </span>
             </div>
           )}
 
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
         <div className="p-3 sm:p-4">
-          <h3 className="text-text-primary font-medium mb-1 sm:mb-1.5 line-clamp-2 text-xs sm:text-sm leading-snug">
+          <h3 className="text-text-primary font-medium mb-1.5 sm:mb-2 line-clamp-2 text-xs sm:text-sm leading-snug tracking-tight">
             {title}
           </h3>
 
           {observations && (
-            <p className="text-[11px] sm:text-xs text-text-muted line-clamp-1 mb-1.5 sm:mb-2 hidden sm:block">
+            <p className="text-[11px] sm:text-xs text-text-muted line-clamp-1 mb-2 hidden sm:block">
               {observations}
             </p>
           )}
 
-          <p className="text-primary font-semibold text-base sm:text-lg tabular-nums">
+          <p className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight">
             {formatPrice(price_cny)}
           </p>
         </div>
