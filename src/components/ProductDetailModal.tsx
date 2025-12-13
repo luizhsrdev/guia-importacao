@@ -109,20 +109,22 @@ export default function ProductDetailModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm ${
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-background/80 backdrop-blur-sm ${
         isClosing ? 'animate-fadeOut' : 'animate-fadeIn'
       }`}
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className={`relative glass-strong rounded-xl shadow-elevation-4 w-full max-w-4xl max-md:h-screen max-md:rounded-none max-md:overflow-y-auto ${
-          isClosing ? 'animate-scaleOut' : 'animate-scaleIn'
+        className={`relative glass-strong shadow-elevation-4 w-full sm:max-w-4xl sm:rounded-xl max-sm:h-[90vh] max-sm:rounded-t-2xl overflow-hidden ${
+          isClosing ? 'max-sm:animate-slideOutDown sm:animate-scaleOut' : 'max-sm:animate-slideInUp sm:animate-scaleIn'
         }`}
       >
+        <div className="sm:hidden w-12 h-1 bg-border-emphasis rounded-full mx-auto mt-3 mb-2" />
+
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 z-10 btn-ghost p-2 rounded-md"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-10 h-10 flex items-center justify-center bg-surface/80 backdrop-blur-sm rounded-full border border-border hover:bg-surface-elevated transition-colors"
           aria-label="Fechar modal"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,9 +132,9 @@ export default function ProductDetailModal({
           </svg>
         </button>
 
-        <div className="grid md:grid-cols-2 gap-0">
-          <div className="flex items-center justify-center p-6 bg-background-secondary/50">
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-background max-w-sm shadow-elevation-2">
+        <div className="h-full max-sm:overflow-y-auto max-sm:overscroll-contain sm:grid sm:grid-cols-2 sm:gap-0">
+          <div className="flex items-center justify-center p-4 sm:p-6 bg-background-secondary/50">
+            <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-background max-w-xs sm:max-w-sm shadow-elevation-2">
               <img
                 src={product.image_main}
                 alt={product.title}
@@ -141,12 +143,12 @@ export default function ProductDetailModal({
             </div>
           </div>
 
-          <div className="flex flex-col justify-between space-y-4 p-6">
+          <div className="flex flex-col justify-between space-y-4 p-4 sm:p-6 pb-safe">
             <div>
-              <h3 className="text-xl font-semibold text-text-primary mb-3 line-clamp-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-text-primary mb-2 sm:mb-3 line-clamp-2 pr-8 sm:pr-0">
                 {product.title}
               </h3>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-xl sm:text-2xl font-bold text-primary">
                 {formatPrice(product.price_cny)}
               </p>
               {currency === 'BRL' && (
@@ -156,7 +158,7 @@ export default function ProductDetailModal({
               )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {getCategoryName(product.category) && (
                 <div className="flex items-center gap-2">
                   <span className="text-text-tertiary text-sm">Categoria:</span>
@@ -173,12 +175,12 @@ export default function ProductDetailModal({
             </div>
 
             {(product.has_box || product.has_charger || product.has_warranty) && (
-              <div className="bg-surface-elevated rounded-md p-4">
+              <div className="bg-surface-elevated rounded-lg p-3 sm:p-4">
                 <h4 className="text-text-secondary text-sm font-medium mb-2">Acompanha:</h4>
                 <ul className="space-y-1.5 text-sm text-text-primary">
                   {product.has_box && (
                     <li className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       Caixa original
@@ -186,7 +188,7 @@ export default function ProductDetailModal({
                   )}
                   {product.has_charger && (
                     <li className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       Carregador
@@ -194,7 +196,7 @@ export default function ProductDetailModal({
                   )}
                   {product.has_warranty && (
                     <li className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       Garantia
@@ -205,7 +207,7 @@ export default function ProductDetailModal({
             )}
 
             {product.observations && (
-              <div className="bg-surface-elevated rounded-md p-4">
+              <div className="bg-surface-elevated rounded-lg p-3 sm:p-4">
                 <h4 className="text-text-secondary text-sm font-medium mb-2">Descrição:</h4>
                 <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">
                   {product.observations}
@@ -213,10 +215,10 @@ export default function ProductDetailModal({
               </div>
             )}
 
-            <div className="flex flex-col gap-3 pt-2">
+            <div className="flex flex-col gap-2 sm:gap-3 pt-2 sticky bottom-0 bg-surface/80 backdrop-blur-sm -mx-4 px-4 pb-4 sm:relative sm:mx-0 sm:px-0 sm:pb-0 sm:bg-transparent sm:backdrop-blur-none safe-bottom">
               <button
                 onClick={() => window.open(product.affiliate_link, '_blank')}
-                className="btn-primary py-3 px-6 rounded-md font-medium"
+                className="btn-primary py-3.5 sm:py-3 px-6 rounded-xl sm:rounded-md font-medium text-base sm:text-sm"
               >
                 Comprar
               </button>
@@ -224,7 +226,7 @@ export default function ProductDetailModal({
               <button
                 onClick={handleViewSeller}
                 disabled={isLoadingLink}
-                className="btn-secondary py-3 px-6 rounded-md disabled:opacity-50"
+                className="btn-secondary py-3.5 sm:py-3 px-6 rounded-xl sm:rounded-md disabled:opacity-50 text-base sm:text-sm"
               >
                 {isLoadingLink ? 'Carregando...' : isPremium ? 'Perfil do Vendedor' : 'Ver Vendedor (Premium)'}
               </button>
