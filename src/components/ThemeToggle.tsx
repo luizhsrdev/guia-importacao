@@ -2,7 +2,6 @@
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { NEUMORPHIC_ELEVATED } from '@/lib/constants';
 
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
@@ -14,7 +13,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className={`w-10 h-10 rounded-xl bg-surface dark:bg-surface-elevated ${NEUMORPHIC_ELEVATED.base}`} />
+      <div className="w-10 h-10 rounded-xl neu-elevated" />
     );
   }
 
@@ -27,7 +26,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={handleToggle}
-      className={`w-10 h-10 rounded-xl bg-surface dark:bg-surface-elevated flex items-center justify-center transition-all duration-200 ${NEUMORPHIC_ELEVATED.base} ${NEUMORPHIC_ELEVATED.hover} ${NEUMORPHIC_ELEVATED.active}`}
+      className="w-10 h-10 rounded-xl flex items-center justify-center neu-elevated"
       aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
     >
       {isDark ? (
