@@ -15,7 +15,6 @@ import { MobileMenu } from '@/components/MobileMenu';
 import { AdminLink } from '@/components/AdminLink';
 import { HomeContent } from './HomeContent';
 import PremiumUpgradeModal from '@/components/PremiumUpgradeModal';
-import { NEUMORPHIC_ELEVATED } from '@/lib/constants';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
 interface HomeWrapperProps {
@@ -37,7 +36,7 @@ export function HomeWrapper({
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 glass-strong border-b border-border/50 safe-top">
+      <header className="sticky top-0 z-40 glass-strong safe-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
@@ -64,7 +63,7 @@ export function HomeWrapper({
 
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className={`group flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-medium text-text-secondary hover:text-primary bg-surface dark:bg-surface-elevated transition-all duration-200 ${NEUMORPHIC_ELEVATED.base} ${NEUMORPHIC_ELEVATED.hover} ${NEUMORPHIC_ELEVATED.active}`}>
+                  <button className="group flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-medium text-text-secondary hover:text-primary neu-elevated">
                     <svg
                       className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors duration-200"
                       fill="none"
