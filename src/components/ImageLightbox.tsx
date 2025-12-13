@@ -68,6 +68,8 @@ export default function ImageLightbox({
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         onClick={handleOpen}
         className={`${thumbnailClassName} cursor-pointer hover:opacity-80 transition-opacity`}
       />
