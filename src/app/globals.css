@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --background: #FAFAFA;
-  --background-secondary: #F4F4F5;
-  --surface: #FFFFFF;
-  --surface-elevated: #F8F8F9;
-  --surface-overlay: #EFEFEF;
+  --background: #F0F0F2;
+  --background-secondary: #E8E8EB;
+  --surface: #F5F5F7;
+  --surface-elevated: #FAFAFA;
+  --surface-overlay: #E0E0E3;
   --primary: #10B981;
   --primary-hover: #059669;
   --primary-glow: rgba(16, 185, 129, 0.15);
@@ -31,11 +31,11 @@
 }
 
 .dark {
-  --background: #09090B;
-  --background-secondary: #0C0C0E;
-  --surface: #18181B;
-  --surface-elevated: #1F1F23;
-  --surface-overlay: #27272A;
+  --background: #1A1A1E;
+  --background-secondary: #1E1E22;
+  --surface: #25252A;
+  --surface-elevated: #2D2D35;
+  --surface-overlay: #35353D;
   --primary: #34D399;
   --primary-hover: #10B981;
   --primary-glow: rgba(52, 211, 153, 0.2);
@@ -109,9 +109,84 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .glass-strong {
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    @apply backdrop-blur-xl border border-white/[0.1];
+    background: color-mix(in srgb, var(--surface) 95%, transparent);
+    @apply backdrop-blur-xl;
     box-shadow: var(--shadow-md);
+  }
+
+  .dark .glass-strong {
+    background: color-mix(in srgb, #2D2D35 95%, transparent);
+  }
+
+  .glass-frosted {
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    @apply backdrop-blur-2xl backdrop-saturate-[1.1] border;
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .dark .glass-frosted {
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+  }
+
+  /* Neumorphic Elevated - botões flutuando */
+  .neu-elevated {
+    background: #F5F5F7;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.06),
+      0 4px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+  }
+
+  .neu-elevated:hover {
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.06),
+      0 8px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .neu-elevated:active {
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    transform: translateY(0) scale(0.98);
+  }
+
+  .dark .neu-elevated {
+    background: #2D2D35;
+    box-shadow:
+      0 6px 14px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .neu-elevated:hover {
+    box-shadow:
+      0 8px 18px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .dark .neu-elevated:active {
+    box-shadow:
+      0 3px 6px rgba(0, 0, 0, 0.4),
+      inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Neumorphic Inset - inputs entalhados */
+  .neu-inset {
+    background: var(--background-secondary);
+    box-shadow:
+      inset 4px 4px 8px rgba(180, 180, 180, 0.8),
+      inset -4px -4px 8px rgba(255, 255, 255, 1);
+  }
+
+  .dark .neu-inset {
+    background: #252528;
+    box-shadow:
+      inset 4px 4px 8px #101015,
+      inset -4px -4px 8px #3a3a42;
   }
 
   .btn {
