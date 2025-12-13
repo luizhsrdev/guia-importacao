@@ -116,7 +116,7 @@ export default function ProductDetailModal({
     >
       <div
         ref={modalRef}
-        className={`relative glass-strong shadow-elevation-4 w-full sm:max-w-4xl sm:rounded-xl max-sm:h-[90vh] max-sm:rounded-t-2xl overflow-hidden ${
+        className={`relative glass-frosted w-full sm:max-w-4xl sm:rounded-xl max-sm:h-[90vh] max-sm:rounded-t-2xl overflow-hidden ${
           isClosing ? 'max-sm:animate-slideOutDown sm:animate-scaleOut' : 'max-sm:animate-slideInUp sm:animate-scaleIn'
         }`}
       >
