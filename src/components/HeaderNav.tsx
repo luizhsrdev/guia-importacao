@@ -52,7 +52,9 @@ export function HeaderNav({
   onPremiumClick,
 }: HeaderNavProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,7 +64,10 @@ export function HeaderNav({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
   }, []);
 
   const appleCategories = categories.filter((c) => {
@@ -171,20 +176,30 @@ export function HeaderNav({
             </button>
 
             {hasCategories && isDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 py-2 min-w-[200px] bg-surface border border-border rounded-xl shadow-lg z-50 animate-fadeIn">
-                {dropdownCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => handleCategorySelect(category.id)}
-                    className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left transition-colors ${
-                      activeCategory === category.id
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
+              <div className="absolute top-full left-0 mt-2 w-[600px] bg-background border border-border rounded-lg shadow-2xl z-50 animate-fadeIn overflow-hidden">
+                {/* Grid 3 colunas estilo Apple */}
+                <div className="p-6">
+                  <div className="grid grid-cols-3 gap-4">
+                    {dropdownCategories.map((category, index) => (
+                      <button
+                        key={category.id}
+                        onClick={() => handleCategorySelect(category.id)}
+                        className="p-4 rounded-lg hover:bg-muted transition-colors group text-left"
+                        style={{
+                          animation: `megaMenuItem 200ms ease-out ${index * 40}ms both`,
+                        }}
+                      >
+                        <span className={`text-sm font-medium transition-colors ${
+                          activeCategory === category.id
+                            ? 'text-primary'
+                            : 'text-text-primary group-hover:text-primary'
+                        }`}>
+                          {category.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -215,6 +230,15 @@ export function HeaderNav({
         {ICONS.calculator}
         <span className="hidden lg:inline">Calculadora</span>
       </a>
+
+      {/* Backdrop quando dropdown está aberto */}
+      {openDropdown && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-fadeIn"
+          style={{ top: '64px', zIndex: 40 }}
+          onClick={() => setOpenDropdown(null)}
+        />
+      )}
     </nav>
   );
 }
