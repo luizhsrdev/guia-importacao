@@ -1,27 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import ProductForm from '@/components/ProductForm';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { deleteProduct, toggleSoldOut } from './actions';
-import type { ProductFormData } from './actions';
-
-interface Product extends ProductFormData {
-  id: string;
-  created_at?: string;
-}
+import type { Product, Category } from '@/types';
 
 interface ProductsClientProps {
   products: Product[];
-  categories: Array<{ id: string; name: string }>;
+  categories: Category[];
 }
 
 export default function ProductsClient({
   products: initialProducts,
   categories,
 }: ProductsClientProps) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState(initialProducts);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; productId: string | null }>({
+    isOpen: false,
+    productId: null,
+  });
 
   // Fechar modal com ESC
   useEffect(() => {
@@ -64,17 +67,26 @@ export default function ProductsClient({
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar este produto?')) return;
-
-    const result = await deleteProduct(id);
-    if (result.success) {
-      setProducts(products.filter((p) => p.id !== id));
-      alert('Produto deletado com sucesso!');
-    } else {
-      alert('Erro ao deletar produto');
-    }
+  const handleDeleteRequest = (id: string) => {
+    setDeleteConfirm({ isOpen: true, productId: id });
   };
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteConfirm.productId) return;
+
+    const result = await deleteProduct(deleteConfirm.productId);
+    if (result.success) {
+      setProducts(products.filter((p) => p.id !== deleteConfirm.productId));
+      toast.success('Produto deletado com sucesso!');
+    } else {
+      toast.error('Erro ao deletar produto');
+    }
+    setDeleteConfirm({ isOpen: false, productId: null });
+  }, [deleteConfirm.productId, products]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteConfirm({ isOpen: false, productId: null });
+  }, []);
 
   const handleToggleSoldOut = async (id: string, currentStatus: boolean) => {
     const result = await toggleSoldOut(id, currentStatus);
@@ -84,13 +96,16 @@ export default function ProductsClient({
           p.id === id ? { ...p, is_sold_out: !currentStatus } : p
         )
       );
+      toast.success(currentStatus ? 'Produto marcado como disponível' : 'Produto marcado como esgotado');
+    } else {
+      toast.error('Erro ao atualizar status');
     }
   };
 
   const handleFormSuccess = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
-    window.location.reload(); // Recarregar para pegar novos dados
+    router.refresh();
   };
 
   const handleCancel = () => {
@@ -275,7 +290,7 @@ export default function ProductsClient({
                       Verificar Xianyu
                     </button>
                     <button
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => handleDeleteRequest(product.id)}
                       className="px-4 py-2 bg-danger/20 text-danger rounded-lg hover:bg-danger/30 transition-colors text-sm ml-auto"
                     >
                       Deletar
@@ -287,6 +302,17 @@ export default function ProductsClient({
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Deletar Produto"
+        message="Tem certeza que deseja deletar este produto? Esta ação não pode ser desfeita."
+        confirmLabel="Deletar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }

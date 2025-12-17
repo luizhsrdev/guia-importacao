@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   createSeller,
   updateSeller,
@@ -36,80 +38,23 @@ export default function SellerForm({
     evidence_images: seller?.evidence_images || [],
   });
 
-  const [uploading, setUploading] = useState(false);
+  const { uploading, uploadFile, uploadMultipleFiles } = useFileUpload();
   const [saving, setSaving] = useState(false);
 
-  // Upload de imagem única (para Gold)
   const handleImageUpload = async (file: File) => {
-    setUploading(true);
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = async () => {
-        const base64Data = reader.result as string;
-        console.log('Arquivo convertido para base64, enviando...');
-
-        const result = await uploadImageToCloudinary(base64Data);
-
-        if (result.success && result.url) {
-          setFormData((prev) => ({ ...prev, image_url: result.url! }));
-          console.log('Upload concluído com sucesso!');
-        } else {
-          console.error('Erro no upload:', result.error);
-          alert(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`);
-        }
-        setUploading(false);
-      };
-
-      reader.onerror = () => {
-        console.error('Erro ao ler arquivo');
-        alert('Erro ao ler arquivo');
-        setUploading(false);
-      };
-    } catch (error) {
-      console.error('Erro:', error);
-      alert('Erro ao fazer upload da imagem');
-      setUploading(false);
+    const url = await uploadFile(file, uploadImageToCloudinary);
+    if (url) {
+      setFormData((prev) => ({ ...prev, image_url: url }));
     }
   };
 
   const handleEvidenceUpload = async (files: FileList) => {
-    setUploading(true);
-    try {
-      const fileArray = Array.from(files);
-      console.log(`Convertendo ${fileArray.length} arquivos para base64...`);
-
-      // Converter todos os arquivos para base64
-      const base64Promises = fileArray.map((file) => {
-        return new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-        });
-      });
-
-      const base64Array = await Promise.all(base64Promises);
-      console.log('Arquivos convertidos, enviando...');
-
-      const result = await uploadEvidenceImages(base64Array);
-
-      if (result.success && result.urls) {
-        setFormData((prev) => ({
-          ...prev,
-          evidence_images: [...(prev.evidence_images || []), ...result.urls!],
-        }));
-        console.log(`Upload concluído: ${result.urls.length} imagens`);
-      } else {
-        console.error('Erro no upload:', result.error);
-        alert(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`);
-      }
-    } catch (error) {
-      console.error('Erro:', error);
-      alert('Erro ao fazer upload das imagens');
-    } finally {
-      setUploading(false);
+    const urls = await uploadMultipleFiles(files, uploadEvidenceImages);
+    if (urls.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        evidence_images: [...(prev.evidence_images || []), ...urls],
+      }));
     }
   };
 
@@ -130,14 +75,13 @@ export default function SellerForm({
         : await createSeller(formData);
 
       if (result.success) {
-        alert('Vendedor salvo com sucesso!');
+        toast.success(seller?.id ? 'Vendedor atualizado com sucesso!' : 'Vendedor criado com sucesso!');
         onSuccess?.();
       } else {
-        alert('Erro ao salvar vendedor: ' + result.error);
+        toast.error('Erro ao salvar vendedor: ' + result.error);
       }
-    } catch (error) {
-      console.error('Erro:', error);
-      alert('Erro ao salvar vendedor');
+    } catch {
+      toast.error('Erro ao salvar vendedor');
     } finally {
       setSaving(false);
     }

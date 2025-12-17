@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import { NEUMORPHIC_INSET, NEUMORPHIC_ELEVATED } from '@/lib/constants';
 
 interface ProductFiltersProps {
-  categories: Array<{ id: string; name: string }>;
   onFilterChange: (filters: {
     search: string;
     categories: string[];
@@ -12,47 +12,22 @@ interface ProductFiltersProps {
   }) => void;
 }
 
-export default function ProductFilters({
-  categories,
+export function ProductFilters({
   onFilterChange,
 }: ProductFiltersProps) {
   const [search, setSearch] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceMin, setPriceMin] = useState<number | null>(null);
-  const [priceMax, setPriceMax] = useState<number | null>(null);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
-
-  const categoryDropdownRef = useRef<HTMLDivElement>(null);
-
-  // Fechar dropdown ao clicar fora
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        categoryDropdownRef.current &&
-        !categoryDropdownRef.current.contains(event.target as Node)
-      ) {
-        setCategoryDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleSearch = () => {
     onFilterChange({
       search,
-      categories: selectedCategories,
-      priceMin,
-      priceMax,
+      categories: [],
+      priceMin: null,
+      priceMax: null,
     });
   };
 
-  const handleClearFilters = () => {
+  const handleClear = () => {
     setSearch('');
-    setSelectedCategories([]);
-    setPriceMin(null);
-    setPriceMax(null);
     onFilterChange({
       search: '',
       categories: [],
@@ -61,83 +36,21 @@ export default function ProductFilters({
     });
   };
 
-  const handleCategoryToggle = (categoryId: string, checked: boolean) => {
-    const newCategories = checked
-      ? [...selectedCategories, categoryId]
-      : selectedCategories.filter((id) => id !== categoryId);
-    setSelectedCategories(newCategories);
-    onFilterChange({
-      search,
-      categories: newCategories,
-      priceMin,
-      priceMax,
-    });
-  };
-
   return (
-    <div className="mb-6 space-y-4">
-      {/* Linha 1: Busca + Botões */}
-      <div className="flex gap-3">
-        {/* Barra de Busca */}
-        <div className="flex-1 relative">
+    <div className="mb-6">
+      <div className="flex gap-2 sm:gap-3">
+        <div className="flex-1 relative group">
           <input
             type="text"
             placeholder="Buscar produtos..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full bg-surface border border-zinc-700 rounded-lg pl-10 pr-4 py-3 text-textMain focus:outline-none focus:border-primary"
+            className={`relative w-full h-12 bg-background-secondary dark:bg-surface-elevated border-[1.5px] border-transparent rounded-2xl pl-14 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-primary dark:focus:border-primary transition-[box-shadow] duration-200 ${NEUMORPHIC_INSET.base} ${NEUMORPHIC_INSET.focus}`}
           />
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
-
-        {/* Botão Buscar */}
-        <button
-          onClick={handleSearch}
-          className="px-8 py-3 bg-primary text-background font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
-        >
-          Buscar
-        </button>
-
-        {/* Botão Limpar Filtros */}
-        <button
-          onClick={handleClearFilters}
-          className="px-6 py-3 bg-zinc-800 text-textMain rounded-lg border border-zinc-700 hover:bg-zinc-700 transition-colors whitespace-nowrap"
-        >
-          Limpar Filtros
-        </button>
-      </div>
-
-      {/* Linha 2: Filtros (Categorias, Preço, etc) */}
-      <div className="flex gap-3">
-        {/* Dropdown de Categorias */}
-        <div className="relative" ref={categoryDropdownRef}>
-          <button
-            onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-            className="px-4 py-3 bg-surface border border-zinc-700 rounded-lg text-textMain hover:border-primary transition-colors flex items-center gap-2"
-          >
-            Categorias
-            {selectedCategories.length > 0 && (
-              <span className="px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs">
-                {selectedCategories.length}
-              </span>
-            )}
+          <div className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-surface dark:bg-surface-elevated transition-all duration-200 ${NEUMORPHIC_ELEVATED.base}`}>
             <svg
-              className={`w-4 h-4 transition-transform ${
-                categoryDropdownOpen ? 'rotate-180' : ''
-              }`}
+              className="w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors duration-200"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -146,68 +59,35 @@ export default function ProductFilters({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M19 9l-7 7-7-7"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
+          </div>
+        </div>
+
+        <button
+          onClick={handleSearch}
+          className="h-12 px-5 sm:px-6 bg-primary text-white rounded-2xl text-sm font-semibold shadow-[0_4px_12px_rgba(16,185,129,0.3),0_1px_3px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(52,211,153,0.25),0_1px_3px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.4),0_2px_4px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_6px_16px_rgba(52,211,153,0.35),0_2px_4px_rgba(0,0,0,0.2)] hover:bg-primary-hover active:scale-[0.97] active:shadow-[0_2px_8px_rgba(16,185,129,0.3)] transition-all duration-200 flex-shrink-0"
+        >
+          <span className="hidden sm:inline">Buscar</span>
+          <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+
+        {search && (
+          <button
+            onClick={handleClear}
+            className={`h-12 w-12 sm:w-auto sm:px-5 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-2xl text-sm font-medium bg-surface transition-all duration-200 flex-shrink-0 ${NEUMORPHIC_ELEVATED.base} ${NEUMORPHIC_ELEVATED.hover} ${NEUMORPHIC_ELEVATED.active}`}
+            aria-label="Limpar busca"
+          >
+            <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="hidden sm:inline">Limpar</span>
           </button>
-
-          {categoryDropdownOpen && (
-            <div className="absolute z-50 mt-2 bg-surface border border-zinc-700 rounded-lg shadow-xl p-3 min-w-[200px] max-h-[300px] overflow-y-auto origin-top animate-dropdown">
-              {categories.map((cat) => (
-                <label
-                  key={cat.id}
-                  className="flex items-center gap-2 py-2 px-2 cursor-pointer hover:bg-zinc-800 rounded transition-colors"
-                >
-                  {/* Checkbox customizado */}
-                  <div className="relative flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(cat.id)}
-                      onChange={(e) => handleCategoryToggle(cat.id, e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-5 h-5 border-2 border-zinc-600 rounded peer-checked:bg-primary peer-checked:border-primary transition-all duration-200 flex items-center justify-center">
-                      {selectedCategories.includes(cat.id) && (
-                        <svg className="w-3 h-3 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-textMain text-sm">{cat.name}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Filtro de Preço (opcional, se quiser adicionar depois) */}
+        )}
       </div>
-
-      {/* Linha 3: Filtros Ativos (Pills) */}
-      {selectedCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedCategories.map((id) => {
-            const cat = categories.find((c) => c.id === id);
-            return (
-              cat && (
-                <span
-                  key={id}
-                  className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm border border-primary/30 flex items-center gap-2"
-                >
-                  {cat.name}
-                  <button
-                    onClick={() => handleCategoryToggle(id, false)}
-                    className="hover:text-primary/80"
-                  >
-                    ×
-                  </button>
-                </span>
-              )
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

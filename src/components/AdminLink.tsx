@@ -4,18 +4,28 @@ import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-export default function AdminLink() {
+interface CheckAdminResponse {
+  isAdmin: boolean;
+}
+
+async function checkAdminStatus(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/check-admin');
+    const data: CheckAdminResponse = await response.json();
+    return data.isAdmin;
+  } catch {
+    return false;
+  }
+}
+
+export function AdminLink() {
   const { user } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      // Verificar se usuário é admin via API
-      fetch('/api/check-admin')
-        .then((res) => res.json())
-        .then((data) => setIsAdmin(data.isAdmin))
-        .catch(() => setIsAdmin(false));
-    }
+    if (!user) return;
+
+    checkAdminStatus().then(setIsAdmin);
   }, [user]);
 
   if (!isAdmin) return null;

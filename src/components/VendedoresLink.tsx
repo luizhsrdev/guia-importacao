@@ -4,31 +4,41 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 
-export default function VendedoresLink() {
+interface CheckPremiumResponse {
+  isPremium: boolean;
+  isAdmin: boolean;
+}
+
+async function checkPremiumStatus(userId: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/check-premium', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    });
+    const data: CheckPremiumResponse = await response.json();
+    return data.isPremium || data.isAdmin;
+  } catch {
+    return false;
+  }
+}
+
+export function VendedoresLink() {
   const { user, isLoaded } = useUser();
   const [showModal, setShowModal] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [isCheckingPremium, setIsCheckingPremium] = useState(true);
 
-  // Verificar se usuário é premium
   useEffect(() => {
     if (!isLoaded || !user) {
       setIsCheckingPremium(false);
       return;
     }
 
-    // Buscar status premium do Supabase
-    fetch('/api/check-premium', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setIsPremium(data.isPremium);
-        setIsCheckingPremium(false);
-      })
-      .catch(() => setIsCheckingPremium(false));
+    checkPremiumStatus(user.id).then((result) => {
+      setIsPremium(result);
+      setIsCheckingPremium(false);
+    });
   }, [user, isLoaded]);
 
   const handleClick = (e: React.MouseEvent) => {

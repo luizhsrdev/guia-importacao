@@ -1,7 +1,19 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { getProductOriginalLink } from '@/app/actions';
+
+interface CategoryLike {
+  name: string;
+  slug?: string;
+}
+
+function getCategoryName(category: CategoryLike | CategoryLike[] | null | undefined): string | null {
+  if (!category) return null;
+  if (Array.isArray(category)) return category[0]?.name ?? null;
+  return category.name;
+}
 
 interface ProductDetailModalProps {
   product: {
@@ -9,20 +21,25 @@ interface ProductDetailModalProps {
     title: string;
     price_cny: string;
     image_main: string;
-    category?: { name: string; slug?: string } | null;
+    category?: CategoryLike | CategoryLike[] | null;
     condition?: string;
     has_box?: boolean;
     has_charger?: boolean;
     has_warranty?: boolean;
     observations?: string;
     affiliate_link: string;
-    original_link: string;
   };
   isOpen: boolean;
   onClose: () => void;
-  onRequestUpgrade: () => void; // Callback para abrir popup premium
+  onRequestUpgrade: () => void;
   isPremium: boolean;
 }
+
+const CONDITION_STYLES = {
+  Lacrado: 'badge-primary',
+  Seminovo: 'badge-blue',
+  Usado: 'badge-gold',
+} as const;
 
 export default function ProductDetailModal({
   product,
@@ -34,16 +51,20 @@ export default function ProductDetailModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const { formatPrice, currency } = useCurrency();
   const [isClosing, setIsClosing] = useState(false);
+  const [isLoadingLink, setIsLoadingLink] = useState(false);
 
-  // Fechar com ESC
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 150);
+  }, [onClose]);
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsClosing(true);
-        setTimeout(() => {
-          setIsClosing(false);
-          onClose();
-        }, 200);
+        handleClose();
       }
     };
     if (isOpen) {
@@ -54,18 +75,8 @@ export default function ProductDetailModal({
       document.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
-  // Função de fechar com animação
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 200);
-  };
-
-  // Fechar ao clicar fora
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
       handleClose();
@@ -74,47 +85,56 @@ export default function ProductDetailModal({
 
   if (!isOpen && !isClosing) return null;
 
-  const handleViewSeller = () => {
-    if (isPremium) {
-      window.open(product.original_link, '_blank');
-    } else {
+  const handleViewSeller = async () => {
+    if (!isPremium) {
       handleClose();
       setTimeout(() => {
         onRequestUpgrade();
-      }, 250);
+      }, 200);
+      return;
+    }
+
+    setIsLoadingLink(true);
+    const result = await getProductOriginalLink(product.id);
+    setIsLoadingLink(false);
+
+    if (result.success && result.originalLink) {
+      window.open(result.originalLink, '_blank');
     }
   };
 
+  const conditionStyle = product.condition
+    ? CONDITION_STYLES[product.condition as keyof typeof CONDITION_STYLES] ?? 'badge-neutral'
+    : null;
+
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4
-                  bg-black/70 backdrop-blur-sm
-                  ${isClosing ? 'animate-fadeOut' : 'animate-fadeIn'}`}
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-background/80 backdrop-blur-sm ${
+        isClosing ? 'animate-fadeOut' : 'animate-fadeIn'
+      }`}
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className={`relative bg-surface rounded-xl border border-zinc-700 shadow-2xl
-                    w-full max-w-4xl
-                    max-md:h-screen max-md:rounded-none max-md:overflow-y-auto
-                    ${isClosing ? 'animate-scaleOut' : 'animate-scaleIn'}`}
+        className={`relative glass-frosted w-full sm:max-w-4xl sm:rounded-xl max-sm:h-[90vh] max-sm:rounded-t-2xl overflow-hidden ${
+          isClosing ? 'max-sm:animate-slideOutDown sm:animate-scaleOut' : 'max-sm:animate-slideInUp sm:animate-scaleIn'
+        }`}
       >
-        {/* Botão X - Canto Superior Direito */}
+        <div className="sm:hidden w-12 h-1 bg-border-emphasis rounded-full mx-auto mt-3 mb-2" />
+
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 z-10 text-textSecondary hover:text-textMain
-                     transition-colors bg-zinc-900/80 rounded-full p-2"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-10 h-10 flex items-center justify-center bg-surface/80 backdrop-blur-sm rounded-full border border-border hover:bg-surface-elevated transition-colors"
+          aria-label="Fechar modal"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        {/* Layout Horizontal - Desktop / Vertical - Mobile */}
-        <div className="grid md:grid-cols-2 gap-0">
-          {/* Coluna Esquerda - Imagem QUADRADA */}
-          <div className="flex items-center justify-center p-6 bg-zinc-900/30">
-            <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-900 max-w-sm shadow-lg">
+        <div className="h-full max-sm:overflow-y-auto max-sm:overscroll-contain sm:grid sm:grid-cols-2 sm:gap-0">
+          <div className="flex items-center justify-center p-4 sm:p-6 bg-background-secondary/50">
+            <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-background max-w-xs sm:max-w-sm shadow-elevation-2">
               <img
                 src={product.image_main}
                 alt={product.title}
@@ -123,84 +143,92 @@ export default function ProductDetailModal({
             </div>
           </div>
 
-          {/* Coluna Direita - Informações */}
-          <div className="flex flex-col justify-between space-y-4 py-6 pr-6 pl-3">
-            {/* 1. TOPO: Nome/Título + Preço */}
+          <div className="flex flex-col justify-between space-y-4 p-4 sm:p-6 pb-safe">
             <div>
-              <h3 className="text-2xl font-bold text-textMain mb-2 line-clamp-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-text-primary mb-2 sm:mb-3 line-clamp-2 pr-8 sm:pr-0">
                 {product.title}
               </h3>
-              <p className="text-3xl font-bold text-primary">
+              <p className="text-xl sm:text-2xl font-bold text-primary">
                 {formatPrice(product.price_cny)}
               </p>
               {currency === 'BRL' && (
-                <p className="text-sm text-textSecondary mt-1">
+                <p className="text-sm text-text-tertiary mt-1">
                   ¥ {product.price_cny}
                 </p>
               )}
             </div>
 
-            {/* 2. CATEGORIA + CONDIÇÃO */}
-            <div className="space-y-2">
-              {product.category && (
+            <div className="space-y-2 sm:space-y-3">
+              {getCategoryName(product.category) && (
                 <div className="flex items-center gap-2">
-                  <span className="text-textSecondary text-sm">Categoria:</span>
-                  <span className="text-textMain font-medium">{product.category.name}</span>
+                  <span className="text-text-tertiary text-sm">Categoria:</span>
+                  <span className="text-text-primary text-sm">{getCategoryName(product.category)}</span>
                 </div>
               )}
 
-              {product.condition && (
+              {product.condition && conditionStyle && (
                 <div className="flex items-center gap-2">
-                  <span className="text-textSecondary text-sm">Condição:</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium
-                    ${product.condition === 'Lacrado' ? 'bg-primary/20 text-primary border border-primary/30' :
-                      product.condition === 'Seminovo' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                      product.condition === 'Usado' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                      'bg-zinc-700/80 text-textSecondary border border-zinc-600'}`}>
-                    {product.condition}
-                  </span>
+                  <span className="text-text-tertiary text-sm">Condição:</span>
+                  <span className={conditionStyle}>{product.condition}</span>
                 </div>
               )}
             </div>
 
-            {/* 3. ACOMPANHA (só se tiver algum item) */}
             {(product.has_box || product.has_charger || product.has_warranty) && (
-              <div className="bg-zinc-900/50 rounded-lg p-3">
-                <h4 className="text-textSecondary text-sm font-medium mb-2">Acompanha:</h4>
-                <ul className="space-y-1 text-sm text-textMain">
-                  {product.has_box && <li>-  Caixa original</li>}
-                  {product.has_charger && <li>-  Carregador</li>}
-                  {product.has_warranty && <li>-  Garantia</li>}
+              <div className="bg-surface-elevated rounded-lg p-3 sm:p-4">
+                <h4 className="text-text-secondary text-sm font-medium mb-2">Acompanha:</h4>
+                <ul className="space-y-1.5 text-sm text-text-primary">
+                  {product.has_box && (
+                    <li className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Caixa original
+                    </li>
+                  )}
+                  {product.has_charger && (
+                    <li className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Carregador
+                    </li>
+                  )}
+                  {product.has_warranty && (
+                    <li className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Garantia
+                    </li>
+                  )}
                 </ul>
               </div>
             )}
 
-            {/* 4. DESCRIÇÃO (se existir) */}
             {product.observations && (
-              <div className="bg-zinc-900/50 rounded-lg p-3">
-                <h4 className="text-textSecondary text-sm font-medium mb-2">Descrição:</h4>
-                <p className="text-textMain text-sm leading-relaxed whitespace-pre-wrap">
+              <div className="bg-surface-elevated rounded-lg p-3 sm:p-4">
+                <h4 className="text-text-secondary text-sm font-medium mb-2">Descrição:</h4>
+                <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">
                   {product.observations}
                 </p>
               </div>
             )}
 
-            {/* 5. BOTÕES */}
-            <div className="flex flex-col gap-3 pt-2">
+            <div className="flex flex-col gap-2 sm:gap-3 pt-2 sticky bottom-0 bg-surface/80 backdrop-blur-sm -mx-4 px-4 pb-4 sm:relative sm:mx-0 sm:px-0 sm:pb-0 sm:bg-transparent sm:backdrop-blur-none safe-bottom">
               <button
                 onClick={() => window.open(product.affiliate_link, '_blank')}
-                className="w-full bg-primary text-background font-medium py-3 px-6 rounded-lg
-                           hover:bg-primary/90 transition-colors"
+                className="btn-primary py-3.5 sm:py-3 px-6 rounded-xl sm:rounded-md font-medium text-base sm:text-sm"
               >
                 Comprar
               </button>
 
               <button
                 onClick={handleViewSeller}
-                className="w-full bg-zinc-800 text-textMain font-medium py-3 px-6 rounded-lg
-                           border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                disabled={isLoadingLink}
+                className="btn-secondary py-3.5 sm:py-3 px-6 rounded-xl sm:rounded-md disabled:opacity-50 text-base sm:text-sm"
               >
-                Perfil do Vendedor
+                {isLoadingLink ? 'Carregando...' : isPremium ? 'Perfil do Vendedor' : 'Ver Vendedor (Premium)'}
               </button>
             </div>
           </div>

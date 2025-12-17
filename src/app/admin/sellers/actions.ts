@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import cloudinary from '@/lib/cloudinary';
+import { CacheTag } from '@/types';
 
 export interface SellerFormData {
   id?: string;
@@ -19,33 +20,22 @@ export interface SellerFormData {
   evidence_images?: string[]; // Imagens de evidência (apenas Blacklist)
 }
 
-// Função helper para upload múltiplo de imagens no Cloudinary
 export async function uploadEvidenceImages(
   base64Array: string[]
 ): Promise<{ success: boolean; urls?: string[]; error?: string }> {
   try {
-    console.log(`Iniciando upload de ${base64Array.length} imagens de evidência...`);
-
-    // Verificar se as credenciais estão configuradas
     if (!process.env.CLOUDINARY_CLOUD_NAME ||
         !process.env.CLOUDINARY_API_KEY ||
         !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Credenciais do Cloudinary não configuradas!');
       return {
         success: false,
-        error: 'Credenciais do Cloudinary não configuradas. Verifique o .env.local'
+        error: 'Credenciais do Cloudinary não configuradas'
       };
     }
 
-    console.log('Credenciais OK, enviando imagens...');
-
-    const uploadPromises = base64Array.map(async (base64Data, index) => {
+    const uploadPromises = base64Array.map(async (base64Data) => {
       try {
-        console.log(`Enviando imagem ${index + 1}/${base64Array.length}...`);
-
-        // Verificar formato
         if (!base64Data.startsWith('data:image/')) {
-          console.error(`Imagem ${index + 1}: Formato inválido`);
           return null;
         }
 
@@ -55,10 +45,8 @@ export async function uploadEvidenceImages(
           timeout: 60000,
         });
 
-        console.log(`Imagem ${index + 1} enviada:`, result.secure_url);
         return result.secure_url;
-      } catch (error) {
-        console.error(`Erro ao fazer upload da imagem ${index + 1}:`, error);
+      } catch {
         return null;
       }
     });
@@ -66,16 +54,13 @@ export async function uploadEvidenceImages(
     const urls = await Promise.all(uploadPromises);
     const validUrls = urls.filter((url): url is string => url !== null);
 
-    console.log(`Upload concluído: ${validUrls.length}/${base64Array.length} imagens enviadas com sucesso`);
-
     if (validUrls.length === 0) {
-      return { success: false, error: 'Nenhuma imagem foi enviada com sucesso. Verifique as credenciais e tente novamente.' };
+      return { success: false, error: 'Nenhuma imagem foi enviada com sucesso' };
     }
 
     return { success: true, urls: validUrls };
   } catch (error) {
-    console.error('Erro geral ao fazer upload de imagens:');
-    console.error('Mensagem:', error instanceof Error ? error.message : error);
+    console.error('Erro ao fazer upload:', error instanceof Error ? error.message : error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido'
@@ -136,7 +121,7 @@ export async function createSeller(formData: SellerFormData) {
   }
 
   revalidatePath('/admin/sellers');
-  revalidateTag('sellers'); // Invalida cache da home
+  revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
 
@@ -169,7 +154,7 @@ export async function updateSeller(formData: SellerFormData) {
   }
 
   revalidatePath('/admin/sellers');
-  revalidateTag('sellers'); // Invalida cache da home
+  revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
 
@@ -183,7 +168,7 @@ export async function deleteSeller(id: string) {
   }
 
   revalidatePath('/admin/sellers');
-  revalidateTag('sellers'); // Invalida cache da home
+  revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   createProduct,
   updateProduct,
@@ -38,83 +39,16 @@ export default function ProductForm({
     observations: product?.observations || '',
   });
 
-  const [uploading, setUploading] = useState(false);
+  const { uploading, uploadFile } = useFileUpload();
   const [saving, setSaving] = useState(false);
 
   const handleImageUpload = async (
     file: File,
     field: 'image_main' | 'image_hover'
   ) => {
-    // Validar tamanho do arquivo ANTES de converter
-    const maxSizeMB = 5;
-    const fileSizeMB = file.size / (1024 * 1024);
-
-    if (fileSizeMB > maxSizeMB) {
-      toast.error(
-        `Imagem muito grande (${fileSizeMB.toFixed(1)}MB). Máximo: ${maxSizeMB}MB`,
-        { duration: 5000 }
-      );
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      // Converter arquivo para base64
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = async () => {
-        const base64Data = reader.result as string;
-
-        // Validar tamanho do base64
-        const base64SizeBytes = (base64Data.length * 3) / 4;
-        const base64SizeMB = base64SizeBytes / (1024 * 1024);
-
-        if (base64SizeMB > maxSizeMB) {
-          toast.error(
-            `Base64 muito grande (${base64SizeMB.toFixed(1)}MB). Máximo: ${maxSizeMB}MB`,
-            { duration: 5000 }
-          );
-          setUploading(false);
-          return;
-        }
-
-        console.log('Arquivo convertido para base64, enviando...');
-
-        const result = await uploadImageToCloudinary(base64Data);
-
-        if (result.success && result.url) {
-          setFormData((prev) => ({ ...prev, [field]: result.url! }));
-          toast.success('Imagem enviada com sucesso!', { duration: 3000 });
-          console.log('Upload concluído com sucesso!');
-        } else {
-          console.error('Erro no upload:', result.error);
-          toast.error(`Erro ao fazer upload: ${result.error || 'Erro desconhecido'}`, {
-            duration: 5000,
-          });
-        }
-        setUploading(false);
-      };
-
-      reader.onerror = () => {
-        console.error('Erro ao ler arquivo');
-        toast.error('Erro ao ler arquivo', { duration: 4000 });
-        setUploading(false);
-      };
-    } catch (error: any) {
-      console.error('Erro:', error);
-
-      // Detectar erro 413 (Payload Too Large)
-      if (error.message?.includes('413') || error.message?.includes('1 MB limit')) {
-        toast.error(
-          'Imagem muito grande! Reduza o tamanho e tente novamente.',
-          { duration: 6000 }
-        );
-      } else {
-        toast.error('Erro ao fazer upload da imagem', { duration: 5000 });
-      }
-      setUploading(false);
+    const url = await uploadFile(file, uploadImageToCloudinary);
+    if (url) {
+      setFormData((prev) => ({ ...prev, [field]: url }));
     }
   };
 
@@ -136,11 +70,11 @@ export default function ProductForm({
       } else {
         toast.error('Erro ao salvar produto: ' + result.error, { duration: 5000 });
       }
-    } catch (error: any) {
-      console.error('Erro:', error);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      const isPayloadTooLarge = errorMessage.includes('413') || errorMessage.includes('1 MB limit');
 
-      // Detectar erro 413 (Payload Too Large)
-      if (error.message?.includes('413') || error.message?.includes('1 MB limit')) {
+      if (isPayloadTooLarge) {
         toast.error(
           'Dados muito grandes! Reduza o tamanho das imagens e tente novamente.',
           { duration: 6000 }

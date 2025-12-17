@@ -1,12 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
-export default function CurrencyToggle() {
+const ANIMATION_DELAY_MS = 50;
+
+export function CurrencyToggle() {
   const { currency, cnyRate, setCurrency, setCnyRate } = useCurrency();
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [tempRate, setTempRate] = useState(cnyRate.toString());
+  const [showRateButton, setShowRateButton] = useState(currency === 'BRL');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (currency === 'BRL') {
+      const timer = setTimeout(() => setShowRateButton(true), ANIMATION_DELAY_MS);
+      return () => clearTimeout(timer);
+    } else {
+      setShowRateButton(false);
+      setIsEditingRate(false);
+    }
+  }, [currency]);
+
+  useEffect(() => {
+    if (isEditingRate && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditingRate]);
 
   const handleRateSubmit = () => {
     const newRate = parseFloat(tempRate);
@@ -21,76 +42,109 @@ export default function CurrencyToggle() {
     setIsEditingRate(false);
   };
 
+  const handleToggle = () => {
+    setCurrency(currency === 'CNY' ? 'BRL' : 'CNY');
+  };
+
   return (
-    <div className="flex items-center gap-3">
-      {/* Toggle CNY/BRL */}
+    <div className="flex items-center gap-2">
       <button
-        onClick={() => setCurrency(currency === 'CNY' ? 'BRL' : 'CNY')}
-        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 rounded-lg border border-zinc-700
-                   hover:border-primary transition-all duration-200"
+        onClick={handleToggle}
+        className="group relative flex items-center gap-2 h-10 px-4 rounded-xl overflow-hidden neu-elevated"
       >
-        <span className="text-textSecondary text-sm">Moeda:</span>
-        <span className="text-primary font-bold">{currency}</span>
+        <span className="text-text-tertiary text-xs font-medium">Moeda</span>
+        <div className="relative w-8 h-5 flex items-center justify-center overflow-hidden">
+          <span
+            className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
+              currency === 'CNY'
+                ? 'translate-y-0 opacity-100'
+                : '-translate-y-full opacity-0'
+            }`}
+          >
+            CNY
+          </span>
+          <span
+            className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
+              currency === 'BRL'
+                ? 'translate-y-0 opacity-100'
+                : 'translate-y-full opacity-0'
+            }`}
+          >
+            BRL
+          </span>
+        </div>
+        <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
       </button>
 
-      {/* Cotação (clicável para editar) */}
-      {currency === 'BRL' && (
-        <div className="relative">
+      <div
+        className={`transition-all duration-300 ease-out overflow-hidden ${
+          currency === 'BRL' && showRateButton
+            ? 'max-w-[300px] opacity-100 translate-x-0'
+            : 'max-w-0 opacity-0 -translate-x-4'
+        }`}
+      >
+        <div>
           {!isEditingRate ? (
             <button
               onClick={() => {
                 setIsEditingRate(true);
                 setTempRate(cnyRate.toString());
               }}
-              className="px-3 py-2 bg-zinc-900 rounded-lg border border-zinc-700
-                         hover:border-primary transition-all duration-200 text-xs
-                         flex items-center gap-1"
+              className="group h-10 px-3 bg-surface rounded-xl border border-border shadow-sm hover:bg-surface-elevated hover:border-border-emphasis transition-all duration-200 text-xs flex items-center gap-1.5 whitespace-nowrap"
             >
-              <span className="text-textSecondary">¥1 = </span>
-              <span className="text-textMain">R$ {cnyRate.toFixed(2)}</span>
-              <svg className="w-3 h-3 text-textSecondary ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              <span className="text-text-tertiary">¥1 =</span>
+              <span className="text-text-primary font-medium">R$ {cnyRate.toFixed(2)}</span>
+              <svg
+                className="w-3.5 h-3.5 text-text-muted ml-0.5 group-hover:text-primary transition-colors duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
               </svg>
             </button>
           ) : (
-            <div className="flex items-center gap-2 animate-expand">
-              <div className="flex items-center gap-1 px-2 py-1 bg-zinc-900 border border-primary rounded-lg">
-                <span className="text-textSecondary text-xs">R$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={tempRate}
-                  onChange={(e) => setTempRate(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleRateSubmit();
-                    if (e.key === 'Escape') handleCancel();
-                  }}
-                  className="w-16 px-1 bg-transparent border-none text-textMain text-xs
-                             focus:outline-none"
-                  autoFocus
-                />
-              </div>
-              <button
-                onClick={handleRateSubmit}
-                className="px-3 py-1.5 bg-primary text-background rounded-lg text-xs font-medium
-                           hover:bg-primary/90 transition-colors"
-              >
-                OK
-              </button>
-              <button
-                onClick={handleCancel}
-                className="p-1.5 text-textSecondary hover:text-textMain transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 h-10 px-3 bg-surface border border-primary rounded-xl transition-all duration-200">
+              <span className="text-text-tertiary text-xs">R$</span>
+              <input
+                ref={inputRef}
+                type="number"
+                step="0.01"
+                min="0"
+                value={tempRate}
+                onChange={(e) => setTempRate(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleRateSubmit();
+                  if (e.key === 'Escape') handleCancel();
+                }}
+                className="w-14 px-1 bg-transparent border-none text-text-primary text-sm font-medium focus:outline-none"
+              />
+            </div>
+            <button
+              onClick={handleRateSubmit}
+              className="h-10 px-4 bg-primary text-white rounded-xl text-xs font-semibold shadow-sm hover:bg-primary-hover active:scale-95 transition-all duration-200"
+            >
+              OK
+            </button>
+            <button
+              onClick={handleCancel}
+              className="h-10 w-10 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-elevated rounded-xl active:scale-95 transition-all duration-200"
+              aria-label="Cancelar"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

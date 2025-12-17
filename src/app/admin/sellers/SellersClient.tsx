@@ -1,30 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import SellerForm from '@/components/SellerForm';
 import ImageLightbox from '@/components/ImageLightbox';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { deleteSeller } from './actions';
-import type { SellerFormData } from './actions';
-
-interface Seller extends SellerFormData {
-  id: string;
-  created_at?: string;
-  seller_categories?: { name: string } | null;
-}
+import type { Seller, Category } from '@/types';
 
 interface SellersClientProps {
   sellers: Seller[];
-  categories: Array<{ id: string; name: string }>;
+  categories: Category[];
 }
 
 export default function SellersClient({
   sellers: initialSellers,
   categories,
 }: SellersClientProps) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSeller, setEditingSeller] = useState<Seller | null>(null);
   const [sellers, setSellers] = useState(initialSellers);
   const [filter, setFilter] = useState<'all' | 'gold' | 'blacklist'>('all');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; sellerId: string | null }>({
+    isOpen: false,
+    sellerId: null,
+  });
 
   // Fechar modal com ESC
   useEffect(() => {
@@ -67,22 +69,31 @@ export default function SellersClient({
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar este vendedor?')) return;
-
-    const result = await deleteSeller(id);
-    if (result.success) {
-      setSellers(sellers.filter((s) => s.id !== id));
-      alert('Vendedor deletado com sucesso!');
-    } else {
-      alert('Erro ao deletar vendedor');
-    }
+  const handleDeleteRequest = (id: string) => {
+    setDeleteConfirm({ isOpen: true, sellerId: id });
   };
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteConfirm.sellerId) return;
+
+    const result = await deleteSeller(deleteConfirm.sellerId);
+    if (result.success) {
+      setSellers(sellers.filter((s) => s.id !== deleteConfirm.sellerId));
+      toast.success('Vendedor deletado com sucesso!');
+    } else {
+      toast.error('Erro ao deletar vendedor');
+    }
+    setDeleteConfirm({ isOpen: false, sellerId: null });
+  }, [deleteConfirm.sellerId, sellers]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteConfirm({ isOpen: false, sellerId: null });
+  }, []);
 
   const handleFormSuccess = () => {
     setIsModalOpen(false);
     setEditingSeller(null);
-    window.location.reload();
+    router.refresh();
   };
 
   const handleCancel = () => {
@@ -367,7 +378,7 @@ export default function SellersClient({
                   Editar
                 </button>
                 <button
-                  onClick={() => handleDelete(seller.id)}
+                  onClick={() => handleDeleteRequest(seller.id)}
                   className="px-4 py-2 bg-danger/20 text-danger rounded-lg hover:bg-danger/30 transition-colors text-sm ml-auto"
                 >
                   Deletar
@@ -377,6 +388,17 @@ export default function SellersClient({
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Deletar Vendedor"
+        message="Tem certeza que deseja deletar este vendedor? Esta ação não pode ser desfeita."
+        confirmLabel="Deletar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }
