@@ -176,7 +176,7 @@ export function HeaderNav({
             </button>
 
             {hasCategories && isDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 w-[600px] bg-background border border-border rounded-lg shadow-2xl z-50 animate-fadeIn overflow-hidden">
+              <div className="absolute top-full left-[-50%] w-[800px] bg-background border-t-0 border-x border-b border-border rounded-b-lg shadow-2xl z-50 animate-appleDropdownSlide overflow-hidden">
                 {/* Grid 3 colunas estilo Apple */}
                 <div className="p-6">
                   <div className="grid grid-cols-3 gap-4">
@@ -186,7 +186,7 @@ export function HeaderNav({
                         onClick={() => handleCategorySelect(category.id)}
                         className="p-4 rounded-lg hover:bg-muted transition-colors group text-left"
                         style={{
-                          animation: `megaMenuItem 200ms ease-out ${index * 40}ms both`,
+                          animation: `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`,
                         }}
                       >
                         <span className={`text-sm font-medium transition-colors ${
