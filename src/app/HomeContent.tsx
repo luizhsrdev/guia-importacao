@@ -280,7 +280,7 @@ export function HomeContent({
                   Aviso Importante
                 </h3>
                 <p className="text-sm text-text-secondary leading-relaxed">
-                  Lista baseada em experiências da comunidade. Vendedores <span className="text-amber-500 dark:text-amber-400 font-semibold">verificados</span> têm histórico positivo, mas sempre faça sua pesquisa. A <span className="text-red-500 dark:text-red-400 font-semibold">blacklist</span> contém vendedores com práticas fraudulentas reportadas.
+                  Lista baseada em experiências da comunidade. Vendedores <span className="text-verified font-semibold">verificados</span> têm histórico positivo, mas sempre faça sua pesquisa. A <span className="text-red-500 dark:text-red-400 font-semibold">blacklist</span> contém vendedores com práticas fraudulentas reportadas.
                 </p>
               </div>
             </div>

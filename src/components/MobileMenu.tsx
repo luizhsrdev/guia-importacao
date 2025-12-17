@@ -74,6 +74,7 @@ function MenuContent({
       name.includes('iphone') ||
       name.includes('ipad') ||
       name.includes('macbook') ||
+      name.includes('mac mini') ||
       name.includes('airpods') ||
       (name.includes('watch') && name.includes('apple'))
     );

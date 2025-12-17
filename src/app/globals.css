@@ -28,6 +28,8 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
   --shadow-glow: 0 0 20px var(--primary-glow);
+  --color-verified: #059669;
+  --color-verified-glow: #059669;
 }
 
 .dark {
@@ -56,6 +58,8 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-glow: 0 0 30px var(--primary-glow);
+  --color-verified: #34D399;
+  --color-verified-glow: #34D399;
 }
 
 body {
@@ -430,9 +434,72 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
 }
 
+/* ===================================
+   UTILITY CLASSES - COR VERIFICADO
+   =================================== */
+.text-verified { color: var(--color-verified); }
+.bg-verified { background-color: var(--color-verified); }
+.border-verified { border-color: var(--color-verified); }
+.bg-verified\/10 { background-color: rgb(52 211 153 / 0.1); }
+.bg-verified\/20 { background-color: rgb(52 211 153 / 0.2); }
+
+.shadow-glow-verified {
+  box-shadow: 0 0 20px var(--color-verified-glow);
+}
+.shadow-glow-verified-lg {
+  box-shadow: 0 0 40px var(--color-verified-glow);
+}
+
+/* ===================================
+   KEYFRAMES - ANIMAÇÕES
+   =================================== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes megaMenuSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes megaMenuExpand {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+@keyframes megaMenuItem {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scaleIn {
@@ -464,6 +531,22 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-fadeIn {
   animation: fadeIn 0.15s ease-out;
+}
+
+.animate-megaMenuSlide {
+  animation: megaMenuSlide 200ms ease-out;
+}
+
+.animate-megaMenuExpand {
+  animation: megaMenuExpand 300ms ease-out;
+}
+
+.animate-megaMenuItem {
+  animation: megaMenuItem 200ms ease-out;
+}
+
+.animate-dropdown {
+  animation: dropdown 150ms ease-out;
 }
 
 .animate-scaleIn {

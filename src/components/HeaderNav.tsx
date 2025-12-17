@@ -72,6 +72,7 @@ export function HeaderNav({
       name.includes('iphone') ||
       name.includes('ipad') ||
       name.includes('macbook') ||
+      name.includes('mac mini') ||
       name.includes('airpods') ||
       (name.includes('watch') && name.includes('apple'))
     );
@@ -171,17 +172,6 @@ export function HeaderNav({
 
             {hasCategories && isDropdownOpen && (
               <div className="absolute top-full left-0 mt-2 py-2 min-w-[200px] bg-surface border border-border rounded-xl shadow-lg z-50 animate-fadeIn">
-                <button
-                  onClick={() => handleCategorySelect(null)}
-                  className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left transition-colors ${
-                    activeCategory === null && activeTab === 'produtos'
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
-                  }`}
-                >
-                  Todos os produtos
-                </button>
-                <div className="h-px bg-border mx-3 my-1" />
                 {dropdownCategories.map((category) => (
                   <button
                     key={category.id}
