@@ -250,8 +250,10 @@ export function HeaderNav({
             onMouseLeave={handleMouseLeave}
           >
             {/* Título */}
-            <div className="max-w-7xl mx-auto px-6 pt-6 pb-2">
-              <h2 className="text-2xl font-semibold text-text-primary">
+            <div className="max-w-7xl mx-auto px-6 pt-1 pb-2">
+              <h2 className={`text-2xl font-semibold text-text-primary transition-opacity duration-200 ${
+                !isFirstOpen ? 'animate-fadeIn' : ''
+              }`}>
                 {getDropdownTitle(openDropdown)}
               </h2>
             </div>
@@ -263,13 +265,15 @@ export function HeaderNav({
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id)}
-                    className="p-4 rounded-lg hover:bg-muted transition-colors group text-left"
+                    className={`p-4 rounded-lg hover:bg-muted transition-colors group text-left ${
+                      !isFirstOpen && !isClosing ? 'animate-fadeIn' : ''
+                    }`}
                     style={{
                       animation: isClosing
                         ? `megaMenuItemOut 200ms cubic-bezier(0.32, 0.72, 0, 1) ${index * 20}ms both`
                         : isFirstOpen
                         ? `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`
-                        : 'none',
+                        : `fadeIn 250ms ease-out both`,
                     }}
                   >
                     <span className={`text-sm font-medium transition-colors ${
