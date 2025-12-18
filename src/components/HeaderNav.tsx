@@ -108,6 +108,33 @@ export function HeaderNav({
     { id: 'mais', label: 'Mais', icon: ICONS.more },
   ];
 
+  const getDropdownTitle = (itemId: string): string => {
+    switch (itemId) {
+      case 'apple':
+        return 'Explorar todos os produtos de Apple';
+      case 'perifericos':
+        return 'Explorar todos os Periféricos';
+      case 'mais':
+        return 'Explorar Mais Produtos';
+      default:
+        return '';
+    }
+  };
+
+  const handleMouseEnter = (itemId: string) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setOpenDropdown(itemId);
+    }, 150);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setOpenDropdown(null);
+    }, 150);
+  };
+
   const getCategoriesForDropdown = (itemId: string): Category[] => {
     if (itemId === 'apple') return appleCategories;
     if (itemId === 'perifericos') return peripheralCategories;
@@ -148,15 +175,15 @@ export function HeaderNav({
         const isActive = dropdownCategories.some((c) => c.id === activeCategory);
 
         return (
-          <div key={item.id} className="relative">
+          <div
+            key={item.id}
+            className="relative"
+            onMouseEnter={() => hasCategories && handleMouseEnter(item.id)}
+            onMouseLeave={handleMouseLeave}
+          >
             <button
-              onClick={() => {
-                if (hasCategories) {
-                  setOpenDropdown(isDropdownOpen ? null : item.id);
-                }
-              }}
               className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
-                isActive
+                isActive || isDropdownOpen
                   ? 'bg-primary/10 text-primary'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
               }`}
@@ -176,9 +203,20 @@ export function HeaderNav({
             </button>
 
             {hasCategories && isDropdownOpen && (
-              <div className="absolute top-full left-[-50%] w-[800px] bg-background border-t-0 border-x border-b border-border rounded-b-lg shadow-2xl z-50 animate-appleDropdownSlide overflow-hidden">
+              <div
+                className="fixed left-0 right-0 top-[64px] bg-background border-t-0 border-b border-border shadow-2xl z-50 animate-appleDropdownSlide overflow-hidden"
+                onMouseEnter={() => handleMouseEnter(item.id)}
+                onMouseLeave={handleMouseLeave}
+              >
+                {/* Título */}
+                <div className="max-w-7xl mx-auto px-6 pt-6 pb-2">
+                  <h2 className="text-2xl font-semibold text-text-primary">
+                    {getDropdownTitle(item.id)}
+                  </h2>
+                </div>
+
                 {/* Grid 3 colunas estilo Apple */}
-                <div className="p-6">
+                <div className="max-w-7xl mx-auto px-6 pb-6">
                   <div className="grid grid-cols-3 gap-4">
                     {dropdownCategories.map((category, index) => (
                       <button
@@ -236,7 +274,7 @@ export function HeaderNav({
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-fadeIn"
           style={{ top: '64px', zIndex: 40 }}
-          onClick={() => setOpenDropdown(null)}
+          onMouseEnter={handleMouseLeave}
         />
       )}
     </nav>
