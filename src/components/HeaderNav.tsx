@@ -54,6 +54,7 @@ export function HeaderNav({
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isFirstOpen, setIsFirstOpen] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -141,14 +142,16 @@ export function HeaderNav({
     }
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
 
-    // Se já está aberto, apenas troca o item sem fechar
+    // Se já está aberto, apenas troca o item sem fechar (alternância)
     if (openDropdown) {
       setIsClosing(false);
+      setIsFirstOpen(false); // Não é primeira abertura, é alternância
       setOpenDropdown(itemId);
     } else {
       // Se está fechado, aguarda 150ms para abrir
       hoverTimeoutRef.current = setTimeout(() => {
         setIsClosing(false);
+        setIsFirstOpen(true); // É primeira abertura
         setOpenDropdown(itemId);
       }, 150);
     }
@@ -231,52 +234,58 @@ export function HeaderNav({
                 </svg>
               )}
             </button>
-
-            {hasCategories && isDropdownOpen && (
-              <div
-                className={`fixed left-0 right-0 top-[64px] bg-background border-t-0 border-b border-border shadow-2xl z-50 overflow-hidden ${
-                  isClosing ? 'animate-appleDropdownSlideUp' : 'animate-appleDropdownSlide'
-                }`}
-                onMouseEnter={() => handleMouseEnter(item.id)}
-                onMouseLeave={handleMouseLeave}
-              >
-                {/* Título */}
-                <div className="max-w-7xl mx-auto px-6 pt-6 pb-2">
-                  <h2 className="text-2xl font-semibold text-text-primary">
-                    {getDropdownTitle(item.id)}
-                  </h2>
-                </div>
-
-                {/* Grid 3 colunas estilo Apple */}
-                <div className="max-w-7xl mx-auto px-6 pb-6">
-                  <div className="grid grid-cols-3 gap-4">
-                    {dropdownCategories.map((category, index) => (
-                      <button
-                        key={category.id}
-                        onClick={() => handleCategorySelect(category.id)}
-                        className="p-4 rounded-lg hover:bg-muted transition-colors group text-left"
-                        style={{
-                          animation: isClosing
-                            ? `megaMenuItemOut 200ms cubic-bezier(0.32, 0.72, 0, 1) ${index * 20}ms both`
-                            : `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`,
-                        }}
-                      >
-                        <span className={`text-sm font-medium transition-colors ${
-                          activeCategory === category.id
-                            ? 'text-primary'
-                            : 'text-text-primary group-hover:text-primary'
-                        }`}>
-                          {category.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         );
       })}
+
+      {/* Dropdown único que troca o conteúdo */}
+      {openDropdown && (() => {
+        const dropdownCategories = getCategoriesForDropdown(openDropdown);
+        return (
+          <div
+            className={`fixed left-0 right-0 top-[64px] bg-background border-t-0 border-b border-border shadow-2xl z-50 overflow-hidden ${
+              isClosing ? 'animate-appleDropdownSlideUp' : (isFirstOpen ? 'animate-appleDropdownSlide' : '')
+            }`}
+            onMouseEnter={() => openDropdown && handleMouseEnter(openDropdown)}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Título */}
+            <div className="max-w-7xl mx-auto px-6 pt-6 pb-2">
+              <h2 className="text-2xl font-semibold text-text-primary">
+                {getDropdownTitle(openDropdown)}
+              </h2>
+            </div>
+
+            {/* Grid 3 colunas estilo Apple */}
+            <div className="max-w-7xl mx-auto px-6 pb-6">
+              <div className="grid grid-cols-3 gap-4">
+                {dropdownCategories.map((category, index) => (
+                  <button
+                    key={category.id}
+                    onClick={() => handleCategorySelect(category.id)}
+                    className="p-4 rounded-lg hover:bg-muted transition-colors group text-left"
+                    style={{
+                      animation: isClosing
+                        ? `megaMenuItemOut 200ms cubic-bezier(0.32, 0.72, 0, 1) ${index * 20}ms both`
+                        : isFirstOpen
+                        ? `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`
+                        : 'none',
+                    }}
+                  >
+                    <span className={`text-sm font-medium transition-colors ${
+                      activeCategory === category.id
+                        ? 'text-primary'
+                        : 'text-text-primary group-hover:text-primary'
+                    }`}>
+                      {category.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="w-px h-5 bg-border mx-2" />
 
