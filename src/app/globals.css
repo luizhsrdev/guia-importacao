@@ -21,10 +21,10 @@
   --text-secondary: #3F3F46;
   --text-tertiary: #71717A;
   --text-muted: #A1A1AA;
-  --border: #E4E4E7;
+  --border: #D4D4D8;
   --border-subtle: #F4F4F5;
-  --border-emphasis: #D4D4D8;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --border-emphasis: #C4C4C8;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
   --shadow-glow: 0 0 20px var(--primary-glow);
