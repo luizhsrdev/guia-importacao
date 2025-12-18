@@ -52,14 +52,16 @@ export function HeaderNav({
   onPremiumClick,
 }: HeaderNavProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpenDropdown(null);
+        handleClose();
       }
     };
 
@@ -67,6 +69,7 @@ export function HeaderNav({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     };
   }, []);
 
@@ -121,17 +124,42 @@ export function HeaderNav({
     }
   };
 
+  const handleClose = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    setIsClosing(true);
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpenDropdown(null);
+      setIsClosing(false);
+    }, 250); // Duração da animação de saída
+  };
+
   const handleMouseEnter = (itemId: string) => {
+    // Cancela qualquer fechamento pendente
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => {
+
+    // Se já está aberto, apenas troca o item sem fechar
+    if (openDropdown) {
+      setIsClosing(false);
       setOpenDropdown(itemId);
-    }, 150);
+    } else {
+      // Se está fechado, aguarda 150ms para abrir
+      hoverTimeoutRef.current = setTimeout(() => {
+        setIsClosing(false);
+        setOpenDropdown(itemId);
+      }, 150);
+    }
   };
 
   const handleMouseLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+
+    // Agenda o fechamento após 150ms
     hoverTimeoutRef.current = setTimeout(() => {
-      setOpenDropdown(null);
+      handleClose();
     }, 150);
   };
 
@@ -147,7 +175,7 @@ export function HeaderNav({
       onTabChange('produtos');
     }
     onCategoryChange(categoryId);
-    setOpenDropdown(null);
+    handleClose();
   };
 
   const handleVendedoresClick = () => {
@@ -204,7 +232,9 @@ export function HeaderNav({
 
             {hasCategories && isDropdownOpen && (
               <div
-                className="fixed left-0 right-0 top-[64px] bg-background border-t-0 border-b border-border shadow-2xl z-50 animate-appleDropdownSlide overflow-hidden"
+                className={`fixed left-0 right-0 top-[64px] bg-background border-t-0 border-b border-border shadow-2xl z-50 overflow-hidden ${
+                  isClosing ? 'animate-appleDropdownSlideUp' : 'animate-appleDropdownSlide'
+                }`}
                 onMouseEnter={() => handleMouseEnter(item.id)}
                 onMouseLeave={handleMouseLeave}
               >
@@ -224,7 +254,9 @@ export function HeaderNav({
                         onClick={() => handleCategorySelect(category.id)}
                         className="p-4 rounded-lg hover:bg-muted transition-colors group text-left"
                         style={{
-                          animation: `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`,
+                          animation: isClosing
+                            ? `megaMenuItemOut 200ms cubic-bezier(0.32, 0.72, 0, 1) ${index * 20}ms both`
+                            : `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`,
                         }}
                       >
                         <span className={`text-sm font-medium transition-colors ${
@@ -272,7 +304,9 @@ export function HeaderNav({
       {/* Backdrop quando dropdown está aberto */}
       {openDropdown && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-fadeIn"
+          className={`fixed inset-0 bg-black/40 backdrop-blur-sm ${
+            isClosing ? 'animate-fadeOut' : 'animate-fadeIn'
+          }`}
           style={{ top: '64px', zIndex: 40 }}
           onMouseEnter={handleMouseLeave}
         />

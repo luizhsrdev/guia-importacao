@@ -491,6 +491,17 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+@keyframes megaMenuItemOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scaleY(0.8);
+  }
+}
+
 @keyframes dropdown {
   from {
     opacity: 0;
@@ -522,6 +533,19 @@ h1, h2, h3, h4, h5, h6 {
   to {
     opacity: 1;
     transform: scaleY(1);
+    transform-origin: top center;
+  }
+}
+
+@keyframes appleDropdownSlideUp {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: top center;
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0);
     transform-origin: top center;
   }
 }
@@ -576,6 +600,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-appleDropdownSlide {
   animation: appleDropdownSlide 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-appleDropdownSlideUp {
+  animation: appleDropdownSlideUp 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
