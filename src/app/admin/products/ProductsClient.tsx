@@ -228,6 +228,16 @@ export default function ProductsClient({
                     )}
                   </div>
 
+                  {/* Badge de Categoria */}
+                  <div className="mb-3 text-sm text-textSecondary">
+                    <span className="font-semibold">Categoria:</span>{' '}
+                    {product.category && !Array.isArray(product.category) ? (
+                      <span className="text-primary font-medium">{product.category.name}</span>
+                    ) : (
+                      <span className="text-yellow-600 font-medium">Não definida</span>
+                    )}
+                  </div>
+
                   <div className="space-y-1 text-sm text-textSecondary mb-4">
                     <p>
                       <span className="font-semibold">Afiliado:</span>{' '}
