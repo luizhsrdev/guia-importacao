@@ -213,6 +213,8 @@ export function HeaderNav({
               className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive || isDropdownOpen
                   ? 'bg-primary/10 text-primary'
+                  : hasCategories
+                  ? 'text-text-secondary'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
               }`}
             >
