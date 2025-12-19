@@ -27,8 +27,9 @@ interface HomeContentProps {
   categories: Category[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  activeCategory: string | null;
-  setActiveCategory: (category: string | null) => void;
+  selectedCategories: string[];
+  onCategoryToggle: (categoryId: string | null) => void;
+  onClearFilters: () => void;
   onPremiumClick: () => void;
 }
 
@@ -39,8 +40,9 @@ export function HomeContent({
   categories,
   activeTab,
   setActiveTab,
-  activeCategory,
-  setActiveCategory,
+  selectedCategories,
+  onCategoryToggle,
+  onClearFilters,
   onPremiumClick,
 }: HomeContentProps) {
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
@@ -55,8 +57,8 @@ export function HomeContent({
         }
       }
 
-      if (activeCategory) {
-        if (!product.category_id || product.category_id !== activeCategory) {
+      if (selectedCategories.length > 0) {
+        if (!product.category_id || !selectedCategories.includes(product.category_id)) {
           return false;
         }
       } else if (filters.categories.length > 0) {
@@ -77,7 +79,7 @@ export function HomeContent({
 
       return true;
     });
-  }, [products, filters, activeCategory]);
+  }, [products, filters, selectedCategories]);
 
   const filteredSellers = useMemo(() => {
     return sellers.filter((s) => {
@@ -89,32 +91,40 @@ export function HomeContent({
   const goldCount = useMemo(() => sellers.filter((s) => s.status === 'gold').length, [sellers]);
   const blacklistCount = useMemo(() => sellers.filter((s) => s.status === 'blacklist').length, [sellers]);
 
-  const activeCategoryName = useMemo(() => {
-    if (!activeCategory) return null;
-    return categories.find((c) => c.id === activeCategory)?.name ?? null;
-  }, [activeCategory, categories]);
+  const selectedCategoryNames = useMemo(() => {
+    return selectedCategories
+      .map((id) => categories.find((c) => c.id === id)?.name)
+      .filter((name): name is string => name !== undefined);
+  }, [selectedCategories, categories]);
 
-  const handleClearCategory = () => {
-    setActiveCategory(null);
-  };
+  const formattedCategoryText = useMemo(() => {
+    if (selectedCategoryNames.length === 0) return null;
+    if (selectedCategoryNames.length === 1) return selectedCategoryNames[0];
+    if (selectedCategoryNames.length === 2) {
+      return `${selectedCategoryNames[0]} e ${selectedCategoryNames[1]}`;
+    }
+    const lastCategory = selectedCategoryNames[selectedCategoryNames.length - 1];
+    const otherCategories = selectedCategoryNames.slice(0, -1).join(', ');
+    return `${otherCategories} e ${lastCategory}`;
+  }, [selectedCategoryNames]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-20">
       {activeTab === 'produtos' && (
         <section>
-          {activeCategoryName && (
+          {formattedCategoryText && (
             <div className="flex items-center gap-3 mb-6">
               <h1 className="text-xl sm:text-2xl font-semibold text-text-primary">
-                {activeCategoryName}
+                {formattedCategoryText}
               </h1>
               <button
-                onClick={handleClearCategory}
-                className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-text-secondary bg-surface border border-border hover:bg-surface-elevated transition-colors"
+                onClick={onClearFilters}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-text-secondary bg-surface border border-border hover:bg-surface-elevated hover:border-border-emphasis transition-colors"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                Limpar filtro
+                Limpar Filtros
               </button>
             </div>
           )}

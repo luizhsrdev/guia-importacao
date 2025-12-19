@@ -34,8 +34,8 @@ const ICONS = {
 
 interface HeaderNavProps {
   categories: Category[];
-  activeCategory: string | null;
-  onCategoryChange: (categoryId: string | null) => void;
+  selectedCategories: string[];
+  onCategoryToggle: (categoryId: string | null) => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
   userStatus: { isAuthenticated: boolean; isPremium: boolean; isAdmin: boolean };
@@ -44,8 +44,8 @@ interface HeaderNavProps {
 
 export function HeaderNav({
   categories,
-  activeCategory,
-  onCategoryChange,
+  selectedCategories,
+  onCategoryToggle,
   activeTab,
   onTabChange,
   userStatus,
@@ -177,8 +177,8 @@ export function HeaderNav({
     if (activeTab !== 'produtos') {
       onTabChange('produtos');
     }
-    onCategoryChange(categoryId);
-    handleClose();
+    onCategoryToggle(categoryId);
+    // Não fecha mais o dropdown para permitir múltiplas seleções
   };
 
   const handleVendedoresClick = () => {
@@ -203,7 +203,7 @@ export function HeaderNav({
         const dropdownCategories = getCategoriesForDropdown(item.id);
         const hasCategories = dropdownCategories.length > 0;
         const isDropdownOpen = openDropdown === item.id;
-        const isActive = dropdownCategories.some((c) => c.id === activeCategory);
+        const isActive = dropdownCategories.some((c) => selectedCategories.includes(c.id));
 
         return (
           <div
@@ -261,30 +261,50 @@ export function HeaderNav({
             {/* Grid 3 colunas estilo Apple */}
             <div className="max-w-7xl mx-auto px-6 pb-6">
               <div className="grid grid-cols-3 gap-4">
-                {dropdownCategories.map((category, index) => (
-                  <button
-                    key={category.id}
-                    onClick={() => handleCategorySelect(category.id)}
-                    className={`p-4 rounded-lg hover:bg-muted transition-colors group text-left ${
-                      !isFirstOpen && !isClosing ? 'animate-fadeIn' : ''
-                    }`}
-                    style={{
-                      animation: isClosing
-                        ? `megaMenuItemOut 200ms cubic-bezier(0.32, 0.72, 0, 1) ${index * 20}ms both`
-                        : isFirstOpen
-                        ? `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`
-                        : `fadeIn 250ms ease-out both`,
-                    }}
-                  >
-                    <span className={`text-sm font-medium transition-colors ${
-                      activeCategory === category.id
-                        ? 'text-primary'
-                        : 'text-text-primary group-hover:text-primary'
-                    }`}>
-                      {category.name}
-                    </span>
-                  </button>
-                ))}
+                {dropdownCategories.map((category, index) => {
+                  const isSelected = selectedCategories.includes(category.id);
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => handleCategorySelect(category.id)}
+                      className={`p-4 rounded-lg transition-all group text-left flex items-center justify-between gap-2 ${
+                        isSelected
+                          ? 'bg-primary/10 border border-primary/30'
+                          : 'hover:bg-muted border border-transparent'
+                      } ${!isFirstOpen && !isClosing ? 'animate-fadeIn' : ''}`}
+                      style={{
+                        animation: isClosing
+                          ? `megaMenuItemOut 200ms cubic-bezier(0.32, 0.72, 0, 1) ${index * 20}ms both`
+                          : isFirstOpen
+                          ? `megaMenuItem 280ms cubic-bezier(0.32, 0.72, 0, 1) ${100 + index * 30}ms both`
+                          : `fadeIn 250ms ease-out both`,
+                      }}
+                    >
+                      <span className={`text-sm font-medium transition-colors ${
+                        isSelected
+                          ? 'text-primary'
+                          : 'text-text-primary group-hover:text-primary'
+                      }`}>
+                        {category.name}
+                      </span>
+                      {isSelected && (
+                        <svg
+                          className="w-4 h-4 text-primary flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

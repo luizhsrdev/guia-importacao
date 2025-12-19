@@ -31,12 +31,33 @@ export function HomeWrapper({
   categories,
 }: HomeWrapperProps) {
   const [activeTab, setActiveTab] = useState('produtos');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const handleLogoClick = () => {
     setActiveTab('produtos');
-    setActiveCategory(null);
+    setSelectedCategories([]);
+  };
+
+  const handleCategoryToggle = (categoryId: string | null) => {
+    if (!categoryId) {
+      setSelectedCategories([]);
+      return;
+    }
+
+    setSelectedCategories((prev) => {
+      if (prev.includes(categoryId)) {
+        // Desmarcar
+        return prev.filter((id) => id !== categoryId);
+      } else {
+        // Marcar
+        return [...prev, categoryId];
+      }
+    });
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
   };
 
   return (
@@ -50,8 +71,8 @@ export function HomeWrapper({
               <div className="hidden md:block">
                 <HeaderNav
                   categories={categories}
-                  activeCategory={activeCategory}
-                  onCategoryChange={setActiveCategory}
+                  selectedCategories={selectedCategories}
+                  onCategoryToggle={handleCategoryToggle}
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
                   userStatus={userStatus}
@@ -94,7 +115,7 @@ export function HomeWrapper({
               </SignedIn>
               <MobileMenu
                 categories={categories}
-                onCategorySelect={setActiveCategory}
+                onCategorySelect={handleCategoryToggle}
                 onTabChange={setActiveTab}
                 userStatus={userStatus}
                 onPremiumClick={() => setShowPremiumModal(true)}
@@ -111,8 +132,9 @@ export function HomeWrapper({
         categories={categories}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
+        selectedCategories={selectedCategories}
+        onCategoryToggle={handleCategoryToggle}
+        onClearFilters={clearFilters}
         onPremiumClick={() => setShowPremiumModal(true)}
       />
 
