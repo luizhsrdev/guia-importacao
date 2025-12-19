@@ -778,13 +778,23 @@ input[type="number"] {
 
 /* Estilos personalizados para range inputs */
 .price-range-slider::-webkit-slider-track {
-  background: var(--border-emphasis);
+  background: #1e1e1e;
   border-radius: 0.5rem;
+  height: 0.5rem;
 }
 
 .price-range-slider::-moz-range-track {
-  background: var(--border-emphasis);
+  background: #1e1e1e;
   border-radius: 0.5rem;
+  height: 0.5rem;
+}
+
+.dark .price-range-slider::-webkit-slider-track {
+  background: #4b5563;
+}
+
+.dark .price-range-slider::-moz-range-track {
+  background: #4b5563;
 }
 
 .price-range-slider::-webkit-slider-thumb {

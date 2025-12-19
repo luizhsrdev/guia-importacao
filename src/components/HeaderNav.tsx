@@ -215,10 +215,10 @@ export function HeaderNav({
             <button
               className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive || isDropdownOpen
-                  ? 'bg-primary/10 text-primary'
+                  ? 'bg-primary/10 text-primary border border-primary/30'
                   : hasCategories
-                  ? 'text-text-secondary'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
+                  ? 'text-text-secondary border border-transparent'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated border border-transparent'
               }`}
             >
               {item.icon}

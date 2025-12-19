@@ -160,7 +160,11 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
                 setShowSortDropdown(true);
               }
             }}
-            className="h-12 pl-11 pr-9 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer w-[120px] sm:w-[130px] flex items-center justify-between"
+            className={`h-12 pl-11 pr-9 rounded-xl text-sm outline-none transition-colors cursor-pointer w-[120px] sm:w-[130px] flex items-center justify-between ${
+              sortBy !== 'none'
+                ? 'bg-primary/10 text-primary border border-primary/30'
+                : 'bg-surface border border-border text-text-primary focus:border-primary'
+            }`}
           >
             <span className="flex items-center gap-1.5">
               {sortBy === 'none' ? (
@@ -176,7 +180,9 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
             </span>
           </button>
           <svg
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
+            className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${
+              sortBy !== 'none' ? 'text-primary' : 'text-text-muted'
+            }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -184,9 +190,9 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
           </svg>
           <svg
-            className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none transition-transform duration-200 ${
+            className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-transform duration-200 ${
               showSortDropdown ? 'rotate-180' : ''
-            }`}
+            } ${sortBy !== 'none' ? 'text-primary' : 'text-text-muted'}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -248,7 +254,9 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
         <button
           onClick={handleToggleAdvanced}
           className={`h-12 px-4 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-            showAdvanced ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
+            showAdvanced || priceMin > 0 || priceMax < 10000 || conditions.length > 0
+              ? 'bg-primary/10 text-primary border border-primary/30'
+              : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
           }`}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
