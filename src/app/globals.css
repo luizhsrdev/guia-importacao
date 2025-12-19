@@ -707,21 +707,25 @@ input[type="number"] {
   from {
     max-height: 0;
     opacity: 0;
+    transform: translateY(-10px);
   }
   to {
-    max-height: 500px;
+    max-height: 600px;
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes collapseHeight {
   from {
-    max-height: 500px;
+    max-height: 600px;
     opacity: 1;
+    transform: translateY(0);
   }
   to {
     max-height: 0;
     opacity: 0;
+    transform: translateY(-10px);
   }
 }
 
@@ -750,11 +754,11 @@ input[type="number"] {
 }
 
 .animate-expandHeight {
-  animation: expandHeight 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: expandHeight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-collapseHeight {
-  animation: collapseHeight 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  animation: collapseHeight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Estilos personalizados para range inputs */

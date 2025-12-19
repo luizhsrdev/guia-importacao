@@ -5,6 +5,13 @@ import { useState, useEffect, useRef } from 'react';
 type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
 type Condition = 'Lacrado' | 'Seminovo' | 'Usado';
 
+const SORT_OPTIONS = [
+  { value: 'none' as const, label: 'Ordenar', icon: '⚡' },
+  { value: 'price-asc' as const, label: 'Preço: Menor → Maior', icon: '↑' },
+  { value: 'price-desc' as const, label: 'Preço: Maior → Menor', icon: '↓' },
+  { value: 'alphabetical' as const, label: 'Ordem Alfabética', icon: 'A-Z' },
+];
+
 interface ProductFiltersProps {
   onFilterChange: (filters: {
     search: string;
@@ -24,7 +31,9 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
   const [conditions, setConditions] = useState<Condition[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
   const advancedRef = useRef<HTMLDivElement>(null);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleConditionToggle = (condition: Condition) => {
     setConditions((prev) =>
@@ -65,7 +74,7 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
     setTimeout(() => {
       setShowAdvanced(false);
       setIsClosing(false);
-    }, 300);
+    }, 350);
   };
 
   const handleToggleAdvanced = () => {
@@ -91,16 +100,19 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
       if (advancedRef.current && !advancedRef.current.contains(event.target as Node)) {
         handleCloseAdvanced();
       }
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setShowSortDropdown(false);
+      }
     };
 
-    if (showAdvanced) {
+    if (showAdvanced || showSortDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showAdvanced]);
+  }, [showAdvanced, showSortDropdown]);
 
   return (
     <div className="mb-6 space-y-4">
@@ -131,18 +143,14 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
           </svg>
         </div>
 
-        {/* Campo Ordenar */}
-        <div className="relative">
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="h-12 pl-11 pr-10 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer appearance-none w-[200px] sm:w-[220px]"
+        {/* Campo Ordenar - Dropdown Customizado */}
+        <div className="relative" ref={sortDropdownRef}>
+          <button
+            onClick={() => setShowSortDropdown(!showSortDropdown)}
+            className="h-12 pl-11 pr-10 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer w-[200px] sm:w-[220px] flex items-center justify-between"
           >
-            <option value="none">Ordenar</option>
-            <option value="price-asc">Preço ↑</option>
-            <option value="price-desc">Preço ↓</option>
-            <option value="alphabetical">A-Z</option>
-          </select>
+            <span>{SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label}</span>
+          </button>
           <svg
             className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
             fill="none"
@@ -152,13 +160,52 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
           </svg>
           <svg
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
+            className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none transition-transform duration-200 ${
+              showSortDropdown ? 'rotate-180' : ''
+            }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
+
+          {/* Dropdown Menu */}
+          {showSortDropdown && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50 animate-dropdown">
+              {SORT_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    setSortBy(option.value);
+                    setShowSortDropdown(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition-colors ${
+                    sortBy === option.value
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-text-primary hover:bg-surface-elevated'
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {sortBy === option.value && (
+                    <svg
+                      className="w-4 h-4 text-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Botão Buscar */}

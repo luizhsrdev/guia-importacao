@@ -155,7 +155,7 @@ export function HomeContent({
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                Limpar Filtros
+                Limpar Seleções
               </button>
             </div>
           )}
@@ -173,7 +173,7 @@ export function HomeContent({
 
           {filteredProducts.length === 0 ? (
             <div
-              className={`text-center py-20 bg-surface rounded-2xl border border-border transition-all duration-300 ${
+              className={`text-center py-20 bg-surface rounded-2xl border border-border transition-all duration-[400ms] ease-out ${
                 showAdvancedFilters ? 'mt-4' : 'mt-0'
               }`}
             >
@@ -201,7 +201,7 @@ export function HomeContent({
             </div>
           ) : (
             <div
-              className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 transition-all duration-300 ${
+              className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 transition-all duration-[400ms] ease-out ${
                 showAdvancedFilters ? 'mt-4' : 'mt-0'
               }`}
             >
