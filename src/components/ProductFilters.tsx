@@ -13,9 +13,10 @@ interface ProductFiltersProps {
     priceMax: number | null;
     conditions: Condition[];
   }) => void;
+  onAdvancedToggle?: (isOpen: boolean) => void;
 }
 
-export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
+export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFiltersProps) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('none');
   const [priceMin, setPriceMin] = useState<number>(0);
@@ -60,10 +61,11 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
 
   const handleCloseAdvanced = () => {
     setIsClosing(true);
+    onAdvancedToggle?.(false);
     setTimeout(() => {
       setShowAdvanced(false);
       setIsClosing(false);
-    }, 200);
+    }, 300);
   };
 
   const handleToggleAdvanced = () => {
@@ -71,6 +73,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
       handleCloseAdvanced();
     } else {
       setShowAdvanced(true);
+      onAdvancedToggle?.(true);
     }
   };
 
@@ -133,13 +136,21 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="h-12 pl-4 pr-10 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer appearance-none"
+            className="h-12 pl-11 pr-10 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer appearance-none w-[200px] sm:w-[220px]"
           >
-            <option value="none">Ordenar por...</option>
-            <option value="price-asc">Preço: Menor → Maior</option>
-            <option value="price-desc">Preço: Maior → Menor</option>
-            <option value="alphabetical">Ordem Alfabética</option>
+            <option value="none">Ordenar</option>
+            <option value="price-asc">Preço ↑</option>
+            <option value="price-desc">Preço ↓</option>
+            <option value="alphabetical">A-Z</option>
           </select>
+          <svg
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+          </svg>
           <svg
             className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
             fill="none"
@@ -180,7 +191,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
         <div
           ref={advancedRef}
           className={`bg-surface border border-border rounded-xl p-4 space-y-4 overflow-hidden origin-top ${
-            isClosing ? 'animate-slideUpFade' : 'animate-slideDownFade'
+            isClosing ? 'animate-collapseHeight' : 'animate-expandHeight'
           }`}
         >
           {/* Slider de Preço */}
@@ -196,7 +207,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
                 step="100"
                 value={priceMin}
                 onChange={(e) => setPriceMin(Math.min(Number(e.target.value), priceMax))}
-                className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer accent-primary"
+                className="w-full h-2 bg-border-subtle rounded-lg appearance-none cursor-pointer accent-primary price-range-slider"
               />
               <input
                 type="range"
@@ -205,7 +216,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
                 step="100"
                 value={priceMax}
                 onChange={(e) => setPriceMax(Math.max(Number(e.target.value), priceMin))}
-                className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer accent-primary"
+                className="w-full h-2 bg-border-subtle rounded-lg appearance-none cursor-pointer accent-primary price-range-slider"
               />
             </div>
           </div>

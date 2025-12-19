@@ -703,6 +703,28 @@ input[type="number"] {
   }
 }
 
+@keyframes expandHeight {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 500px;
+    opacity: 1;
+  }
+}
+
+@keyframes collapseHeight {
+  from {
+    max-height: 500px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
 .animate-slideInRight {
   animation: slideInRight 0.25s cubic-bezier(0.32, 0.72, 0, 1);
 }
@@ -725,6 +747,56 @@ input[type="number"] {
 
 .animate-slideUpFade {
   animation: slideUpFade 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-expandHeight {
+  animation: expandHeight 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-collapseHeight {
+  animation: collapseHeight 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* Estilos personalizados para range inputs */
+.price-range-slider::-webkit-slider-track {
+  background: var(--border-subtle);
+  border-radius: 0.5rem;
+}
+
+.price-range-slider::-moz-range-track {
+  background: var(--border-subtle);
+  border-radius: 0.5rem;
+}
+
+.price-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.price-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+.price-range-slider::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.price-range-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px var(--primary-glow);
 }
 
 .safe-top {

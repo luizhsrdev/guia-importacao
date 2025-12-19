@@ -52,6 +52,7 @@ export function HomeContent({
 }: HomeContentProps) {
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
   const [filters, setFilters] = useState<ProductFiltersState>(INITIAL_FILTERS);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const filteredProducts = useMemo(() => {
     let result = products.filter((product) => {
@@ -159,7 +160,10 @@ export function HomeContent({
             </div>
           )}
 
-          <ProductFilters onFilterChange={setFilters} />
+          <ProductFilters
+            onFilterChange={setFilters}
+            onAdvancedToggle={setShowAdvancedFilters}
+          />
 
           <div className="flex items-center justify-between mb-6">
             <p className="text-sm text-text-tertiary">
@@ -168,7 +172,11 @@ export function HomeContent({
           </div>
 
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-20 bg-surface rounded-2xl border border-border">
+            <div
+              className={`text-center py-20 bg-surface rounded-2xl border border-border transition-all duration-300 ${
+                showAdvancedFilters ? 'mt-4' : 'mt-0'
+              }`}
+            >
               <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-surface-elevated flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-text-muted"
@@ -192,7 +200,11 @@ export function HomeContent({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+            <div
+              className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 transition-all duration-300 ${
+                showAdvancedFilters ? 'mt-4' : 'mt-0'
+              }`}
+            >
               {filteredProducts.map((product) => (
                 <ProductCard
                   key={product.id}
