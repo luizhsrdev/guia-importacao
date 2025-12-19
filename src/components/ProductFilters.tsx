@@ -6,10 +6,8 @@ type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
 type Condition = 'Lacrado' | 'Seminovo' | 'Usado';
 
 const SORT_OPTIONS = [
-  { value: 'none' as const, label: 'Ordenar', icon: '⚡' },
-  { value: 'price-asc' as const, label: 'Preço: Menor → Maior', icon: '↑' },
-  { value: 'price-desc' as const, label: 'Preço: Maior → Menor', icon: '↓' },
-  { value: 'alphabetical' as const, label: 'Ordem Alfabética', icon: 'A-Z' },
+  { value: 'price-asc' as const, label: 'Preço', icon: '↑' },
+  { value: 'price-desc' as const, label: 'Preço', icon: '↓' },
 ];
 
 interface ProductFiltersProps {
@@ -32,6 +30,7 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [isClosingDropdown, setIsClosingDropdown] = useState(false);
   const advancedRef = useRef<HTMLDivElement>(null);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -86,6 +85,14 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
     }
   };
 
+  const handleCloseSortDropdown = () => {
+    setIsClosingDropdown(true);
+    setTimeout(() => {
+      setShowSortDropdown(false);
+      setIsClosingDropdown(false);
+    }, 150);
+  };
+
   // Auto-aplicar filtros quando mudam
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -101,7 +108,7 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
         handleCloseAdvanced();
       }
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
-        setShowSortDropdown(false);
+        handleCloseSortDropdown();
       }
     };
 
@@ -146,10 +153,27 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
         {/* Campo Ordenar - Dropdown Customizado */}
         <div className="relative" ref={sortDropdownRef}>
           <button
-            onClick={() => setShowSortDropdown(!showSortDropdown)}
-            className="h-12 pl-11 pr-10 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer w-[200px] sm:w-[220px] flex items-center justify-between"
+            onClick={() => {
+              if (showSortDropdown) {
+                handleCloseSortDropdown();
+              } else {
+                setShowSortDropdown(true);
+              }
+            }}
+            className="h-12 pl-11 pr-9 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer w-[120px] sm:w-[130px] flex items-center justify-between"
           >
-            <span>{SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label}</span>
+            <span className="flex items-center gap-1.5">
+              {sortBy === 'none' ? (
+                'Ordenar'
+              ) : (
+                <>
+                  {SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label}
+                  <span className="text-base">
+                    {SORT_OPTIONS.find((opt) => opt.value === sortBy)?.icon}
+                  </span>
+                </>
+              )}
+            </span>
           </button>
           <svg
             className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
@@ -172,13 +196,22 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
 
           {/* Dropdown Menu */}
           {showSortDropdown && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50 animate-dropdown">
+            <div
+              className={`absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50 ${
+                isClosingDropdown ? 'animate-dropdownOut' : 'animate-dropdown'
+              }`}
+            >
               {SORT_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => {
-                    setSortBy(option.value);
-                    setShowSortDropdown(false);
+                    // Se clicar na opção já selecionada, desmarca
+                    if (sortBy === option.value) {
+                      setSortBy('none');
+                    } else {
+                      setSortBy(option.value);
+                    }
+                    handleCloseSortDropdown();
                   }}
                   className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition-colors ${
                     sortBy === option.value
@@ -186,7 +219,10 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
                       : 'text-text-primary hover:bg-surface-elevated'
                   }`}
                 >
-                  <span>{option.label}</span>
+                  <span className="flex items-center gap-2">
+                    {option.label}
+                    <span className="text-base">{option.icon}</span>
+                  </span>
                   {sortBy === option.value && (
                     <svg
                       className="w-4 h-4 text-primary"
@@ -208,17 +244,6 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
           )}
         </div>
 
-        {/* Botão Buscar */}
-        <button
-          onClick={handleApply}
-          className="h-12 px-5 sm:px-6 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all flex-shrink-0"
-        >
-          <span className="hidden sm:inline">Buscar</span>
-          <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </button>
-
         {/* Botão Filtros Avançados */}
         <button
           onClick={handleToggleAdvanced}
@@ -230,6 +255,17 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
           <span className="hidden sm:inline">Filtros</span>
+        </button>
+
+        {/* Botão Buscar */}
+        <button
+          onClick={handleApply}
+          className="h-12 px-5 sm:px-6 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all flex-shrink-0"
+        >
+          <span className="hidden sm:inline">Buscar</span>
+          <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </button>
       </div>
 
