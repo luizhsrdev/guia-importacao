@@ -101,7 +101,7 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, title: e.target.value }))
           }
-          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
           placeholder="Digite o título do produto..."
         />
       </div>
@@ -119,7 +119,7 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, price_cny: e.target.value }))
           }
           placeholder="Ex: ¥ 299"
-          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
@@ -133,7 +133,7 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, category_id: e.target.value }))
           }
-          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         >
           <option value="">Selecione uma categoria</option>
           {categories.map((cat) => (
@@ -146,7 +146,7 @@ export default function ProductForm({
 
       {/* Condição */}
       <div>
-        <label className="block text-textMain font-medium mb-2">
+        <label className="block text-text-primary font-medium mb-2">
           Condição do Produto
         </label>
         <select
@@ -154,7 +154,7 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, condition: e.target.value }))
           }
-          className="w-full bg-[#2A2A2A] border border-zinc-700 rounded-lg p-3 text-textMain focus:outline-none focus:border-primary"
+          className="w-full bg-surface border border-border rounded-lg p-3 text-text-primary focus:outline-none focus:border-primary"
         >
           <option value="Lacrado">Lacrado</option>
           <option value="Seminovo">Seminovo</option>
@@ -175,7 +175,7 @@ export default function ProductForm({
             }
             className="w-4 h-4 accent-primary"
           />
-          <span className="text-textMain text-sm">Com caixa original</span>
+          <span className="text-text-primary text-sm">Com caixa original</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -186,7 +186,7 @@ export default function ProductForm({
             }
             className="w-4 h-4 accent-primary"
           />
-          <span className="text-textMain text-sm">Com carregador</span>
+          <span className="text-text-primary text-sm">Com carregador</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -197,13 +197,13 @@ export default function ProductForm({
             }
             className="w-4 h-4 accent-primary"
           />
-          <span className="text-textMain text-sm">Com garantia</span>
+          <span className="text-text-primary text-sm">Com garantia</span>
         </label>
       </div>
 
       {/* Observações */}
       <div>
-        <label className="block text-textMain font-medium mb-2">
+        <label className="block text-text-primary font-medium mb-2">
           Observações Detalhadas
           <span className="text-textSecondary text-sm ml-2">
             (Ex: 19 ciclos de bateria, 100% saúde, arranhões na tampa)
@@ -215,7 +215,7 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, observations: e.target.value }))
           }
           rows={3}
-          className="w-full bg-[#2A2A2A] border border-zinc-700 rounded-lg p-3 text-textMain focus:outline-none focus:border-primary resize-none"
+          className="w-full bg-surface border border-border rounded-lg p-3 text-text-primary focus:outline-none focus:border-primary resize-none"
           placeholder="Detalhes importantes sobre o estado do produto..."
         />
       </div>
@@ -236,7 +236,7 @@ export default function ProductForm({
             }))
           }
           placeholder="https://..."
-          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
@@ -253,7 +253,7 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, original_link: e.target.value }))
           }
           placeholder="https://..."
-          className="w-full px-4 py-3 bg-[#2A2A2A] border border-red-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all"
+          className="w-full px-4 py-3 bg-surface border border-red-700 rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all"
         />
         <button
           type="button"
@@ -287,7 +287,7 @@ export default function ProductForm({
               if (file) handleImageUpload(file, 'image_main');
             }}
             disabled={uploading}
-            className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
+            className="w-full px-4 py-2 bg-surface border border-border rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
           />
         </div>
 
@@ -311,7 +311,7 @@ export default function ProductForm({
               if (file) handleImageUpload(file, 'image_hover');
             }}
             disabled={uploading}
-            className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
+            className="w-full px-4 py-2 bg-surface border border-border rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
           />
         </div>
       </div>
@@ -352,7 +352,7 @@ export default function ProductForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 bg-zinc-800 border border-zinc-700 text-textMain rounded-lg hover:bg-zinc-700 transition-all font-semibold"
+            className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-surface-elevated transition-all font-semibold"
           >
             Cancelar
           </button>

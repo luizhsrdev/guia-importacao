@@ -778,12 +778,12 @@ input[type="number"] {
 
 /* Estilos personalizados para range inputs */
 .price-range-slider::-webkit-slider-track {
-  background: var(--border-subtle);
+  background: var(--border-emphasis);
   border-radius: 0.5rem;
 }
 
 .price-range-slider::-moz-range-track {
-  background: var(--border-subtle);
+  background: var(--border-emphasis);
   border-radius: 0.5rem;
 }
 

@@ -99,7 +99,7 @@ export default function SellerForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, name: e.target.value }))
           }
-          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
@@ -148,7 +148,7 @@ export default function SellerForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, category_id: e.target.value }))
           }
-          className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         >
           <option value="">Selecione uma categoria</option>
           {categories.map((category) => (
@@ -179,7 +179,7 @@ export default function SellerForm({
             if (file) handleImageUpload(file);
           }}
           disabled={uploading}
-          className="w-full px-4 py-2 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
+          className="w-full px-4 py-2 bg-surface border border-border rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
         />
         <p className="text-textSecondary text-sm mt-1">
           Foto do perfil do vendedor (formato quadrado recomendado)
@@ -214,10 +214,10 @@ export default function SellerForm({
             }))
           }
           placeholder="https://..."
-          className={`w-full px-4 py-3 bg-[#2A2A2A] rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none transition-all ${
+          className={`w-full px-4 py-3 bg-surface rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none transition-all ${
             formData.status === 'blacklist'
               ? 'border border-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500'
-              : 'border border-zinc-700 focus:ring-1 focus:ring-primary focus:border-primary'
+              : 'border border-border focus:ring-1 focus:ring-primary focus:border-primary'
           }`}
         />
         <p className="text-textSecondary text-sm mt-1">
@@ -242,7 +242,7 @@ export default function SellerForm({
               }
               rows={4}
               placeholder="Informações úteis sobre este vendedor confiável..."
-              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
           </div>
 
@@ -261,7 +261,7 @@ export default function SellerForm({
                 }))
               }
               placeholder="https://... (link para avaliações, feedback, etc)"
-              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
             <p className="text-textSecondary text-sm mt-1">
               Link para página com feedbacks positivos sobre o vendedor
@@ -289,7 +289,7 @@ export default function SellerForm({
               }
               rows={4}
               placeholder="Descreva detalhadamente o motivo pelo qual este vendedor está na blacklist..."
-              className="w-full px-4 py-3 bg-[#2A2A2A] border border-red-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all"
+              className="w-full px-4 py-3 bg-surface border border-red-700 rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all"
             />
           </div>
 
@@ -308,7 +308,7 @@ export default function SellerForm({
                 }))
               }
               placeholder="https://... (link para discussão, post, reclamação, etc)"
-              className="w-full px-4 py-3 bg-[#2A2A2A] border border-zinc-700 rounded-lg text-textMain placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
             <p className="text-textSecondary text-sm mt-1">
               Link adicional para discussões, posts ou outras provas online
@@ -356,7 +356,7 @@ export default function SellerForm({
                 if (files && files.length > 0) handleEvidenceUpload(files);
               }}
               disabled={uploading}
-              className="w-full px-4 py-2 bg-[#2A2A2A] border border-red-700 rounded-lg text-textMain file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer"
+              className="w-full px-4 py-2 bg-surface border border-red-700 rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer"
             />
           </div>
         </>
@@ -383,7 +383,7 @@ export default function SellerForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 bg-zinc-800 border border-zinc-700 text-textMain rounded-lg hover:bg-zinc-700 transition-all font-semibold"
+            className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-surface-elevated transition-all font-semibold"
           >
             Cancelar
           </button>
