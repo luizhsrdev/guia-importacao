@@ -6,18 +6,23 @@ import SellerCard from '@/components/SellerCard';
 import { ProductFilters } from '@/components/ProductFilters';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
+type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
+type Condition = 'Lacrado' | 'Seminovo' | 'Usado';
+
 interface ProductFiltersState {
   search: string;
-  categories: string[];
+  sortBy: SortOption;
   priceMin: number | null;
   priceMax: number | null;
+  conditions: Condition[];
 }
 
 const INITIAL_FILTERS: ProductFiltersState = {
   search: '',
-  categories: [],
+  sortBy: 'none',
   priceMin: null,
   priceMax: null,
+  conditions: [],
 };
 
 interface HomeContentProps {
@@ -49,7 +54,8 @@ export function HomeContent({
   const [filters, setFilters] = useState<ProductFiltersState>(INITIAL_FILTERS);
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    let result = products.filter((product) => {
+      // Filtro de busca
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         if (!product.title.toLowerCase().includes(searchLower)) {
@@ -57,16 +63,14 @@ export function HomeContent({
         }
       }
 
+      // Filtro de categorias selecionadas
       if (selectedCategories.length > 0) {
         if (!product.category_id || !selectedCategories.includes(product.category_id)) {
           return false;
         }
-      } else if (filters.categories.length > 0) {
-        if (!product.category_id || !filters.categories.includes(product.category_id)) {
-          return false;
-        }
       }
 
+      // Filtro de faixa de preço
       if (filters.priceMin !== null || filters.priceMax !== null) {
         const price = parseFloat(product.price_cny.replace(/[^0-9.]/g, ''));
         if (filters.priceMin !== null && price < filters.priceMin) {
@@ -77,8 +81,34 @@ export function HomeContent({
         }
       }
 
+      // Filtro de condição
+      if (filters.conditions.length > 0) {
+        if (!product.condition || !filters.conditions.includes(product.condition as Condition)) {
+          return false;
+        }
+      }
+
       return true;
     });
+
+    // Ordenação
+    if (filters.sortBy === 'price-asc') {
+      result = [...result].sort((a, b) => {
+        const priceA = parseFloat(a.price_cny.replace(/[^0-9.]/g, ''));
+        const priceB = parseFloat(b.price_cny.replace(/[^0-9.]/g, ''));
+        return priceA - priceB;
+      });
+    } else if (filters.sortBy === 'price-desc') {
+      result = [...result].sort((a, b) => {
+        const priceA = parseFloat(a.price_cny.replace(/[^0-9.]/g, ''));
+        const priceB = parseFloat(b.price_cny.replace(/[^0-9.]/g, ''));
+        return priceB - priceA;
+      });
+    } else if (filters.sortBy === 'alphabetical') {
+      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    return result;
   }, [products, filters, selectedCategories]);
 
   const filteredSellers = useMemo(() => {
