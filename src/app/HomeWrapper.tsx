@@ -34,13 +34,18 @@ export function HomeWrapper({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
+  const handleLogoClick = () => {
+    setActiveTab('produtos');
+    setActiveCategory(null);
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 bg-background border-b border-border safe-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
-              <Logo size="md" />
+              <Logo size="md" onClick={handleLogoClick} />
 
               <div className="hidden md:block">
                 <HeaderNav

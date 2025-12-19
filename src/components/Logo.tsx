@@ -1,10 +1,15 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
+  onClick?: () => void;
 }
 
-export function Logo({ size = 'md' }: LogoProps) {
+export function Logo({ size = 'md', onClick }: LogoProps) {
+  const router = useRouter();
+
   const sizes = {
     sm: { wrapper: 'gap-2', text: 'text-base', icon: 'w-7 h-7', iconInner: 'w-4 h-4' },
     md: { wrapper: 'gap-2.5', text: 'text-lg', icon: 'w-8 h-8', iconInner: 'w-[18px] h-[18px]' },
@@ -13,8 +18,18 @@ export function Logo({ size = 'md' }: LogoProps) {
 
   const s = sizes[size];
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+    router.push('/');
+  };
+
   return (
-    <div className={`flex items-center ${s.wrapper}`}>
+    <button
+      onClick={handleClick}
+      className={`flex items-center ${s.wrapper} cursor-pointer hover:opacity-80 transition-opacity duration-200`}
+    >
       <div
         className={`${s.icon} rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25`}
       >
@@ -37,6 +52,6 @@ export function Logo({ size = 'md' }: LogoProps) {
       <span className={`${s.text} font-bold font-logo tracking-tight text-text-primary`}>
         Planilha do Sena
       </span>
-    </div>
+    </button>
   );
 }
