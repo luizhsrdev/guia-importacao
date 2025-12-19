@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
 type Condition = 'Lacrado' | 'Seminovo' | 'Usado';
@@ -22,6 +22,8 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
   const [priceMax, setPriceMax] = useState<number>(10000);
   const [conditions, setConditions] = useState<Condition[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const advancedRef = useRef<HTMLDivElement>(null);
 
   const handleConditionToggle = (condition: Condition) => {
     setConditions((prev) =>
@@ -56,6 +58,22 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
     });
   };
 
+  const handleCloseAdvanced = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowAdvanced(false);
+      setIsClosing(false);
+    }, 200);
+  };
+
+  const handleToggleAdvanced = () => {
+    if (showAdvanced) {
+      handleCloseAdvanced();
+    } else {
+      setShowAdvanced(true);
+    }
+  };
+
   // Auto-aplicar filtros quando mudam
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -63,6 +81,23 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
     }, 300);
     return () => clearTimeout(timer);
   }, [search, sortBy, priceMin, priceMax, conditions]);
+
+  // Fechar ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (advancedRef.current && !advancedRef.current.contains(event.target as Node)) {
+        handleCloseAdvanced();
+      }
+    };
+
+    if (showAdvanced) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showAdvanced]);
 
   return (
     <div className="mb-6 space-y-4">
@@ -94,16 +129,26 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
         </div>
 
         {/* Campo Ordenar */}
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortOption)}
-          className="h-12 px-4 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer"
-        >
-          <option value="none">Ordenar por...</option>
-          <option value="price-asc">Preço: Menor → Maior</option>
-          <option value="price-desc">Preço: Maior → Menor</option>
-          <option value="alphabetical">Ordem Alfabética</option>
-        </select>
+        <div className="relative">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="h-12 pl-4 pr-10 bg-surface border border-border rounded-xl text-sm text-text-primary outline-none focus:border-primary transition-colors cursor-pointer appearance-none"
+          >
+            <option value="none">Ordenar por...</option>
+            <option value="price-asc">Preço: Menor → Maior</option>
+            <option value="price-desc">Preço: Maior → Menor</option>
+            <option value="alphabetical">Ordem Alfabética</option>
+          </select>
+          <svg
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
 
         {/* Botão Buscar */}
         <button
@@ -118,7 +163,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
 
         {/* Botão Filtros Avançados */}
         <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
+          onClick={handleToggleAdvanced}
           className={`h-12 px-4 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
             showAdvanced ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
           }`}
@@ -132,7 +177,12 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
 
       {/* Filtros Avançados */}
       {showAdvanced && (
-        <div className="bg-surface border border-border rounded-xl p-4 space-y-4 animate-fadeIn">
+        <div
+          ref={advancedRef}
+          className={`bg-surface border border-border rounded-xl p-4 space-y-4 overflow-hidden origin-top ${
+            isClosing ? 'animate-slideUpFade' : 'animate-slideDownFade'
+          }`}
+        >
           {/* Slider de Preço */}
           <div>
             <label className="block text-sm font-medium text-text-primary mb-3">
@@ -160,37 +210,43 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
             </div>
           </div>
 
-          {/* Checkboxes de Condição */}
+          {/* Botões Pill de Condição */}
           <div>
             <label className="block text-sm font-medium text-text-primary mb-3">
               Condição do Produto
             </label>
             <div className="flex flex-wrap gap-3">
-              {(['Lacrado', 'Seminovo', 'Usado'] as Condition[]).map((condition) => (
-                <label
-                  key={condition}
-                  className="flex items-center gap-2 cursor-pointer group"
-                >
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={conditions.includes(condition)}
-                      onChange={() => handleConditionToggle(condition)}
-                      className="peer sr-only"
-                    />
-                    <div className="w-5 h-5 border-2 border-border rounded peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
-                      {conditions.includes(condition) && (
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">
-                    {condition}
-                  </span>
-                </label>
-              ))}
+              {(['Lacrado', 'Seminovo', 'Usado'] as Condition[]).map((condition) => {
+                const isSelected = conditions.includes(condition);
+                return (
+                  <button
+                    key={condition}
+                    onClick={() => handleConditionToggle(condition)}
+                    className={`flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-medium transition-all ${
+                      isSelected
+                        ? 'bg-primary/10 text-primary border-2 border-primary'
+                        : 'bg-surface text-text-secondary border-2 border-transparent hover:text-text-primary hover:border-border'
+                    }`}
+                  >
+                    <span>{condition}</span>
+                    {isSelected && (
+                      <svg
+                        className="w-4 h-4 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
