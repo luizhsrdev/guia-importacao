@@ -103,18 +103,20 @@ export default function ProductCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
-        <div className="p-3 sm:p-4">
+        <div className="p-3 sm:p-4 flex flex-col">
           <h3 className="text-text-primary font-medium mb-1.5 sm:mb-2 line-clamp-2 text-xs sm:text-sm leading-snug tracking-tight">
             {title}
           </h3>
 
-          {observations && (
-            <p className="text-[11px] sm:text-xs text-text-muted line-clamp-1 mb-2 hidden sm:block">
-              {observations}
-            </p>
-          )}
+          <div className="mb-2 hidden sm:block min-h-[2.5rem]">
+            {observations && (
+              <p className="text-[11px] sm:text-xs text-text-muted line-clamp-2 overflow-hidden leading-tight">
+                {observations}
+              </p>
+            )}
+          </div>
 
-          <p className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight">
+          <p className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight mt-auto">
             {formatPrice(price_cny)}
           </p>
         </div>
