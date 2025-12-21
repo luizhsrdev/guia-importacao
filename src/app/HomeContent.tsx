@@ -5,6 +5,7 @@ import ProductCard from '@/components/ProductCard';
 import SellerCard from '@/components/SellerCard';
 import { ProductFilters } from '@/components/ProductFilters';
 import { ProductFormModal } from '@/components/ProductFormModal';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
 type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
@@ -51,11 +52,17 @@ export function HomeContent({
   onClearFilters,
   onPremiumClick,
 }: HomeContentProps) {
+  const { isAdminModeActive } = useAdminMode();
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
   const [filters, setFilters] = useState<ProductFiltersState>(INITIAL_FILTERS);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | undefined>();
   const [showProductFormModal, setShowProductFormModal] = useState(false);
+
+  const handleAddProduct = () => {
+    setEditingProductId(undefined);
+    setShowProductFormModal(true);
+  };
 
   const handleEditProduct = (productId: string) => {
     setEditingProductId(productId);
@@ -183,10 +190,24 @@ export function HomeContent({
             onAdvancedToggle={setShowAdvancedFilters}
           />
 
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-sm text-text-tertiary">
-              {filteredProducts.length} produto{filteredProducts.length !== 1 ? 's' : ''} encontrado{filteredProducts.length !== 1 ? 's' : ''}
-            </p>
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-text-tertiary">
+                {filteredProducts.length} produto{filteredProducts.length !== 1 ? 's' : ''} encontrado{filteredProducts.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+
+            {isAdminModeActive && (
+              <button
+                onClick={handleAddProduct}
+                className="flex items-center gap-2 h-9 px-4 rounded-lg bg-red-500/10 text-red-500 border border-red-500 font-medium text-sm hover:bg-red-500/20 transition-all mt-3"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Adicionar Produto
+              </button>
+            )}
           </div>
 
           {filteredProducts.length === 0 ? (
