@@ -84,10 +84,10 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative bg-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto m-4 border border-border"
+        className="relative bg-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] m-4 border border-border flex flex-col overflow-hidden"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
+        <div className="flex-shrink-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-text-primary">
               {productId ? 'Editar Produto' : 'Adicionar Produto'}
@@ -107,7 +107,7 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto p-6 modal-scroll">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
