@@ -11,6 +11,7 @@ import {
   type SellerFormData,
 } from '@/lib/actions/sellers';
 import { uploadImageToCloudinary } from '@/lib/actions/products';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface SellerFormProps {
   seller?: SellerFormData;
@@ -42,6 +43,7 @@ export default function SellerForm({
   const { uploading, uploadFile, uploadMultipleFiles } = useFileUpload();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleImageUpload = async (file: File) => {
     const url = await uploadFile(file, uploadImageToCloudinary);
@@ -67,14 +69,12 @@ export default function SellerForm({
     }));
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     if (!seller?.id) return;
-
-    const confirmDelete = confirm(
-      'Tem certeza que deseja excluir este vendedor? Esta ação não pode ser desfeita.'
-    );
-
-    if (!confirmDelete) return;
 
     setDeleting(true);
     try {
@@ -82,6 +82,7 @@ export default function SellerForm({
 
       if (result.success) {
         toast.success('Vendedor excluído com sucesso!');
+        setShowDeleteModal(false);
         onSuccess?.();
       } else {
         toast.error('Erro ao excluir vendedor: ' + result.error);
@@ -434,6 +435,15 @@ export default function SellerForm({
           Fazendo upload das imagens...
         </p>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Excluir Vendedor"
+        message={`Tem certeza que deseja excluir "${formData.name}"?`}
+        isDeleting={deleting}
+      />
     </form>
   );
 }

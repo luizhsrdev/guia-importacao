@@ -10,6 +10,7 @@ import {
   uploadImageToCloudinary,
   type ProductFormData,
 } from '@/lib/actions/products';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface ProductFormProps {
   product?: ProductFormData;
@@ -42,6 +43,7 @@ export default function ProductForm({
   const { uploading, uploadFile } = useFileUpload();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleImageUpload = async (
     file: File,
@@ -53,14 +55,12 @@ export default function ProductForm({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     if (!product?.id) return;
-
-    const confirmDelete = confirm(
-      'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.'
-    );
-
-    if (!confirmDelete) return;
 
     setDeleting(true);
     try {
@@ -68,6 +68,7 @@ export default function ProductForm({
 
       if (result.success) {
         toast.success('Produto excluído com sucesso!', { duration: 3000 });
+        setShowDeleteModal(false);
         onSuccess?.();
       } else {
         toast.error('Erro ao excluir produto: ' + result.error, { duration: 5000 });
@@ -382,6 +383,15 @@ export default function ProductForm({
           Fazendo upload da imagem...
         </p>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Excluir Produto"
+        message={`Tem certeza que deseja excluir "${formData.title}"?`}
+        isDeleting={deleting}
+      />
     </form>
   );
 }
