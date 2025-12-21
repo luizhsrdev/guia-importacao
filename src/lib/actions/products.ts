@@ -126,7 +126,7 @@ export async function createProduct(formData: ProductFormData) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/products');
+  revalidatePath('/');
   revalidateTag(CacheTag.PRODUCTS);
   return { success: true };
 }
@@ -171,7 +171,7 @@ export async function updateProduct(formData: ProductFormData) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/products');
+  revalidatePath('/');
   revalidateTag(CacheTag.PRODUCTS);
   return { success: true };
 }
@@ -185,7 +185,7 @@ export async function deleteProduct(id: string) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/products');
+  revalidatePath('/');
   revalidateTag(CacheTag.PRODUCTS);
   return { success: true };
 }
@@ -202,7 +202,7 @@ export async function toggleSoldOut(id: string, currentStatus: boolean) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/products');
+  revalidatePath('/');
   return { success: true };
 }
 

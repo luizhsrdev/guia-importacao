@@ -2,19 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 import ProductForm from './ProductForm';
-import { getCategories, getProductById } from '@/app/admin/products/actions';
-import type { ProductFormData } from '@/app/admin/products/actions';
+import { getProductById } from '@/lib/actions/products';
+import type { ProductFormData } from '@/lib/actions/products';
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   productId?: string;
+  categories: Array<{ id: string; name: string }>;
   onSuccess?: () => void;
 }
 
-export function ProductFormModal({ isOpen, onClose, productId, onSuccess }: ProductFormModalProps) {
+export function ProductFormModal({ isOpen, onClose, productId, categories, onSuccess }: ProductFormModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [product, setProduct] = useState<ProductFormData | undefined>();
   const [loading, setLoading] = useState(true);
 
@@ -25,14 +25,16 @@ export function ProductFormModal({ isOpen, onClose, productId, onSuccess }: Prod
   }, [isOpen, productId]);
 
   const loadData = async () => {
+    if (!productId) {
+      // Produto novo, não precisa carregar dados
+      setProduct(undefined);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const [categoriesData, productData] = await Promise.all([
-        getCategories(),
-        productId ? getProductById(productId) : Promise.resolve(null),
-      ]);
-
-      setCategories(categoriesData);
+      const productData = await getProductById(productId);
       setProduct(productData || undefined);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);

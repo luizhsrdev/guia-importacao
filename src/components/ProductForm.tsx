@@ -8,7 +8,7 @@ import {
   updateProduct,
   uploadImageToCloudinary,
   type ProductFormData,
-} from '@/app/admin/products/actions';
+} from '@/lib/actions/products';
 
 interface ProductFormProps {
   product?: ProductFormData;

@@ -12,7 +12,6 @@ import { HeaderNav } from '@/components/HeaderNav';
 import { CurrencyToggle } from '@/components/CurrencyToggle';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { MobileMenu } from '@/components/MobileMenu';
-import { AdminLink } from '@/components/AdminLink';
 import { HomeContent } from './HomeContent';
 import PremiumUpgradeModal from '@/components/PremiumUpgradeModal';
 import { AdminModeProvider } from '@/contexts/AdminModeContext';

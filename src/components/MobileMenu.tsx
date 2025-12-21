@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom';
 import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { AdminLink } from './AdminLink';
 import { Logo } from './Logo';
 import type { Category, UserStatus } from '@/types';
 
@@ -347,12 +346,6 @@ function MenuContent({
               </div>
             )}
           </div>
-
-          <SignedIn>
-            <div onClick={onClose} className="mt-4">
-              <AdminLink />
-            </div>
-          </SignedIn>
         </div>
 
         {/* Footer Actions */}

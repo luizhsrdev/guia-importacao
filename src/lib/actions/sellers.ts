@@ -9,15 +9,15 @@ export interface SellerFormData {
   id?: string;
   name: string;
   status: 'gold' | 'blacklist';
-  category_id?: string; // Renomeado de niche_id
-  notes?: string; // Descrição (usado para ambos)
+  category_id?: string;
+  notes?: string;
   affiliate_link?: string;
-  profile_link?: string; // Link do perfil Xianyu (ambos)
-  feedback_link?: string; // Link de feedback (apenas Gold)
-  image_url?: string; // Imagem do vendedor (apenas Gold)
-  blacklist_reason?: string; // Motivo (apenas Blacklist)
-  proof_link?: string; // Link de prova adicional (apenas Blacklist)
-  evidence_images?: string[]; // Imagens de evidência (apenas Blacklist)
+  profile_link?: string;
+  feedback_link?: string;
+  image_url?: string;
+  blacklist_reason?: string;
+  proof_link?: string;
+  evidence_images?: string[];
 }
 
 export async function uploadEvidenceImages(
@@ -120,7 +120,7 @@ export async function createSeller(formData: SellerFormData) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/sellers');
+  revalidatePath('/vendedores');
   revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
@@ -153,7 +153,7 @@ export async function updateSeller(formData: SellerFormData) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/sellers');
+  revalidatePath('/vendedores');
   revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }
@@ -167,7 +167,7 @@ export async function deleteSeller(id: string) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/sellers');
+  revalidatePath('/vendedores');
   revalidateTag(CacheTag.SELLERS);
   return { success: true };
 }

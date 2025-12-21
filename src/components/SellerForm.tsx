@@ -8,8 +8,8 @@ import {
   updateSeller,
   uploadEvidenceImages,
   type SellerFormData,
-} from '@/app/admin/sellers/actions';
-import { uploadImageToCloudinary } from '@/app/admin/products/actions';
+} from '@/lib/actions/sellers';
+import { uploadImageToCloudinary } from '@/lib/actions/products';
 
 interface SellerFormProps {
   seller?: SellerFormData;

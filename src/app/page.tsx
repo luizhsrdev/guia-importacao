@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { HomeWrapper } from './HomeWrapper';
 import { getPublicProducts, getPublicSellers } from './actions';
 import { getCurrentUserStatus } from '@/lib/user-server';
-import { getCategories } from '@/app/admin/products/actions';
+import { getCategories } from '@/lib/actions/products';
 
 function HomePageSkeleton() {
   return (

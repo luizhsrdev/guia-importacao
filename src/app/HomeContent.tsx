@@ -364,6 +364,7 @@ export function HomeContent({
         isOpen={showProductFormModal}
         onClose={handleCloseProductFormModal}
         productId={editingProductId}
+        categories={categories}
         onSuccess={handleProductFormSuccess}
       />
     </div>
