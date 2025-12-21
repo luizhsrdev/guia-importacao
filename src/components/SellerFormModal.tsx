@@ -114,6 +114,7 @@ export function SellerFormModal({ isOpen, onClose, sellerId, categories, onSucce
             </div>
           ) : (
             <SellerForm
+              key={sellerId || 'new'}
               seller={seller}
               categories={categories}
               onSuccess={handleSuccess}
