@@ -266,7 +266,7 @@ export default function ProductForm({
               if (file) handleImageUpload(file, 'image_main');
             }}
             disabled={uploading}
-            className="w-full px-4 py-2 bg-surface border border-border rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
+            className="w-full px-4 py-2 bg-surface border-2 border-border-emphasis rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           />
         </div>
 
@@ -290,7 +290,7 @@ export default function ProductForm({
               if (file) handleImageUpload(file, 'image_hover');
             }}
             disabled={uploading}
-            className="w-full px-4 py-2 bg-surface border border-border rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer"
+            className="w-full px-4 py-2 bg-surface border-2 border-border-emphasis rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background hover:file:bg-primary/90 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           />
         </div>
       </div>
