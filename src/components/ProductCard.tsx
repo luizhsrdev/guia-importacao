@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import ProductDetailModal from './ProductDetailModal';
 import PremiumUpgradeModal from './PremiumUpgradeModal';
 
@@ -25,6 +26,7 @@ interface ProductCardProps {
   has_charger?: boolean;
   has_warranty?: boolean;
   isPremium: boolean;
+  onEdit?: () => void;
 }
 
 const CONDITION_STYLES = {
@@ -50,10 +52,12 @@ export default function ProductCard({
   has_charger,
   has_warranty,
   isPremium,
+  onEdit,
 }: ProductCardProps) {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const { formatPrice } = useCurrency();
+  const { isAdminModeActive } = useAdminMode();
 
   const conditionStyle = condition
     ? CONDITION_STYLES[condition as keyof typeof CONDITION_STYLES] ?? 'tag-neutral'
@@ -116,9 +120,26 @@ export default function ProductCard({
             )}
           </div>
 
-          <p className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight mt-auto">
-            {formatPrice(price_cny)}
-          </p>
+          <div className="flex items-center justify-between mt-auto">
+            <p className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight">
+              {formatPrice(price_cny)}
+            </p>
+
+            {isAdminModeActive && onEdit && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="flex items-center justify-center w-7 h-7 rounded-md bg-red-500/10 hover:bg-red-500/20 transition-colors group/edit"
+                title="Editar produto"
+              >
+                <svg className="w-3.5 h-3.5 text-red-500 group-hover/edit:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </article>
 

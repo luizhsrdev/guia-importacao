@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import ProductCard from '@/components/ProductCard';
 import SellerCard from '@/components/SellerCard';
 import { ProductFilters } from '@/components/ProductFilters';
+import { ProductFormModal } from '@/components/ProductFormModal';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
 type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
@@ -53,6 +54,23 @@ export function HomeContent({
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
   const [filters, setFilters] = useState<ProductFiltersState>(INITIAL_FILTERS);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | undefined>();
+  const [showProductFormModal, setShowProductFormModal] = useState(false);
+
+  const handleEditProduct = (productId: string) => {
+    setEditingProductId(productId);
+    setShowProductFormModal(true);
+  };
+
+  const handleCloseProductFormModal = () => {
+    setShowProductFormModal(false);
+    setEditingProductId(undefined);
+  };
+
+  const handleProductFormSuccess = () => {
+    // Recarregar a página para atualizar os dados
+    window.location.reload();
+  };
 
   const filteredProducts = useMemo(() => {
     let result = products.filter((product) => {
@@ -222,6 +240,7 @@ export function HomeContent({
                   has_charger={product.has_charger}
                   has_warranty={product.has_warranty}
                   isPremium={userStatus.isPremium}
+                  onEdit={() => handleEditProduct(product.id)}
                 />
               ))}
             </div>
@@ -339,6 +358,14 @@ export function HomeContent({
           </aside>
         </section>
       )}
+
+      {/* Modal de Edição de Produto */}
+      <ProductFormModal
+        isOpen={showProductFormModal}
+        onClose={handleCloseProductFormModal}
+        productId={editingProductId}
+        onSuccess={handleProductFormSuccess}
+      />
     </div>
   );
 }
