@@ -32,7 +32,7 @@ export default function SellerCard({ seller, onEdit }: SellerCardProps) {
     <div
       className={`bg-surface rounded-2xl p-5 sm:p-6 border shadow-sm transition-all duration-300 ${
         isGold
-          ? 'border-amber-500/20 hover:border-amber-500/50 hover:shadow-glow-gold'
+          ? 'border-emerald-500/20 hover:border-emerald-500/50 hover:shadow-glow-primary'
           : 'border-red-500/20 hover:border-red-500/50 hover:shadow-glow-danger'
       }`}
     >
@@ -85,7 +85,7 @@ export default function SellerCard({ seller, onEdit }: SellerCardProps) {
         <>
           {seller.notes && (
             <div className="bg-surface-elevated rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
-              <h4 className="text-amber-400 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">Sobre o vendedor</h4>
+              <h4 className="text-primary text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">Sobre o vendedor</h4>
               <p className="text-text-secondary text-xs sm:text-sm leading-relaxed">
                 {seller.notes}
               </p>

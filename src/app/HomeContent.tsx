@@ -336,7 +336,7 @@ export function HomeContent({
               onClick={() => setFilterSellers('gold')}
               className={`h-11 px-5 sm:px-6 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
                 filterSellers === 'gold'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-white shadow-glow-gold'
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 text-white shadow-glow-primary'
                   : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated hover:border-border-emphasis shadow-sm'
               }`}
             >

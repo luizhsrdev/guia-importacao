@@ -306,7 +306,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .tag-gold {
-    @apply tag text-amber-50 bg-amber-600;
+    @apply tag text-emerald-50 bg-emerald-600;
   }
 
   .tag-danger {
@@ -330,7 +330,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .badge-gold {
-    @apply badge text-amber-50 bg-amber-600;
+    @apply badge text-emerald-50 bg-emerald-600;
   }
 
   .badge-danger {
@@ -448,6 +448,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 .shadow-glow-verified-lg {
   box-shadow: 0 0 40px var(--color-verified-glow);
+}
+
+.shadow-glow-primary {
+  box-shadow: 0 0 20px var(--primary-glow-strong);
+}
+.shadow-glow-primary-lg {
+  box-shadow: 0 0 40px var(--primary-glow-strong);
 }
 
 /* ===================================
