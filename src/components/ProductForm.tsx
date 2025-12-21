@@ -6,6 +6,7 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   createProduct,
   updateProduct,
+  deleteProduct,
   uploadImageToCloudinary,
   type ProductFormData,
 } from '@/lib/actions/products';
@@ -40,6 +41,7 @@ export default function ProductForm({
 
   const { uploading, uploadFile } = useFileUpload();
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleImageUpload = async (
     file: File,
@@ -48,6 +50,32 @@ export default function ProductForm({
     const url = await uploadFile(file, uploadImageToCloudinary);
     if (url) {
       setFormData((prev) => ({ ...prev, [field]: url }));
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!product?.id) return;
+
+    const confirmDelete = confirm(
+      'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.'
+    );
+
+    if (!confirmDelete) return;
+
+    setDeleting(true);
+    try {
+      const result = await deleteProduct(product.id);
+
+      if (result.success) {
+        toast.success('Produto excluído com sucesso!', { duration: 3000 });
+        onSuccess?.();
+      } else {
+        toast.error('Erro ao excluir produto: ' + result.error, { duration: 5000 });
+      }
+    } catch (error) {
+      toast.error('Erro ao excluir produto', { duration: 5000 });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -318,7 +346,7 @@ export default function ProductForm({
       <div className="flex gap-4 pt-4 border-t border-zinc-800">
         <button
           type="submit"
-          disabled={saving || uploading}
+          disabled={saving || uploading || deleting}
           className="flex-1 px-6 py-3 bg-primary text-background rounded-lg font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary/20"
         >
           {saving
@@ -331,9 +359,20 @@ export default function ProductForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-surface-elevated transition-all font-semibold"
+            disabled={saving || deleting}
+            className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-surface-elevated transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
+          </button>
+        )}
+        {product?.id && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={saving || uploading || deleting}
+            className="px-6 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-600/20"
+          >
+            {deleting ? 'Excluindo...' : 'Excluir'}
           </button>
         )}
       </div>

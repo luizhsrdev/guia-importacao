@@ -6,6 +6,7 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   createSeller,
   updateSeller,
+  deleteSeller,
   uploadEvidenceImages,
   type SellerFormData,
 } from '@/lib/actions/sellers';
@@ -40,6 +41,7 @@ export default function SellerForm({
 
   const { uploading, uploadFile, uploadMultipleFiles } = useFileUpload();
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleImageUpload = async (file: File) => {
     const url = await uploadFile(file, uploadImageToCloudinary);
@@ -63,6 +65,32 @@ export default function SellerForm({
       ...prev,
       evidence_images: prev.evidence_images?.filter((_, i) => i !== index),
     }));
+  };
+
+  const handleDelete = async () => {
+    if (!seller?.id) return;
+
+    const confirmDelete = confirm(
+      'Tem certeza que deseja excluir este vendedor? Esta ação não pode ser desfeita.'
+    );
+
+    if (!confirmDelete) return;
+
+    setDeleting(true);
+    try {
+      const result = await deleteSeller(seller.id);
+
+      if (result.success) {
+        toast.success('Vendedor excluído com sucesso!');
+        onSuccess?.();
+      } else {
+        toast.error('Erro ao excluir vendedor: ' + result.error);
+      }
+    } catch {
+      toast.error('Erro ao excluir vendedor');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -366,7 +394,7 @@ export default function SellerForm({
       <div className="flex gap-4 pt-4 border-t border-zinc-800">
         <button
           type="submit"
-          disabled={saving || uploading}
+          disabled={saving || uploading || deleting}
           className={`flex-1 px-6 py-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
             formData.status === 'blacklist'
               ? 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20'
@@ -383,9 +411,20 @@ export default function SellerForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-surface-elevated transition-all font-semibold"
+            disabled={saving || deleting}
+            className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-surface-elevated transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
+          </button>
+        )}
+        {seller?.id && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={saving || uploading || deleting}
+            className="px-6 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-600/20"
+          >
+            {deleting ? 'Excluindo...' : 'Excluir'}
           </button>
         )}
       </div>

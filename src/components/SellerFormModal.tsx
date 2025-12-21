@@ -20,19 +20,23 @@ export function SellerFormModal({ isOpen, onClose, sellerId, categories, onSucce
 
   useEffect(() => {
     if (isOpen) {
+      // Reset state imediatamente quando o modal abre
+      setSeller(undefined);
+      setLoading(true);
       loadData();
+    } else {
+      // Limpar estado quando o modal fecha para evitar dados residuais
+      setSeller(undefined);
     }
   }, [isOpen, sellerId]);
 
   const loadData = async () => {
     if (!sellerId) {
       // Vendedor novo, não precisa carregar dados
-      setSeller(undefined);
       setLoading(false);
       return;
     }
 
-    setLoading(true);
     try {
       const sellerData = await getSellerById(sellerId);
       setSeller(sellerData || undefined);

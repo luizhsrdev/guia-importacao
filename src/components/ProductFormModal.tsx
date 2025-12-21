@@ -20,19 +20,23 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
 
   useEffect(() => {
     if (isOpen) {
+      // Reset state imediatamente quando o modal abre
+      setProduct(undefined);
+      setLoading(true);
       loadData();
+    } else {
+      // Limpar estado quando o modal fecha para evitar dados residuais
+      setProduct(undefined);
     }
   }, [isOpen, productId]);
 
   const loadData = async () => {
     if (!productId) {
       // Produto novo, não precisa carregar dados
-      setProduct(undefined);
       setLoading(false);
       return;
     }
 
-    setLoading(true);
     try {
       const productData = await getProductById(productId);
       setProduct(productData || undefined);
@@ -114,6 +118,7 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
             </div>
           ) : (
             <ProductForm
+              key={productId || 'new'}
               product={product}
               categories={categories}
               onSuccess={handleSuccess}
