@@ -4,12 +4,12 @@ import { supabase } from '@/lib/supabase';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import cloudinary from '@/lib/cloudinary';
 import { CacheTag } from '@/types';
+import { generateAffiliateLink } from '@/lib/cssbuy';
 
 export interface ProductFormData {
   id?: string;
   title: string;
   price_cny: string;
-  affiliate_link: string;
   original_link: string;
   category_id?: string;
   is_sold_out: boolean;
@@ -95,10 +95,20 @@ export async function getProductById(id: string) {
 
 // Criar produto
 export async function createProduct(formData: ProductFormData) {
+  // Gerar link de afiliado automaticamente a partir do link Xianyu
+  const affiliateLink = generateAffiliateLink(formData.original_link);
+
+  if (!affiliateLink) {
+    return {
+      success: false,
+      error: 'Link do Xianyu inválido. Verifique o formato (deve conter ?id=NUMERO).'
+    };
+  }
+
   const { error } = await supabase.from('products').insert({
     title: formData.title,
     price_cny: formData.price_cny,
-    affiliate_link: formData.affiliate_link,
+    affiliate_link: affiliateLink,
     original_link: formData.original_link,
     category_id: formData.category_id || null,
     is_sold_out: formData.is_sold_out,
@@ -127,12 +137,22 @@ export async function updateProduct(formData: ProductFormData) {
     return { success: false, error: 'ID do produto não fornecido' };
   }
 
+  // Gerar link de afiliado automaticamente a partir do link Xianyu
+  const affiliateLink = generateAffiliateLink(formData.original_link);
+
+  if (!affiliateLink) {
+    return {
+      success: false,
+      error: 'Link do Xianyu inválido. Verifique o formato (deve conter ?id=NUMERO).'
+    };
+  }
+
   const { error } = await supabase
     .from('products')
     .update({
       title: formData.title,
       price_cny: formData.price_cny,
-      affiliate_link: formData.affiliate_link,
+      affiliate_link: affiliateLink,
       original_link: formData.original_link,
       category_id: formData.category_id || null,
       is_sold_out: formData.is_sold_out,

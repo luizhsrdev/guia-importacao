@@ -26,7 +26,6 @@ export default function ProductForm({
   const [formData, setFormData] = useState<ProductFormData>({
     title: product?.title || '',
     price_cny: product?.price_cny || '',
-    affiliate_link: product?.affiliate_link || '',
     original_link: product?.original_link || '',
     category_id: product?.category_id || '',
     is_sold_out: product?.is_sold_out || false,
@@ -217,26 +216,6 @@ export default function ProductForm({
           rows={3}
           className="w-full bg-surface border border-border rounded-lg p-3 text-text-primary focus:outline-none focus:border-primary resize-none"
           placeholder="Detalhes importantes sobre o estado do produto..."
-        />
-      </div>
-
-      {/* Link de Afiliado */}
-      <div>
-        <label className="block text-sm font-medium text-textSecondary mb-2">
-          Link de Afiliado (CSSBuy) *
-        </label>
-        <input
-          type="url"
-          required
-          value={formData.affiliate_link}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              affiliate_link: e.target.value,
-            }))
-          }
-          placeholder="https://..."
-          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
