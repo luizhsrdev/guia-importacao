@@ -100,7 +100,7 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, title: e.target.value }))
           }
-          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border-2 border-border-emphasis rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
           placeholder="Digite o título do produto..."
         />
       </div>
@@ -118,7 +118,7 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, price_cny: e.target.value }))
           }
           placeholder="Ex: ¥ 299"
-          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border-2 border-border-emphasis rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
 
@@ -132,7 +132,7 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, category_id: e.target.value }))
           }
-          className="w-full px-4 py-3 bg-surface border border-border rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 bg-surface border-2 border-border-emphasis rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
         >
           <option value="">Selecione uma categoria</option>
           {categories.map((cat) => (
@@ -153,7 +153,7 @@ export default function ProductForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, condition: e.target.value }))
           }
-          className="w-full bg-surface border border-border rounded-lg p-3 text-text-primary focus:outline-none focus:border-primary"
+          className="w-full bg-surface border-2 border-border-emphasis rounded-lg p-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         >
           <option value="Lacrado">Lacrado</option>
           <option value="Seminovo">Seminovo</option>
@@ -214,7 +214,7 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, observations: e.target.value }))
           }
           rows={3}
-          className="w-full bg-surface border border-border rounded-lg p-3 text-text-primary focus:outline-none focus:border-primary resize-none"
+          className="w-full bg-surface border-2 border-border-emphasis rounded-lg p-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
           placeholder="Detalhes importantes sobre o estado do produto..."
         />
       </div>
@@ -232,7 +232,7 @@ export default function ProductForm({
             setFormData((prev) => ({ ...prev, original_link: e.target.value }))
           }
           placeholder="https://..."
-          className="w-full px-4 py-3 bg-surface border border-red-700 rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all"
+          className="w-full px-4 py-3 bg-surface border-2 border-red-700 rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
         />
         <button
           type="button"
