@@ -1,0 +1,127 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import SellerForm from './SellerForm';
+import { getSellerById } from '@/lib/actions/sellers';
+import type { SellerFormData } from '@/lib/actions/sellers';
+
+interface SellerFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  sellerId?: string;
+  categories: Array<{ id: string; name: string }>;
+  onSuccess?: () => void;
+}
+
+export function SellerFormModal({ isOpen, onClose, sellerId, categories, onSuccess }: SellerFormModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [seller, setSeller] = useState<SellerFormData | undefined>();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadData();
+    }
+  }, [isOpen, sellerId]);
+
+  const loadData = async () => {
+    if (!sellerId) {
+      // Vendedor novo, não precisa carregar dados
+      setSeller(undefined);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const sellerData = await getSellerById(sellerId);
+      setSeller(sellerData || undefined);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const handleSuccess = () => {
+    onSuccess?.();
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <div
+        ref={modalRef}
+        className="relative bg-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] m-4 border border-border flex flex-col overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-text-primary">
+              {sellerId ? 'Editar Vendedor' : 'Adicionar Vendedor'}
+            </h2>
+            <p className="text-sm text-text-muted mt-0.5">
+              {sellerId ? 'Atualize as informações do vendedor' : 'Preencha os dados do novo vendedor'}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-lg bg-surface-elevated hover:bg-border transition-colors flex items-center justify-center"
+          >
+            <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 modal-scroll">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <SellerForm
+              seller={seller}
+              categories={categories}
+              onSuccess={handleSuccess}
+              onCancel={onClose}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

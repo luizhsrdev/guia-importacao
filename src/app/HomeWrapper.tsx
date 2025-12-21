@@ -22,14 +22,16 @@ interface HomeWrapperProps {
   products: PublicProduct[];
   sellers: Seller[];
   userStatus: UserStatus;
-  categories: Category[];
+  productCategories: Category[];
+  sellerCategories: Array<{ id: string; name: string }>;
 }
 
 export function HomeWrapper({
   products,
   sellers,
   userStatus,
-  categories,
+  productCategories,
+  sellerCategories,
 }: HomeWrapperProps) {
   const [activeTab, setActiveTab] = useState('produtos');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -73,7 +75,7 @@ export function HomeWrapper({
 
               <div className="hidden md:block">
                 <HeaderNav
-                  categories={categories}
+                  categories={productCategories}
                   selectedCategories={selectedCategories}
                   onCategoryToggle={handleCategoryToggle}
                   activeTab={activeTab}
@@ -128,7 +130,7 @@ export function HomeWrapper({
                 <UserButton />
               </SignedIn>
               <MobileMenu
-                categories={categories}
+                categories={productCategories}
                 onCategorySelect={handleCategoryToggle}
                 onTabChange={setActiveTab}
                 userStatus={userStatus}
@@ -143,7 +145,8 @@ export function HomeWrapper({
           products={products}
           sellers={sellers}
           userStatus={userStatus}
-          categories={categories}
+          productCategories={productCategories}
+          sellerCategories={sellerCategories}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           selectedCategories={selectedCategories}

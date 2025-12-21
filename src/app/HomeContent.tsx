@@ -5,6 +5,7 @@ import ProductCard from '@/components/ProductCard';
 import SellerCard from '@/components/SellerCard';
 import { ProductFilters } from '@/components/ProductFilters';
 import { ProductFormModal } from '@/components/ProductFormModal';
+import { SellerFormModal } from '@/components/SellerFormModal';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
@@ -31,7 +32,8 @@ interface HomeContentProps {
   products: PublicProduct[];
   sellers: Seller[];
   userStatus: UserStatus;
-  categories: Category[];
+  productCategories: Category[];
+  sellerCategories: Array<{ id: string; name: string }>;
   activeTab: string;
   setActiveTab: (tab: string) => void;
   selectedCategories: string[];
@@ -44,7 +46,8 @@ export function HomeContent({
   products,
   sellers,
   userStatus,
-  categories,
+  productCategories,
+  sellerCategories,
   activeTab,
   setActiveTab,
   selectedCategories,
@@ -58,6 +61,8 @@ export function HomeContent({
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | undefined>();
   const [showProductFormModal, setShowProductFormModal] = useState(false);
+  const [editingSellerId, setEditingSellerId] = useState<string | undefined>();
+  const [showSellerFormModal, setShowSellerFormModal] = useState(false);
 
   const handleAddProduct = () => {
     setEditingProductId(undefined);
@@ -75,6 +80,26 @@ export function HomeContent({
   };
 
   const handleProductFormSuccess = () => {
+    // Recarregar a página para atualizar os dados
+    window.location.reload();
+  };
+
+  const handleAddSeller = () => {
+    setEditingSellerId(undefined);
+    setShowSellerFormModal(true);
+  };
+
+  const handleEditSeller = (sellerId: string) => {
+    setEditingSellerId(sellerId);
+    setShowSellerFormModal(true);
+  };
+
+  const handleCloseSellerFormModal = () => {
+    setShowSellerFormModal(false);
+    setEditingSellerId(undefined);
+  };
+
+  const handleSellerFormSuccess = () => {
     // Recarregar a página para atualizar os dados
     window.location.reload();
   };
@@ -149,9 +174,9 @@ export function HomeContent({
 
   const selectedCategoryNames = useMemo(() => {
     return selectedCategories
-      .map((id) => categories.find((c) => c.id === id)?.name)
+      .map((id) => productCategories.find((c) => c.id === id)?.name)
       .filter((name): name is string => name !== undefined);
-  }, [selectedCategories, categories]);
+  }, [selectedCategories, productCategories]);
 
   const formattedCategoryText = useMemo(() => {
     if (selectedCategoryNames.length === 0) return null;
@@ -275,9 +300,23 @@ export function HomeContent({
             <h1 className="section-title mb-2">
               Lista de Vendedores
             </h1>
-            <p className="text-text-secondary text-sm">
-              {sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''} cadastrado{sellers.length !== 1 ? 's' : ''}
-            </p>
+            <div className="mb-3">
+              <p className="text-text-secondary text-sm">
+                {sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''} cadastrado{sellers.length !== 1 ? 's' : ''}
+              </p>
+
+              {isAdminModeActive && (
+                <button
+                  onClick={handleAddSeller}
+                  className="flex items-center gap-2 h-9 px-4 rounded-lg bg-red-500/10 text-red-500 border border-red-500 font-medium text-sm hover:bg-red-500/20 transition-all mt-3"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Adicionar Vendedor
+                </button>
+              )}
+            </div>
           </header>
 
           <div className="flex gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible scrollbar-hide">
@@ -345,7 +384,11 @@ export function HomeContent({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {filteredSellers.map((seller) => (
-                <SellerCard key={seller.id} seller={seller} />
+                <SellerCard
+                  key={seller.id}
+                  seller={seller}
+                  onEdit={() => handleEditSeller(seller.id)}
+                />
               ))}
             </div>
           )}
@@ -385,8 +428,17 @@ export function HomeContent({
         isOpen={showProductFormModal}
         onClose={handleCloseProductFormModal}
         productId={editingProductId}
-        categories={categories}
+        categories={productCategories}
         onSuccess={handleProductFormSuccess}
+      />
+
+      {/* Modal de Edição de Vendedor */}
+      <SellerFormModal
+        isOpen={showSellerFormModal}
+        onClose={handleCloseSellerFormModal}
+        sellerId={editingSellerId}
+        categories={sellerCategories}
+        onSuccess={handleSellerFormSuccess}
       />
     </div>
   );

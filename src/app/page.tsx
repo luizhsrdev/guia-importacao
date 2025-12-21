@@ -2,7 +2,8 @@ import { Suspense } from 'react';
 import { HomeWrapper } from './HomeWrapper';
 import { getPublicProducts, getPublicSellers } from './actions';
 import { getCurrentUserStatus } from '@/lib/user-server';
-import { getCategories } from '@/lib/actions/products';
+import { getCategories as getProductCategories } from '@/lib/actions/products';
+import { getCategories as getSellerCategories } from '@/lib/actions/sellers';
 
 function HomePageSkeleton() {
   return (
@@ -44,11 +45,12 @@ function HomePageSkeleton() {
 }
 
 async function HomeContent() {
-  const [products, sellers, userStatus, categories] = await Promise.all([
+  const [products, sellers, userStatus, productCategories, sellerCategories] = await Promise.all([
     getPublicProducts(),
     getPublicSellers(),
     getCurrentUserStatus(),
-    getCategories(),
+    getProductCategories(),
+    getSellerCategories(),
   ]);
 
   return (
@@ -56,7 +58,8 @@ async function HomeContent() {
       products={products}
       sellers={sellers}
       userStatus={userStatus}
-      categories={categories}
+      productCategories={productCategories}
+      sellerCategories={sellerCategories}
     />
   );
 }
