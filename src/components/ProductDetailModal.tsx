@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getProductOriginalLink } from '@/app/actions';
+import { trackProductCardClick, trackProductPurchaseClick } from '@/lib/analytics';
 
 interface CategoryLike {
   name: string;
@@ -83,7 +84,20 @@ export default function ProductDetailModal({
     }
   };
 
+  // Track product card click when modal opens
+  useEffect(() => {
+    if (isOpen && product.id) {
+      trackProductCardClick(product.id);
+    }
+  }, [isOpen, product.id]);
+
   if (!isOpen && !isClosing) return null;
+
+  const handleBuyClick = async () => {
+    // Track purchase click before opening link
+    await trackProductPurchaseClick(product.id);
+    window.open(product.affiliate_link, '_blank');
+  };
 
   const handleViewSeller = async () => {
     if (!isPremium) {
@@ -217,7 +231,7 @@ export default function ProductDetailModal({
 
             <div className="flex flex-col gap-2 sm:gap-3 pt-2 sticky bottom-0 bg-surface/80 backdrop-blur-sm -mx-4 px-4 pb-4 sm:relative sm:mx-0 sm:px-0 sm:pb-0 sm:bg-transparent sm:backdrop-blur-none safe-bottom">
               <button
-                onClick={() => window.open(product.affiliate_link, '_blank')}
+                onClick={handleBuyClick}
                 className="btn-primary py-3.5 sm:py-3 px-6 rounded-xl sm:rounded-md font-medium text-base sm:text-sm"
               >
                 Comprar

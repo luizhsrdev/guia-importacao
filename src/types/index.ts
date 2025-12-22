@@ -2,6 +2,9 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  // Analytics fields
+  selection_count?: number;
+  last_selected_at?: string;
 }
 
 interface ProductBase {
@@ -20,6 +23,12 @@ interface ProductBase {
   has_warranty?: boolean;
   observations?: string;
   created_at?: string;
+  // Analytics fields
+  view_count?: number;
+  card_click_count?: number;
+  purchase_click_count?: number;
+  card_ctr?: number;
+  purchase_ctr?: number;
 }
 
 export interface Product extends ProductBase {

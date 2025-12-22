@@ -16,6 +16,7 @@ import { HomeContent } from './HomeContent';
 import PremiumUpgradeModal from '@/components/PremiumUpgradeModal';
 import { AdminModeProvider } from '@/contexts/AdminModeContext';
 import { AdminToggleSlider } from '@/components/AdminToggleSlider';
+import { trackCategorySelection } from '@/lib/analytics';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
 interface HomeWrapperProps {
@@ -54,7 +55,8 @@ export function HomeWrapper({
         // Desmarcar
         return prev.filter((id) => id !== categoryId);
       } else {
-        // Marcar
+        // Marcar - track selection
+        trackCategorySelection(categoryId);
         return [...prev, categoryId];
       }
     });

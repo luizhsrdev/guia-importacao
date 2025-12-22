@@ -53,6 +53,11 @@ export const getPublicProducts = unstable_cache(
         has_charger,
         has_warranty,
         observations,
+        view_count,
+        card_click_count,
+        purchase_click_count,
+        card_ctr,
+        purchase_ctr,
         category:product_categories(id, name, slug)
       `)
       .order('created_at', { ascending: false });

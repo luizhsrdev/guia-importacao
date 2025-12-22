@@ -287,6 +287,12 @@ export function HomeContent({
                   has_warranty={product.has_warranty}
                   isPremium={userStatus.isPremium}
                   onEdit={() => handleEditProduct(product.id)}
+                  view_count={product.view_count}
+                  card_click_count={product.card_click_count}
+                  purchase_click_count={product.purchase_click_count}
+                  card_ctr={product.card_ctr}
+                  purchase_ctr={product.purchase_ctr}
+                  showMetrics={isAdminModeActive}
                 />
               ))}
             </div>
