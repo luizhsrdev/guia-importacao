@@ -2,9 +2,17 @@
 
 import { useState, useMemo } from 'react';
 import { calculateImportCost, formatBrl } from '@/lib/import-calculator';
-import type { ImportCalculationResult } from '@/types';
+import {
+  calculateFreight,
+  SHIPPING_ROUTES,
+  formatCny,
+  formatBrl as formatBrlFreight,
+  formatKg,
+} from '@/lib/freight-calculator';
+import type { ImportCalculationResult, FreightCalculationResult, VIPLevel } from '@/types';
 
 const DEFAULT_CNY_TO_BRL = 0.80;
+const DEFAULT_USD_TO_CNY = 6.5;
 
 interface AgentOption {
   label: string;
@@ -29,6 +37,18 @@ interface FormState {
   selectedAgent: string;
 }
 
+interface FreightFormState {
+  productPriceCny: string;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
+  routeId: string;
+  vipLevel: string;
+  usdToCny: string;
+  cnyToBrl: string;
+}
+
 const INITIAL_FORM: FormState = {
   productPriceCny: '',
   shippingCny: '',
@@ -39,8 +59,22 @@ const INITIAL_FORM: FormState = {
   selectedAgent: 'CSSBuy (5%)',
 };
 
+const INITIAL_FREIGHT_FORM: FreightFormState = {
+  productPriceCny: '',
+  weight: '',
+  length: '',
+  width: '',
+  height: '',
+  routeId: 'china-post-air',
+  vipLevel: '0',
+  usdToCny: DEFAULT_USD_TO_CNY.toString(),
+  cnyToBrl: DEFAULT_CNY_TO_BRL.toString(),
+};
+
 export function CalculadoraClient() {
+  const [activeCalculator, setActiveCalculator] = useState<'import' | 'freight'>('freight');
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [freightForm, setFreightForm] = useState<FreightFormState>(INITIAL_FREIGHT_FORM);
 
   const result: ImportCalculationResult | null = useMemo(() => {
     const productCny = parseFloat(form.productPriceCny) || 0;
@@ -63,8 +97,44 @@ export function CalculadoraClient() {
     });
   }, [form]);
 
+  const freightResult: FreightCalculationResult | null = useMemo(() => {
+    const productCny = parseFloat(freightForm.productPriceCny) || 0;
+    const weight = parseFloat(freightForm.weight) || 0;
+    const length = parseFloat(freightForm.length) || 0;
+    const width = parseFloat(freightForm.width) || 0;
+    const height = parseFloat(freightForm.height) || 0;
+    const vipLevel = parseInt(freightForm.vipLevel) as VIPLevel;
+    const usdToCny = parseFloat(freightForm.usdToCny) || DEFAULT_USD_TO_CNY;
+    const cnyToBrl = parseFloat(freightForm.cnyToBrl) || DEFAULT_CNY_TO_BRL;
+
+    if (productCny === 0 || weight === 0) {
+      return null;
+    }
+
+    try {
+      return calculateFreight({
+        productPriceCny: productCny,
+        weight,
+        length,
+        width,
+        height,
+        routeId: freightForm.routeId,
+        vipLevel,
+        usdToCny,
+        cnyToBrl,
+      });
+    } catch (error) {
+      console.error('Erro ao calcular frete:', error);
+      return null;
+    }
+  }, [freightForm]);
+
   const handleInputChange = (field: keyof FormState, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFreightInputChange = (field: keyof FreightFormState, value: string) => {
+    setFreightForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAgentChange = (agentLabel: string) => {
@@ -78,10 +148,248 @@ export function CalculadoraClient() {
     }
   };
 
+  const selectedRoute = SHIPPING_ROUTES.find((r) => r.id === freightForm.routeId);
+
   return (
     <div className="space-y-5">
       <div className="card p-5">
-        <h2 className="text-base font-medium text-text-primary mb-4">Valores do Produto</h2>
+        <div className="flex gap-2 mb-5">
+          <button
+            onClick={() => setActiveCalculator('freight')}
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+              activeCalculator === 'freight'
+                ? 'bg-primary text-background'
+                : 'bg-surface-elevated text-text-secondary hover:bg-surface-elevated/70'
+            }`}
+          >
+            Frete CSSBuy
+          </button>
+          <button
+            onClick={() => setActiveCalculator('import')}
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+              activeCalculator === 'import'
+                ? 'bg-primary text-background'
+                : 'bg-surface-elevated text-text-secondary hover:bg-surface-elevated/70'
+            }`}
+          >
+            Impostos de Importação
+          </button>
+        </div>
+      </div>
+
+      {activeCalculator === 'freight' ? (
+        <>
+          <div className="card p-5">
+            <h2 className="text-base font-medium text-text-primary mb-4">Informações do Produto</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Valor do Produto (¥)
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={freightForm.productPriceCny}
+                  onChange={(e) => handleFreightInputChange('productPriceCny', e.target.value)}
+                  placeholder="0.00"
+                  className="input-field"
+                />
+                <p className="text-xs text-text-tertiary mt-1.5">
+                  Usado para calcular o seguro (3%)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Peso Real (kg)
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  value={freightForm.weight}
+                  onChange={(e) => handleFreightInputChange('weight', e.target.value)}
+                  placeholder="0.00"
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Comprimento (cm)
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={freightForm.length}
+                  onChange={(e) => handleFreightInputChange('length', e.target.value)}
+                  placeholder="0"
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Largura (cm)
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={freightForm.width}
+                  onChange={(e) => handleFreightInputChange('width', e.target.value)}
+                  placeholder="0"
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Altura (cm)
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={freightForm.height}
+                  onChange={(e) => handleFreightInputChange('height', e.target.value)}
+                  placeholder="0"
+                  className="input-field"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="card p-5">
+            <h2 className="text-base font-medium text-text-primary mb-4">Configurações de Envio</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm text-text-secondary mb-2">
+                  Rota de Envio
+                </label>
+                <select
+                  value={freightForm.routeId}
+                  onChange={(e) => handleFreightInputChange('routeId', e.target.value)}
+                  className="input-field"
+                >
+                  {SHIPPING_ROUTES.map((route) => (
+                    <option key={route.id} value={route.id}>
+                      {route.name} - {route.deliveryDays} dias
+                      {route.type === 'volumetric' ? ' (Volumétrico)' : ' (Peso Puro)'}
+                    </option>
+                  ))}
+                </select>
+                {selectedRoute && (
+                  <p className="text-xs text-text-tertiary mt-1.5">
+                    1º Peso: {formatCny(selectedRoute.firstWeight)} | 2º Peso: {formatCny(selectedRoute.secondWeight)} a cada {selectedRoute.increment}kg
+                    {selectedRoute.minWeight && ` | Peso mínimo: ${selectedRoute.minWeight}kg`}
+                    {selectedRoute.maxWeight && ` | Peso máximo: ${selectedRoute.maxWeight}kg`}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Nível VIP CSSBuy
+                </label>
+                <select
+                  value={freightForm.vipLevel}
+                  onChange={(e) => handleFreightInputChange('vipLevel', e.target.value)}
+                  className="input-field"
+                >
+                  <option value="0">VIP 0 (5% taxa)</option>
+                  <option value="1">VIP 1 (4% taxa)</option>
+                  <option value="2">VIP 2 (3% taxa)</option>
+                  <option value="3">VIP 3 (2.5% taxa)</option>
+                  <option value="4">VIP 4 (2% taxa)</option>
+                  <option value="5">VIP 5 (1% taxa)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Câmbio USD → CNY
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  value={freightForm.usdToCny}
+                  onChange={(e) => handleFreightInputChange('usdToCny', e.target.value)}
+                  placeholder="6.5"
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">
+                  Câmbio CNY → BRL
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  value={freightForm.cnyToBrl}
+                  onChange={(e) => handleFreightInputChange('cnyToBrl', e.target.value)}
+                  placeholder="0.80"
+                  className="input-field"
+                />
+              </div>
+            </div>
+          </div>
+
+          {freightResult && (
+            <div className="card border-primary/30 p-5">
+              <h2 className="text-base font-medium text-text-primary mb-4">Resultado do Frete</h2>
+
+              <div className="space-y-3">
+                <div className="bg-surface-elevated rounded-lg p-3 mb-3">
+                  <h3 className="text-sm font-medium text-text-secondary mb-2">Análise de Peso</h3>
+                  <div className="space-y-2 text-sm">
+                    <FreightRow label="Peso Real" value={formatKg(freightResult.actualWeight)} />
+                    <FreightRow label="Peso Volumétrico" value={formatKg(freightResult.volumetricWeight)} />
+                    <FreightRow
+                      label="Peso Efetivo (Cobrado)"
+                      value={formatKg(freightResult.effectiveWeight)}
+                      highlight
+                    />
+                  </div>
+                </div>
+
+                <FreightRow label="Custo do Frete" value={formatCny(freightResult.shippingCostCny)} />
+                <FreightRow label="Seguro (3%)" value={formatCny(freightResult.insuranceCny)} />
+                <div className="divider my-3" />
+                <FreightRow label="Subtotal" value={formatCny(freightResult.subtotalCny)} />
+                <FreightRow
+                  label={`Taxa de Serviço (${freightResult.serviceFeePercent}%)`}
+                  value={formatCny(freightResult.serviceFeeCny)}
+                />
+                <div className="divider my-3" />
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-text-primary">Total em CNY</span>
+                  <span className="font-bold text-primary text-lg">
+                    {formatCny(freightResult.totalCny)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-text-primary">Total em BRL</span>
+                  <span className="font-bold text-primary text-xl">
+                    {formatBrlFreight(freightResult.totalBrl)}
+                  </span>
+                </div>
+                <div className="bg-primary/10 border border-primary/20 rounded-md p-3 mt-3">
+                  <p className="text-primary text-sm">
+                    Prazo de entrega: {freightResult.deliveryDays} dias úteis
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="card p-5">
+            <h2 className="text-base font-medium text-text-primary mb-4">Valores do Produto</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -224,6 +532,8 @@ export function CalculadoraClient() {
           )}
         </div>
       )}
+        </>
+      )}
     </div>
   );
 }
@@ -240,6 +550,23 @@ function ResultRow({ label, value, highlight = false }: ResultRowProps) {
       <span className="text-text-secondary text-sm">{label}</span>
       <span className={`text-sm ${highlight ? 'text-danger' : 'text-text-primary'}`}>
         {formatBrl(value)}
+      </span>
+    </div>
+  );
+}
+
+interface FreightRowProps {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}
+
+function FreightRow({ label, value, highlight = false }: FreightRowProps) {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-text-secondary text-sm">{label}</span>
+      <span className={`text-sm ${highlight ? 'text-primary font-medium' : 'text-text-primary'}`}>
+        {value}
       </span>
     </div>
   );

@@ -129,3 +129,45 @@ export interface ImportCalculationResult {
   importTax: number;
   totalBrl: number;
 }
+
+export type ShippingRouteType = 'volumetric' | 'pure_weight';
+
+export type VIPLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+export interface ShippingRoute {
+  id: string;
+  name: string;
+  type: ShippingRouteType;
+  firstWeight: number;
+  secondWeight: number;
+  increment: number;
+  deliveryDays: string;
+  minWeight?: number;
+  maxWeight?: number;
+}
+
+export interface FreightCalculationInput {
+  productPriceCny: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+  routeId: string;
+  vipLevel: VIPLevel;
+  usdToCny: number;
+  cnyToBrl: number;
+}
+
+export interface FreightCalculationResult {
+  actualWeight: number;
+  volumetricWeight: number;
+  effectiveWeight: number;
+  shippingCostCny: number;
+  insuranceCny: number;
+  subtotalCny: number;
+  serviceFeePercent: number;
+  serviceFeeCny: number;
+  totalCny: number;
+  totalBrl: number;
+  deliveryDays: string;
+}
