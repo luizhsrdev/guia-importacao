@@ -172,7 +172,7 @@ function MenuContent({
 
         {/* Quick Actions */}
         <div className="px-5 pb-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {/* Todos Produtos */}
             <button
               onClick={handleAllProductsClick}
@@ -201,20 +201,6 @@ function MenuContent({
               </div>
               <span className="text-xs font-medium text-text-primary">Vendedores</span>
             </button>
-
-            {/* Calculadora */}
-            <a
-              href="/calculadora"
-              onClick={onClose}
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
-            >
-              <div className="w-12 h-12 rounded-xl bg-accent-blue/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className="text-xs font-medium text-text-primary">Calculadora</span>
-            </a>
           </div>
         </div>
 
