@@ -58,14 +58,23 @@ export async function trackProductPurchaseClick(productId: string) {
  */
 export async function trackCategorySelection(categoryId: string) {
   try {
-    const { error } = await supabase.rpc('increment_category_selections', {
+    console.log('[ANALYTICS] Rastreando seleção de categoria:', categoryId);
+
+    const { data, error } = await supabase.rpc('increment_category_selections', {
       category_id: categoryId
     });
 
     if (error) {
-      console.error('Erro ao rastrear seleção de categoria:', error);
+      console.error('[ANALYTICS] Erro ao rastrear seleção de categoria:', {
+        categoryId,
+        error: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+    } else {
+      console.log('[ANALYTICS] Categoria rastreada com sucesso:', categoryId, data);
     }
   } catch (error) {
-    console.error('Erro ao rastrear seleção de categoria:', error);
+    console.error('[ANALYTICS] Exceção ao rastrear seleção de categoria:', error);
   }
 }

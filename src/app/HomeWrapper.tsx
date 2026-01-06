@@ -67,7 +67,10 @@ export function HomeWrapper({
   };
 
   return (
-    <AdminModeProvider>
+    <AdminModeProvider
+      isUserAdmin={userStatus.isAdmin}
+      isUserAuthenticated={userStatus.isAuthenticated}
+    >
       <main className="min-h-screen bg-background">
         <header className="sticky top-0 z-40 bg-background border-b border-border safe-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
