@@ -10,18 +10,23 @@ export async function GET() {
     .limit(5);
 
   if (productsError) {
-    console.error('Erro ao buscar top produtos:', productsError);
+    console.error('[API TOP METRICS] Erro ao buscar top produtos:', productsError);
+  } else {
+    console.log('[API TOP METRICS] Top produtos encontrados:', topProducts?.length || 0);
   }
 
   // Top 5 categorias mais selecionadas
   const { data: topCategories, error: categoriesError } = await supabase
     .from('product_categories')
-    .select('id, name, emoji, selection_count')
-    .order('selection_count', { ascending: false })
+    .select('id, name, selection_count')
+    .order('selection_count', { ascending: false, nullsFirst: false })
     .limit(5);
 
   if (categoriesError) {
-    console.error('Erro ao buscar top categorias:', categoriesError);
+    console.error('[API TOP METRICS] Erro ao buscar top categorias:', categoriesError);
+  } else {
+    console.log('[API TOP METRICS] Top categorias encontradas:', topCategories?.length || 0);
+    console.log('[API TOP METRICS] Categorias:', JSON.stringify(topCategories, null, 2));
   }
 
   return NextResponse.json({
