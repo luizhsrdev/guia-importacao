@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import { Logo } from './Logo';
 import type { Category, UserStatus } from '@/types';
 
@@ -29,6 +30,7 @@ function MenuContent({
 }: MenuContentProps) {
   const { setTheme, resolvedTheme } = useTheme();
   const { currency, setCurrency } = useCurrency();
+  const { isAdminModeActive, toggleAdminMode } = useAdminMode();
   const isDark = resolvedTheme === 'dark';
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [dragY, setDragY] = useState(0);
@@ -159,15 +161,53 @@ function MenuContent({
         {/* Header */}
         <div className="flex items-center justify-between px-5 pb-4">
           <Logo size="sm" />
-          <button
-            onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-elevated active:scale-95 transition-transform"
-            aria-label="Fechar menu"
-          >
-            <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Admin Toggle Button - only for admins */}
+            {userStatus.isAdmin && (
+              <button
+                onClick={toggleAdminMode}
+                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                  isAdminModeActive
+                    ? 'bg-red-500 active:scale-95'
+                    : 'bg-red-500/10 active:scale-95'
+                }`}
+                aria-label={isAdminModeActive ? "Desativar modo admin" : "Ativar modo admin"}
+              >
+                <svg
+                  className={`w-5 h-5 transition-colors ${
+                    isAdminModeActive ? 'text-white' : 'text-red-500'
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </button>
+            )}
+
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-elevated active:scale-95 transition-transform"
+              aria-label="Fechar menu"
+            >
+              <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Quick Actions */}
