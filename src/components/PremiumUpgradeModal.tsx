@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { FeatureItem } from './FeatureItem';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface PremiumUpgradeModalProps {
   isOpen: boolean;
@@ -16,6 +17,9 @@ export default function PremiumUpgradeModal({
 }: PremiumUpgradeModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
+
+  // Lock body scroll when modal is open (prevents layout shift)
+  useBodyScrollLock(isOpen);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -33,11 +37,9 @@ export default function PremiumUpgradeModal({
     };
     if (isOpen) {
       document.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden';
     }
     return () => {
       document.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, handleClose]);
 

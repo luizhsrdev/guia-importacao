@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getProductOriginalLink } from '@/app/actions';
 import { trackProductCardClick, trackProductPurchaseClick } from '@/lib/analytics';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface CategoryLike {
   name: string;
@@ -54,6 +55,9 @@ export default function ProductDetailModal({
   const [isClosing, setIsClosing] = useState(false);
   const [isLoadingLink, setIsLoadingLink] = useState(false);
 
+  // Lock body scroll when modal is open (prevents layout shift)
+  useBodyScrollLock(isOpen);
+
   const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
@@ -70,11 +74,9 @@ export default function ProductDetailModal({
     };
     if (isOpen) {
       document.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden';
     }
     return () => {
       document.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, handleClose]);
 

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import SellerForm from './SellerForm';
 import { getSellerById } from '@/lib/actions/sellers';
 import type { SellerFormData } from '@/lib/actions/sellers';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface SellerFormModalProps {
   isOpen: boolean;
@@ -17,6 +18,9 @@ export function SellerFormModal({ isOpen, onClose, sellerId, categories, onSucce
   const modalRef = useRef<HTMLDivElement>(null);
   const [seller, setSeller] = useState<SellerFormData | undefined>();
   const [loading, setLoading] = useState(true);
+
+  // Lock body scroll when modal is open (prevents layout shift)
+  useBodyScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -63,13 +67,11 @@ export function SellerFormModal({ isOpen, onClose, sellerId, categories, onSucce
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 

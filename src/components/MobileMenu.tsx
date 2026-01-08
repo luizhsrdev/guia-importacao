@@ -6,6 +6,7 @@ import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { Logo } from './Logo';
 import type { Category, UserStatus } from '@/types';
 
@@ -38,12 +39,8 @@ function MenuContent({
   const dragStartY = useRef(0);
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
+  // Lock body scroll when menu is open (prevents layout shift)
+  useBodyScrollLock(true);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     dragStartY.current = e.touches[0].clientY;

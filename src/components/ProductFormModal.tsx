@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import ProductForm from './ProductForm';
 import { getProductById } from '@/lib/actions/products';
 import type { ProductFormData } from '@/lib/actions/products';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -17,6 +18,9 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
   const modalRef = useRef<HTMLDivElement>(null);
   const [product, setProduct] = useState<ProductFormData | undefined>();
   const [loading, setLoading] = useState(true);
+
+  // Lock body scroll when modal is open (prevents layout shift)
+  useBodyScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -63,13 +67,11 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
