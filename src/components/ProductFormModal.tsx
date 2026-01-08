@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import ProductForm from './ProductForm';
 import { getProductById } from '@/lib/actions/products';
 import type { ProductFormData } from '@/lib/actions/products';
@@ -18,9 +18,18 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
   const modalRef = useRef<HTMLDivElement>(null);
   const [product, setProduct] = useState<ProductFormData | undefined>();
   const [loading, setLoading] = useState(true);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Lock body scroll when modal is open (prevents layout shift)
   useBodyScrollLock(isOpen);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 150);
+  }, [onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,13 +63,13 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
+        handleClose();
       }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        handleClose();
       }
     };
 
@@ -73,24 +82,28 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
 
   const handleSuccess = () => {
     onSuccess?.();
-    onClose();
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${
+      isClosing ? 'animate-fadeOut' : 'animate-fadeIn'
+    }`}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative bg-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] m-4 border border-border flex flex-col overflow-hidden"
+        className={`relative bg-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] m-4 border border-border flex flex-col overflow-hidden ${
+          isClosing ? 'animate-scaleOut' : 'animate-scaleIn'
+        }`}
       >
         {/* Header */}
         <div className="flex-shrink-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
@@ -103,7 +116,7 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-9 h-9 rounded-lg bg-surface-elevated hover:bg-border transition-colors flex items-center justify-center"
           >
             <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +137,7 @@ export function ProductFormModal({ isOpen, onClose, productId, categories, onSuc
               product={product}
               categories={categories}
               onSuccess={handleSuccess}
-              onCancel={onClose}
+              onCancel={handleClose}
             />
           )}
         </div>
