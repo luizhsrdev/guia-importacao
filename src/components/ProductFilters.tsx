@@ -160,10 +160,10 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
                 setShowSortDropdown(true);
               }
             }}
-            className={`h-12 pl-11 pr-9 rounded-xl text-sm outline-none transition-colors cursor-pointer w-[120px] sm:w-[130px] flex items-center justify-between ${
+            className={`h-12 pl-11 pr-9 rounded-xl text-sm font-medium outline-none transition-all cursor-pointer w-[120px] sm:w-[130px] flex items-center justify-between ${
               sortBy !== 'none'
                 ? 'bg-primary/10 text-primary border border-primary/30'
-                : 'bg-surface border border-border text-text-primary focus:border-primary'
+                : 'bg-surface border border-border text-text-secondary hover:text-text-primary focus:border-primary'
             }`}
           >
             <span className="flex items-center gap-1.5">

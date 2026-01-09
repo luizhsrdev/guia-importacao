@@ -62,6 +62,17 @@
   --color-verified-glow: #34D399;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* Offset para header fixo */
+}
+
+/* Suavização e momentum scrolling (iOS/macOS style) */
+* {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 body {
   color: var(--text-primary);
   background: var(--background);
@@ -399,6 +410,60 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ===================================
+   CUSTOM SCROLLBARS - GLOBAL
+   =================================== */
+/* Scrollbar customizada para toda aplicação */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-emphasis) transparent;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--background);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-emphasis);
+  border-radius: 10px;
+  border: 2px solid var(--background);
+  transition: background 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: var(--text-secondary);
+}
+
+/* Dark mode scrollbar */
+.dark *::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: var(--border-emphasis);
+  border-color: var(--background);
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+.dark *::-webkit-scrollbar-thumb:active {
+  background: var(--text-secondary);
+}
+
+/* Scrollbar específica para modais (mais fina) */
 .modal-scroll::-webkit-scrollbar {
   width: 6px;
 }
@@ -872,5 +937,32 @@ input[type="number"] {
     padding-left: 1rem;
     padding-right: 1rem;
     border-radius: 0;
+  }
+}
+
+/* ===================================
+   SMOOTH SCROLL UTILITIES
+   =================================== */
+/* Container com scroll suave e momentum */
+.smooth-scroll-container {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  will-change: scroll-position;
+}
+
+/* Scroll suave para âncoras e navegação */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Desabilita smooth scroll para usuários que preferem movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  * {
+    scroll-behavior: auto !important;
+    -webkit-overflow-scrolling: auto !important;
   }
 }
