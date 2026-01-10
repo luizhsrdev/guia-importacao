@@ -850,23 +850,23 @@ input[type="number"] {
 
 /* Estilos personalizados para range inputs */
 .price-range-slider::-webkit-slider-track {
-  background: #1e1e1e;
+  background: var(--border-emphasis);
   border-radius: 0.5rem;
   height: 0.5rem;
 }
 
 .price-range-slider::-moz-range-track {
-  background: #1e1e1e;
+  background: var(--border-emphasis);
   border-radius: 0.5rem;
   height: 0.5rem;
 }
 
 .dark .price-range-slider::-webkit-slider-track {
-  background: #4b5563;
+  background: var(--border-emphasis);
 }
 
 .dark .price-range-slider::-moz-range-track {
-  background: #4b5563;
+  background: var(--border-emphasis);
 }
 
 .price-range-slider::-webkit-slider-thumb {

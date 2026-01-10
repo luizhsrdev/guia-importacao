@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { trackProductView, trackProductCardClick, trackProductPurchaseClick } from '@/lib/analytics';
@@ -71,9 +72,16 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [showReportMenu, setShowReportMenu] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedReportType, setSelectedReportType] = useState<string | null>(null);
+  const [reportDescription, setReportDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { formatPrice } = useCurrency();
   const { isAdminModeActive } = useAdminMode();
   const viewTracked = useRef(false);
+  const optionsMenuRef = useRef<HTMLDivElement>(null);
 
   // Rastrear visualização (apenas 1x por sessão)
   useEffect(() => {
@@ -91,6 +99,82 @@ export default function ProductCard({
   const handleCardClick = () => {
     trackProductCardClick(id);
     setDetailModalOpen(true);
+  };
+
+  // Fechar menus ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (optionsMenuRef.current && !optionsMenuRef.current.contains(event.target as Node)) {
+        setShowOptionsMenu(false);
+        setShowReportMenu(false);
+      }
+    };
+
+    if (showOptionsMenu || showReportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showOptionsMenu, showReportMenu]);
+
+  // Abrir menu de report e fechar menu principal
+  const handleOpenReportMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowOptionsMenu(false);
+    setShowReportMenu(true);
+  };
+
+  // Selecionar tipo de report e abrir modal de confirmação
+  const handleSelectReportType = (type: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedReportType(type);
+    setShowReportMenu(false);
+    setShowConfirmModal(true);
+  };
+
+  // Confirmar e enviar report
+  const handleConfirmReport = async () => {
+    if (!selectedReportType || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/products/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: id,
+          issue_type: selectedReportType,
+          description: selectedReportType === 'other' ? reportDescription : null,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Obrigado pelo report!');
+        setShowConfirmModal(false);
+        setSelectedReportType(null);
+        setReportDescription('');
+      } else if (response.status === 429) {
+        const data = await response.json();
+        toast.error(data.error || 'Você já reportou esse problema recentemente.');
+      } else {
+        toast.error('Erro ao enviar report. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar report:', error);
+      toast.error('Erro ao enviar report. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Cancelar report
+  const handleCancelReport = () => {
+    setShowConfirmModal(false);
+    setSelectedReportType(null);
+    setReportDescription('');
   };
 
   // Determinar cor do CTR
@@ -240,7 +324,176 @@ export default function ProductCard({
             </div>
           )}
         </div>
+
+        {/* Menu de Três Pontos - Não aparece no modo admin */}
+        {!isAdminModeActive && !is_sold_out && (
+          <div
+            ref={optionsMenuRef}
+            className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botão de Três Pontos */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowOptionsMenu(!showOptionsMenu);
+                setShowReportMenu(false);
+              }}
+              className="w-8 h-8 rounded-lg bg-surface-elevated/90 backdrop-blur-sm border border-border hover:border-border-emphasis transition-all flex items-center justify-center"
+              title="Opções"
+            >
+              <svg className="w-4 h-4 text-text-muted" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="12" cy="19" r="2" />
+              </svg>
+            </button>
+
+            {/* Dropdown: Opções Principais */}
+            {showOptionsMenu && (
+              <div className="absolute bottom-full right-0 mb-2 w-44 bg-surface border border-border rounded-xl shadow-lg overflow-hidden animate-dropdown z-10">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toast('Funcionalidade em breve!', { icon: '⭐' });
+                    setShowOptionsMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                >
+                  <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  <span>Favoritar</span>
+                </button>
+                <button
+                  onClick={handleOpenReportMenu}
+                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors border-t border-border"
+                >
+                  <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span>Reportar</span>
+                </button>
+              </div>
+            )}
+
+            {/* Dropdown: Opções de Report */}
+            {showReportMenu && (
+              <div className="absolute bottom-full right-0 mb-2 w-56 bg-surface border border-border rounded-xl shadow-lg overflow-hidden animate-dropdown z-10">
+                <div className="px-4 py-2 bg-surface-elevated border-b border-border">
+                  <p className="text-xs font-medium text-text-primary">Qual o problema?</p>
+                </div>
+                <button
+                  onClick={(e) => handleSelectReportType('out_of_stock', e)}
+                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                >
+                  <span className="text-base">📦</span>
+                  <span>Item Esgotado</span>
+                </button>
+                <button
+                  onClick={(e) => handleSelectReportType('broken_link', e)}
+                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                >
+                  <span className="text-base">⚠️</span>
+                  <span>Link Quebrado/Não Funciona</span>
+                </button>
+                <button
+                  onClick={(e) => handleSelectReportType('seller_not_responding', e)}
+                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                >
+                  <span className="text-base">💬</span>
+                  <span>Vendedor não responde</span>
+                </button>
+                <button
+                  onClick={(e) => handleSelectReportType('wrong_price', e)}
+                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                >
+                  <span className="text-base">💰</span>
+                  <span>Preço diferente</span>
+                </button>
+                <button
+                  onClick={(e) => handleSelectReportType('other', e)}
+                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors border-t border-border"
+                >
+                  <span className="text-base">📝</span>
+                  <span>Outro motivo</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </article>
+
+      {/* Modal de Confirmação de Report */}
+      {showConfirmModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
+          onClick={handleCancelReport}
+        >
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+
+          <div
+            className="relative bg-surface rounded-2xl shadow-2xl w-full max-w-md m-4 border border-border animate-scaleIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary">Confirmar Report</h3>
+                  <p className="text-sm text-text-muted">Tem certeza que deseja reportar este anúncio?</p>
+                </div>
+              </div>
+
+              {selectedReportType === 'other' && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Descreva o problema:
+                  </label>
+                  <textarea
+                    value={reportDescription}
+                    onChange={(e) => setReportDescription(e.target.value)}
+                    placeholder="Digite aqui o motivo do report..."
+                    className="w-full h-24 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted resize-none focus:outline-none focus:border-primary transition-colors"
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-text-muted mt-1 text-right">
+                    {reportDescription.length}/500
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelReport}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2.5 bg-surface-elevated border border-border rounded-lg text-sm font-medium text-text-primary hover:border-border-emphasis transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleConfirmReport}
+                  disabled={isSubmitting || (selectedReportType === 'other' && !reportDescription.trim())}
+                  className="flex-1 px-4 py-2.5 bg-red-500 rounded-lg text-sm font-semibold text-white hover:bg-red-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Enviando...</span>
+                    </>
+                  ) : (
+                    'Confirmar Report'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ProductDetailModal
         product={{

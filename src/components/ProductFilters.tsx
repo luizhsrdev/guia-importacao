@@ -298,7 +298,7 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
                 step="100"
                 value={priceMin}
                 onChange={(e) => setPriceMin(Math.min(Number(e.target.value), priceMax))}
-                className="w-full h-2 bg-border-subtle rounded-lg appearance-none cursor-pointer accent-primary price-range-slider"
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-primary price-range-slider"
               />
               <input
                 type="range"
@@ -307,7 +307,7 @@ export function ProductFilters({ onFilterChange, onAdvancedToggle }: ProductFilt
                 step="100"
                 value={priceMax}
                 onChange={(e) => setPriceMax(Math.max(Number(e.target.value), priceMin))}
-                className="w-full h-2 bg-border-subtle rounded-lg appearance-none cursor-pointer accent-primary price-range-slider"
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-primary price-range-slider"
               />
             </div>
           </div>
