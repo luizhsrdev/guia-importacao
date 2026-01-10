@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useFavorites } from '@/hooks/useFavorites';
 import { trackProductView, trackProductCardClick, trackProductPurchaseClick } from '@/lib/analytics';
 import ProductDetailModal from './ProductDetailModal';
 import PremiumUpgradeModal from './PremiumUpgradeModal';
@@ -80,6 +81,7 @@ export default function ProductCard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { formatPrice } = useCurrency();
   const { isAdminModeActive } = useAdminMode();
+  const { toggleFavorite, isFavorite, isSignedIn } = useFavorites();
   const viewTracked = useRef(false);
   const optionsMenuRef = useRef<HTMLDivElement>(null);
 
@@ -177,6 +179,13 @@ export default function ProductCard({
     setReportDescription('');
   };
 
+  // Favoritar produto
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowOptionsMenu(false);
+    await toggleFavorite(id);
+  };
+
   // Determinar cor do CTR
   const getCTRColor = (ctr: number) => {
     if (ctr >= 10) return 'text-emerald-500';
@@ -214,6 +223,15 @@ export default function ProductCard({
           {condition && conditionStyle && (
             <div className={`absolute top-3 left-3 ${conditionStyle}`}>
               {condition}
+            </div>
+          )}
+
+          {/* Badge de Favorito */}
+          {isFavorite(id) && (
+            <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center shadow-lg animate-scaleIn">
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
             </div>
           )}
 
@@ -353,17 +371,24 @@ export default function ProductCard({
             {showOptionsMenu && (
               <div className="absolute bottom-full right-0 mb-2 w-44 bg-surface border border-border rounded-xl shadow-lg overflow-hidden animate-dropdown z-10">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toast('Funcionalidade em breve!', { icon: '⭐' });
-                    setShowOptionsMenu(false);
-                  }}
+                  onClick={handleToggleFavorite}
                   className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
                 >
-                  <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <span>Favoritar</span>
+                  {isFavorite(id) ? (
+                    <>
+                      <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <span>Remover favorito</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                      <span>Favoritar</span>
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={handleOpenReportMenu}
@@ -385,38 +410,33 @@ export default function ProductCard({
                 </div>
                 <button
                   onClick={(e) => handleSelectReportType('out_of_stock', e)}
-                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                  className="w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-surface-elevated transition-colors"
                 >
-                  <span className="text-base">📦</span>
-                  <span>Item Esgotado</span>
+                  Item Esgotado
                 </button>
                 <button
                   onClick={(e) => handleSelectReportType('broken_link', e)}
-                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                  className="w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-surface-elevated transition-colors"
                 >
-                  <span className="text-base">⚠️</span>
-                  <span>Link Quebrado/Não Funciona</span>
+                  Link Quebrado/Não Funciona
                 </button>
                 <button
                   onClick={(e) => handleSelectReportType('seller_not_responding', e)}
-                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                  className="w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-surface-elevated transition-colors"
                 >
-                  <span className="text-base">💬</span>
-                  <span>Vendedor não responde</span>
+                  Vendedor não responde
                 </button>
                 <button
                   onClick={(e) => handleSelectReportType('wrong_price', e)}
-                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors"
+                  className="w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-surface-elevated transition-colors"
                 >
-                  <span className="text-base">💰</span>
-                  <span>Preço diferente</span>
+                  Preço diferente
                 </button>
                 <button
                   onClick={(e) => handleSelectReportType('other', e)}
-                  className="w-full px-4 py-3 text-left text-sm flex items-center gap-3 text-text-primary hover:bg-surface-elevated transition-colors border-t border-border"
+                  className="w-full px-4 py-3 text-left text-sm text-text-primary hover:bg-surface-elevated transition-colors border-t border-border"
                 >
-                  <span className="text-base">📝</span>
-                  <span>Outro motivo</span>
+                  Outro motivo
                 </button>
               </div>
             )}
