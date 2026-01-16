@@ -204,20 +204,20 @@ export default function ReportedProductsPage() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
                       Produto
                     </th>
-                    <th className="text-center px-2 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider" title="Link Quebrado">
-                      ⚠️
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Link Quebrado
                     </th>
-                    <th className="text-center px-2 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider" title="Sem Estoque">
-                      📦
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Sem Estoque
                     </th>
-                    <th className="text-center px-2 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider" title="Vendedor Não Responde">
-                      💬
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Vendedor
                     </th>
-                    <th className="text-center px-2 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider" title="Preço Diferente">
-                      💰
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Preço
                     </th>
-                    <th className="text-center px-2 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider" title="Outros">
-                      📝
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Outros
                     </th>
                     <th className="text-center px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
                       Status
@@ -244,46 +244,46 @@ export default function ReportedProductsPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-2 py-4 text-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold ${
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
                           product.broken_link_reports > 0
-                            ? 'bg-yellow-500/10 text-yellow-500'
+                            ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
                             : 'bg-surface-elevated text-text-muted'
                         }`}>
                           {product.broken_link_reports}
                         </span>
                       </td>
-                      <td className="px-2 py-4 text-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold ${
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
                           product.out_of_stock_reports > 0
-                            ? 'bg-orange-500/10 text-orange-500'
+                            ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20'
                             : 'bg-surface-elevated text-text-muted'
                         }`}>
                           {product.out_of_stock_reports}
                         </span>
                       </td>
-                      <td className="px-2 py-4 text-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold ${
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
                           product.seller_not_responding_reports > 0
-                            ? 'bg-blue-500/10 text-blue-500'
+                            ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
                             : 'bg-surface-elevated text-text-muted'
                         }`}>
                           {product.seller_not_responding_reports}
                         </span>
                       </td>
-                      <td className="px-2 py-4 text-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold ${
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
                           product.wrong_price_reports > 0
-                            ? 'bg-purple-500/10 text-purple-500'
+                            ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20'
                             : 'bg-surface-elevated text-text-muted'
                         }`}>
                           {product.wrong_price_reports}
                         </span>
                       </td>
-                      <td className="px-2 py-4 text-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold ${
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
                           product.other_reports > 0
-                            ? 'bg-pink-500/10 text-pink-500'
+                            ? 'bg-pink-500/10 text-pink-500 border border-pink-500/20'
                             : 'bg-surface-elevated text-text-muted'
                         }`}>
                           {product.other_reports}
