@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabase } from '@/lib/supabase';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,6 +58,10 @@ export async function POST(request: NextRequest) {
       console.error('[CLEAR REPORTS API] Erro ao deletar reports:', deleteError);
       // Não retornar erro, pois a limpeza dos contadores já foi feita
     }
+
+    // Revalidar cache para mostrar mudanças imediatamente
+    revalidatePath('/');
+    revalidatePath('/admin/reported-products');
 
     return NextResponse.json({ success: true });
 

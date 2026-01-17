@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabase } from '@/lib/supabase';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,6 +43,10 @@ export async function POST(request: NextRequest) {
       console.error('[MARK SOLD OUT API] Erro ao atualizar produto:', updateError);
       return NextResponse.json({ error: 'Erro ao marcar produto' }, { status: 500 });
     }
+
+    // Revalidar cache da home para mostrar mudanças imediatamente
+    revalidatePath('/');
+    revalidatePath('/admin/reported-products');
 
     return NextResponse.json({ success: true });
 
