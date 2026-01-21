@@ -15,6 +15,8 @@ interface ReportedProduct {
   other_reports: number;
   is_sold_out: boolean;
   needs_validation: boolean;
+  affiliate_link: string;
+  original_link: string;
 }
 
 export default function ReportedProductsPage() {
@@ -130,9 +132,9 @@ export default function ReportedProductsPage() {
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border hover:border-border-emphasis transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              <span className="text-sm font-medium">Voltar</span>
+              <span className="text-sm font-medium">Início</span>
             </button>
           </div>
         </div>
@@ -222,7 +224,7 @@ export default function ReportedProductsPage() {
                     <th className="text-center px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
@@ -307,31 +309,51 @@ export default function ReportedProductsPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Link Afiliado */}
+                          <button
+                            onClick={() => window.open(product.affiliate_link, '_blank')}
+                            className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            title="Abrir link de afiliado (CSSBuy)"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+
+                          {/* Link Xianyu */}
+                          <button
+                            onClick={() => window.open(product.original_link, '_blank')}
+                            className="p-2 text-orange-500 hover:bg-orange-500/10 rounded-lg transition-colors"
+                            title="Abrir link original (Xianyu)"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                          </button>
+
+                          {/* Marcar Esgotado */}
                           {!product.is_sold_out && (
                             <button
                               onClick={() => handleMarkAsSoldOut(product.id)}
-                              className="px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                              className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                               title="Marcar como esgotado"
                             >
-                              Marcar Esgotado
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
                             </button>
                           )}
+
+                          {/* Limpar Reports */}
                           <button
                             onClick={() => handleClearReports(product.id)}
-                            className="px-3 py-1.5 text-xs font-medium text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                            className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                             title="Limpar reports"
                           >
-                            Limpar Reports
-                          </button>
-                          <button
-                            onClick={() => window.open(`/?product=${product.id}`, '_blank')}
-                            className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                            title="Ver produto"
-                          >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </button>
                         </div>

@@ -24,7 +24,7 @@ export async function GET() {
     // Buscar produtos com reports
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, title, image_main, broken_link_reports, out_of_stock_reports, seller_not_responding_reports, wrong_price_reports, other_reports, is_sold_out, needs_validation')
+      .select('id, title, image_main, broken_link_reports, out_of_stock_reports, seller_not_responding_reports, wrong_price_reports, other_reports, is_sold_out, needs_validation, affiliate_link, original_link')
       .or('broken_link_reports.gt.0,out_of_stock_reports.gt.0,seller_not_responding_reports.gt.0,wrong_price_reports.gt.0,other_reports.gt.0')
       .order('broken_link_reports', { ascending: false });
 
