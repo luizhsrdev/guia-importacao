@@ -24,17 +24,17 @@ export async function POST(request: NextRequest) {
 
     // Parse body
     const body = await request.json();
-    const { product_id } = body;
+    const { product_id, is_sold_out } = body;
 
     if (!product_id) {
       return NextResponse.json({ error: 'product_id é obrigatório' }, { status: 400 });
     }
 
-    // Marcar produto como esgotado
+    // Marcar produto como esgotado ou disponível
     const { error: updateError } = await supabase
       .from('products')
       .update({
-        is_sold_out: true,
+        is_sold_out: is_sold_out !== undefined ? is_sold_out : true,
         needs_validation: false
       })
       .eq('id', product_id);

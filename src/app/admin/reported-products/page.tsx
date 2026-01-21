@@ -58,23 +58,24 @@ export default function ReportedProductsPage() {
     }
   };
 
-  const handleMarkAsSoldOut = async (productId: string) => {
+  const handleToggleSoldOut = async (productId: string, currentStatus: boolean) => {
     try {
+      const newStatus = !currentStatus;
       const res = await fetch('/api/admin/products/mark-sold-out', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: productId }),
+        body: JSON.stringify({ product_id: productId, is_sold_out: newStatus }),
       });
 
       if (res.ok) {
-        toast.success('Produto marcado como esgotado');
+        toast.success(newStatus ? 'Produto marcado como esgotado' : 'Produto retornado ao estoque');
         fetchReportedProducts();
       } else {
-        toast.error('Erro ao marcar produto');
+        toast.error('Erro ao atualizar produto');
       }
     } catch (error) {
       console.error('Erro:', error);
-      toast.error('Erro ao marcar produto');
+      toast.error('Erro ao atualizar produto');
     }
   };
 
@@ -314,7 +315,7 @@ export default function ReportedProductsPage() {
                           {/* Link Afiliado */}
                           <button
                             onClick={() => window.open(product.affiliate_link, '_blank')}
-                            className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            className="p-2 text-emerald-600 hover:bg-emerald-600/10 rounded-lg transition-colors"
                             title="Abrir link de afiliado (CSSBuy)"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +326,7 @@ export default function ReportedProductsPage() {
                           {/* Link Xianyu */}
                           <button
                             onClick={() => window.open(product.original_link, '_blank')}
-                            className="p-2 text-orange-500 hover:bg-orange-500/10 rounded-lg transition-colors"
+                            className="p-2 text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
                             title="Abrir link original (Xianyu)"
                           >
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -333,23 +334,31 @@ export default function ReportedProductsPage() {
                             </svg>
                           </button>
 
-                          {/* Marcar Esgotado */}
-                          {!product.is_sold_out && (
-                            <button
-                              onClick={() => handleMarkAsSoldOut(product.id)}
-                              className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Marcar como esgotado"
-                            >
+                          {/* Toggle Esgotado/Disponível */}
+                          <button
+                            onClick={() => handleToggleSoldOut(product.id, product.is_sold_out)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              product.is_sold_out
+                                ? 'text-green-600 hover:bg-green-600/10'
+                                : 'text-rose-600 hover:bg-rose-600/10'
+                            }`}
+                            title={product.is_sold_out ? 'Retornar ao estoque' : 'Marcar como esgotado'}
+                          >
+                            {product.is_sold_out ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
-                            </button>
-                          )}
+                            )}
+                          </button>
 
                           {/* Limpar Reports */}
                           <button
                             onClick={() => handleClearReports(product.id)}
-                            className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                            className="p-2 text-sky-600 hover:bg-sky-600/10 rounded-lg transition-colors"
                             title="Limpar reports"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
