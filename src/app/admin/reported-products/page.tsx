@@ -205,10 +205,10 @@ export default function ReportedProductsPage() {
                       Produto
                     </th>
                     <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                      Link Quebrado
+                      Link OFF
                     </th>
                     <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                      Sem Estoque
+                      S/Estoque
                     </th>
                     <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
                       Vendedor
