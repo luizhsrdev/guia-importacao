@@ -154,11 +154,6 @@ export default function ReportedProductsPage() {
     );
   }
 
-  const totalReports = products.reduce(
-    (acc, p) => acc + p.broken_link_reports + p.out_of_stock_reports + p.seller_not_responding_reports + p.wrong_price_reports + p.other_reports,
-    0
-  );
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -184,53 +179,8 @@ export default function ReportedProductsPage() {
         </div>
       </header>
 
-      {/* Stats */}
+      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-surface border border-border rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs text-text-muted">Total de Reports</p>
-                <p className="text-2xl font-bold text-text-primary">{totalReports}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-surface border border-border rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs text-text-muted">Produtos com Problemas</p>
-                <p className="text-2xl font-bold text-text-primary">{products.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-surface border border-border rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs text-text-muted">Precisam Validação</p>
-                <p className="text-2xl font-bold text-text-primary">
-                  {products.filter(p => p.needs_validation).length}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Table */}
         {products.length === 0 ? (
