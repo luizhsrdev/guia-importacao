@@ -1,7 +1,10 @@
 'use client';
 
 import ImageLightbox from './ImageLightbox';
+import ReportAndFavoriteMenu from './ReportAndFavoriteMenu';
+import FavoriteBadge from './FavoriteBadge';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useSellerFavorites } from '@/hooks/useSellerFavorites';
 
 interface Seller {
   id: string;
@@ -26,16 +29,31 @@ interface SellerCardProps {
 
 export default function SellerCard({ seller, onEdit }: SellerCardProps) {
   const { isAdminModeActive } = useAdminMode();
+  const { toggleFavorite, isFavorite } = useSellerFavorites();
   const isGold = seller.status === 'gold';
 
   return (
     <div
-      className={`bg-surface rounded-2xl p-5 sm:p-6 border shadow-sm transition-all duration-300 ${
+      className={`relative bg-surface rounded-2xl p-5 sm:p-6 border shadow-sm transition-all duration-300 group ${
         isGold
           ? 'border-emerald-500/20 hover:border-emerald-500/50 hover:shadow-glow-primary'
           : 'border-red-500/20 hover:border-red-500/50 hover:shadow-glow-danger'
       }`}
     >
+      {/* Menu de Três Pontos e Badge de Favorito */}
+      {!isAdminModeActive && (
+        <>
+          <ReportAndFavoriteMenu
+            itemId={seller.id}
+            itemType="seller"
+            isFavorite={isFavorite(seller.id)}
+            onToggleFavorite={() => toggleFavorite(seller.id)}
+            className="top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          />
+          {isFavorite(seller.id) && <FavoriteBadge className="top-3 left-3 z-10" />}
+        </>
+      )}
+
       <div className="flex items-start justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
         <div className="flex-1 min-w-0">
           <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-0.5 sm:mb-1 truncate">
