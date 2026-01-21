@@ -275,9 +275,9 @@ export default function ReportedProductsPage() {
           {/* Widget Produtos */}
           <button
             onClick={() => setActiveTab('products')}
-            className={`bg-surface border rounded-xl p-6 text-left transition-all ${
+            className={`bg-surface border-2 rounded-xl p-6 text-left transition-all ${
               activeTab === 'products'
-                ? 'border-primary shadow-lg ring-2 ring-primary/20'
+                ? 'border-yellow-500'
                 : 'border-border hover:border-border-emphasis'
             }`}
           >
@@ -292,18 +292,15 @@ export default function ReportedProductsPage() {
                 <p className="text-3xl font-bold text-text-primary">{totalProductReports}</p>
                 <p className="text-xs text-text-muted mt-1">{products.length} produto{products.length !== 1 ? 's' : ''} reportado{products.length !== 1 ? 's' : ''}</p>
               </div>
-              {activeTab === 'products' && (
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              )}
             </div>
           </button>
 
           {/* Widget Vendedores */}
           <button
             onClick={() => setActiveTab('sellers')}
-            className={`bg-surface border rounded-xl p-6 text-left transition-all ${
+            className={`bg-surface border-2 rounded-xl p-6 text-left transition-all ${
               activeTab === 'sellers'
-                ? 'border-primary shadow-lg ring-2 ring-primary/20'
+                ? 'border-blue-500'
                 : 'border-border hover:border-border-emphasis'
             }`}
           >
@@ -318,9 +315,6 @@ export default function ReportedProductsPage() {
                 <p className="text-3xl font-bold text-text-primary">{totalSellerReports}</p>
                 <p className="text-xs text-text-muted mt-1">{sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''} reportado{sellers.length !== 1 ? 's' : ''}</p>
               </div>
-              {activeTab === 'sellers' && (
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              )}
             </div>
           </button>
         </div>
