@@ -27,13 +27,38 @@ interface ProductReport {
   user_ip: string;
 }
 
+interface ReportedSeller {
+  id: string;
+  name: string;
+  status: 'gold' | 'blacklist';
+  profile_link: string | null;
+  broken_link_reports: number;
+  seller_not_responding_reports: number;
+  other_reports: number;
+  needs_validation: boolean;
+}
+
+interface SellerReport {
+  id: string;
+  report_type: string;
+  description: string | null;
+  created_at: string;
+  user_ip: string;
+}
+
+type TabType = 'products' | 'sellers';
+
 export default function ReportedProductsPage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<TabType>('products');
   const [products, setProducts] = useState<ReportedProduct[]>([]);
+  const [sellers, setSellers] = useState<ReportedSeller[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ReportedProduct | null>(null);
+  const [selectedSeller, setSelectedSeller] = useState<ReportedSeller | null>(null);
   const [productReports, setProductReports] = useState<ProductReport[]>([]);
+  const [sellerReports, setSellerReports] = useState<SellerReport[]>([]);
   const [loadingReports, setLoadingReports] = useState(false);
 
   useEffect(() => {
@@ -48,22 +73,32 @@ export default function ReportedProductsPage() {
         return;
       }
       setIsAdmin(true);
-      fetchReportedProducts();
+      fetchReportedData();
     } catch (error) {
       console.error('Erro ao verificar admin:', error);
       router.push('/');
     }
   };
 
-  const fetchReportedProducts = async () => {
+  const fetchReportedData = async () => {
     try {
-      const res = await fetch('/api/admin/reported-products');
-      if (res.ok) {
-        const data = await res.json();
+      // Buscar produtos e vendedores em paralelo
+      const [productsRes, sellersRes] = await Promise.all([
+        fetch('/api/admin/reported-products'),
+        fetch('/api/admin/reported-sellers')
+      ]);
+
+      if (productsRes.ok) {
+        const data = await productsRes.json();
         setProducts(data.products || []);
       }
+
+      if (sellersRes.ok) {
+        const data = await sellersRes.json();
+        setSellers(data.sellers || []);
+      }
     } catch (error) {
-      console.error('Erro ao buscar produtos reportados:', error);
+      console.error('Erro ao buscar dados reportados:', error);
     } finally {
       setLoading(false);
     }
@@ -100,8 +135,29 @@ export default function ReportedProductsPage() {
 
       if (res.ok) {
         toast.success('Reports limpos com sucesso');
-        fetchReportedProducts();
+        fetchReportedData();
         setSelectedProduct(null);
+      } else {
+        toast.error('Erro ao limpar reports');
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao limpar reports');
+    }
+  };
+
+  const handleClearSellerReports = async (sellerId: string) => {
+    try {
+      const res = await fetch('/api/admin/sellers/clear-reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seller_id: sellerId }),
+      });
+
+      if (res.ok) {
+        toast.success('Reports limpos com sucesso');
+        fetchReportedData();
+        setSelectedSeller(null);
       } else {
         toast.error('Erro ao limpar reports');
       }
@@ -126,9 +182,31 @@ export default function ReportedProductsPage() {
     }
   };
 
+  const fetchSellerReports = async (sellerId: string) => {
+    setLoadingReports(true);
+    try {
+      const res = await fetch(`/api/admin/seller-reports?seller_id=${sellerId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSellerReports(data.reports || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar reports:', error);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
   const handleProductClick = (product: ReportedProduct) => {
     setSelectedProduct(product);
+    setSelectedSeller(null);
     fetchProductReports(product.id);
+  };
+
+  const handleSellerClick = (seller: ReportedSeller) => {
+    setSelectedSeller(seller);
+    setSelectedProduct(null);
+    fetchSellerReports(seller.id);
   };
 
   const getReportTypeLabel = (type: string) => {
@@ -141,6 +219,17 @@ export default function ReportedProductsPage() {
     };
     return labels[type] || type;
   };
+
+  // Calcular totais
+  const totalProductReports = products.reduce(
+    (acc, p) => acc + p.broken_link_reports + p.out_of_stock_reports + p.seller_not_responding_reports + p.wrong_price_reports + p.other_reports,
+    0
+  );
+
+  const totalSellerReports = sellers.reduce(
+    (acc, s) => acc + s.broken_link_reports + s.seller_not_responding_reports + s.other_reports,
+    0
+  );
 
   if (!isAdmin) {
     return null;
@@ -161,9 +250,9 @@ export default function ReportedProductsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-text-primary">Produtos Reportados</h1>
+              <h1 className="text-2xl font-bold text-text-primary">Reports</h1>
               <p className="text-sm text-text-muted mt-1">
-                Gerencie reports de usuários sobre problemas em produtos
+                Gerencie reports de usuários sobre problemas
               </p>
             </div>
             <button
@@ -179,11 +268,65 @@ export default function ReportedProductsPage() {
         </div>
       </header>
 
-      {/* Content */}
+      {/* Widgets e Abas */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {/* Widgets */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          {/* Widget Produtos */}
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`bg-surface border rounded-xl p-6 text-left transition-all ${
+              activeTab === 'products'
+                ? 'border-primary shadow-lg ring-2 ring-primary/20'
+                : 'border-border hover:border-border-emphasis'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-text-muted font-medium uppercase tracking-wider mb-1">Produtos</p>
+                <p className="text-3xl font-bold text-text-primary">{totalProductReports}</p>
+                <p className="text-xs text-text-muted mt-1">{products.length} produto{products.length !== 1 ? 's' : ''} reportado{products.length !== 1 ? 's' : ''}</p>
+              </div>
+              {activeTab === 'products' && (
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              )}
+            </div>
+          </button>
 
-        {/* Table */}
-        {products.length === 0 ? (
+          {/* Widget Vendedores */}
+          <button
+            onClick={() => setActiveTab('sellers')}
+            className={`bg-surface border rounded-xl p-6 text-left transition-all ${
+              activeTab === 'sellers'
+                ? 'border-primary shadow-lg ring-2 ring-primary/20'
+                : 'border-border hover:border-border-emphasis'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-text-muted font-medium uppercase tracking-wider mb-1">Vendedores</p>
+                <p className="text-3xl font-bold text-text-primary">{totalSellerReports}</p>
+                <p className="text-xs text-text-muted mt-1">{sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''} reportado{sellers.length !== 1 ? 's' : ''}</p>
+              </div>
+              {activeTab === 'sellers' && (
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              )}
+            </div>
+          </button>
+        </div>
+
+        {/* Tabela de Produtos */}
+        {activeTab === 'products' && (products.length === 0 ? (
           <div className="bg-surface border border-border rounded-xl p-12 text-center">
             <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -382,10 +525,154 @@ export default function ReportedProductsPage() {
               </table>
             </div>
           </div>
-        )}
+        ))}
+
+        {/* Tabela de Vendedores */}
+        {activeTab === 'sellers' && (sellers.length === 0 ? (
+          <div className="bg-surface border border-border rounded-xl p-12 text-center">
+            <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="text-lg font-semibold text-text-primary mb-2">Nenhum vendedor reportado</h3>
+            <p className="text-sm text-text-muted">Não há vendedores com reports no momento</p>
+          </div>
+        ) : (
+          <div className="bg-surface border border-border rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-surface-elevated border-b border-border">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Vendedor
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Link OFF
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Vendedor
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Outros
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {sellers.map((seller) => (
+                    <tr
+                      key={seller.id}
+                      className="hover:bg-surface-elevated transition-colors cursor-pointer"
+                      onClick={() => handleSellerClick(seller)}
+                    >
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-surface-elevated flex items-center justify-center">
+                            <svg className="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <div className="max-w-[200px]">
+                            <p className="text-sm font-medium text-text-primary truncate">
+                              {seller.name}
+                            </p>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              seller.status === 'gold'
+                                ? 'bg-emerald-500/10 text-emerald-500'
+                                : 'bg-red-500/10 text-red-500'
+                            }`}>
+                              {seller.status === 'gold' ? 'Verificado' : 'Blacklist'}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
+                          seller.broken_link_reports > 0
+                            ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
+                            : 'bg-surface-elevated text-text-muted'
+                        }`}>
+                          {seller.broken_link_reports}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
+                          seller.seller_not_responding_reports > 0
+                            ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                            : 'bg-surface-elevated text-text-muted'
+                        }`}>
+                          {seller.seller_not_responding_reports}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
+                          seller.other_reports > 0
+                            ? 'bg-pink-500/10 text-pink-500 border border-pink-500/20'
+                            : 'bg-surface-elevated text-text-muted'
+                        }`}>
+                          {seller.other_reports}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        {seller.needs_validation ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 text-yellow-500 text-xs font-medium rounded-full">
+                            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
+                            Precisa Validar
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-500/10 text-green-500 text-xs font-medium rounded-full">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                            Ativo
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Link Xianyu */}
+                          {seller.profile_link && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(seller.profile_link!, '_blank');
+                              }}
+                              className="p-2 text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
+                              title="Abrir perfil (Xianyu)"
+                            >
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                              </svg>
+                            </button>
+                          )}
+
+                          {/* Limpar Reports */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClearSellerReports(seller.id);
+                            }}
+                            className="p-2 text-sky-600 hover:bg-sky-600/10 rounded-lg transition-colors"
+                            title="Limpar reports"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Modal de Detalhes dos Reports */}
+      {/* Modal de Detalhes dos Reports de Produtos */}
       {selectedProduct && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -504,6 +791,131 @@ export default function ReportedProductsPage() {
               </button>
               <button
                 onClick={() => handleClearReports(selectedProduct.id)}
+                className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-sky-600/10 text-sky-600 hover:bg-sky-600/20 transition-colors font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Limpar Reports
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Detalhes dos Reports de Vendedores */}
+      {selectedSeller && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedSeller(null)}
+        >
+          <div
+            className="bg-surface rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start gap-4 p-6 border-b border-border">
+              <div className="w-16 h-16 rounded-xl bg-surface-elevated flex items-center justify-center">
+                <svg className="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-bold text-text-primary mb-1">
+                  {selectedSeller.name}
+                </h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    selectedSeller.status === 'gold'
+                      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                      : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                  }`}>
+                    {selectedSeller.status === 'gold' ? 'Verificado' : 'Blacklist'}
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                    {selectedSeller.broken_link_reports} Link OFF
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                    {selectedSeller.seller_not_responding_reports} Vendedor
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-pink-500/10 text-pink-500 border border-pink-500/20">
+                    {selectedSeller.other_reports} Outros
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedSeller(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-elevated hover:bg-surface-overlay transition-colors"
+              >
+                <svg className="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body - Lista de Reports */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingReports ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : sellerReports.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-text-muted">Nenhum report detalhado encontrado</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sellerReports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="bg-surface-elevated border border-border rounded-xl p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <span className="text-sm font-semibold text-text-primary">
+                          {getReportTypeLabel(report.report_type)}
+                        </span>
+                        <span className="text-xs text-text-muted">
+                          {new Date(report.created_at).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      {report.description && (
+                        <p className="text-sm text-text-secondary bg-background rounded-lg p-3 border border-border">
+                          {report.description}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-text-muted">IP:</span>
+                        <code className="text-xs bg-background px-2 py-0.5 rounded border border-border text-text-muted">
+                          {report.user_ip}
+                        </code>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer - Ações */}
+            <div className="flex items-center gap-3 p-6 border-t border-border">
+              {selectedSeller.profile_link && (
+                <button
+                  onClick={() => window.open(selectedSeller.profile_link!, '_blank')}
+                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-colors font-medium"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                  Perfil Xianyu
+                </button>
+              )}
+              <button
+                onClick={() => handleClearSellerReports(selectedSeller.id)}
                 className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-sky-600/10 text-sky-600 hover:bg-sky-600/20 transition-colors font-medium"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
