@@ -19,11 +19,22 @@ interface ReportedProduct {
   original_link: string;
 }
 
+interface ProductReport {
+  id: string;
+  report_type: string;
+  description: string | null;
+  created_at: string;
+  user_ip: string;
+}
+
 export default function ReportedProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<ReportedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ReportedProduct | null>(null);
+  const [productReports, setProductReports] = useState<ProductReport[]>([]);
+  const [loadingReports, setLoadingReports] = useState(false);
 
   useEffect(() => {
     checkAdminStatus();
@@ -90,6 +101,7 @@ export default function ReportedProductsPage() {
       if (res.ok) {
         toast.success('Reports limpos com sucesso');
         fetchReportedProducts();
+        setSelectedProduct(null);
       } else {
         toast.error('Erro ao limpar reports');
       }
@@ -97,6 +109,37 @@ export default function ReportedProductsPage() {
       console.error('Erro:', error);
       toast.error('Erro ao limpar reports');
     }
+  };
+
+  const fetchProductReports = async (productId: string) => {
+    setLoadingReports(true);
+    try {
+      const res = await fetch(`/api/admin/product-reports?product_id=${productId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setProductReports(data.reports || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar reports:', error);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
+  const handleProductClick = (product: ReportedProduct) => {
+    setSelectedProduct(product);
+    fetchProductReports(product.id);
+  };
+
+  const getReportTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      broken_link: 'Link Quebrado',
+      out_of_stock: 'Sem Estoque',
+      seller_not_responding: 'Vendedor não responde',
+      wrong_price: 'Preço diferente',
+      other: 'Outro motivo'
+    };
+    return labels[type] || type;
   };
 
   if (!isAdmin) {
@@ -232,7 +275,11 @@ export default function ReportedProductsPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {products.map((product) => (
-                    <tr key={product.id} className="hover:bg-surface-elevated transition-colors">
+                    <tr
+                      key={product.id}
+                      className="hover:bg-surface-elevated transition-colors cursor-pointer"
+                      onClick={() => handleProductClick(product)}
+                    >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
                           <img
@@ -310,11 +357,14 @@ export default function ReportedProductsPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-2">
                           {/* Link Afiliado */}
                           <button
-                            onClick={() => window.open(product.affiliate_link, '_blank')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(product.affiliate_link, '_blank');
+                            }}
                             className="p-2 text-emerald-600 hover:bg-emerald-600/10 rounded-lg transition-colors"
                             title="Abrir link de afiliado (CSSBuy)"
                           >
@@ -325,7 +375,10 @@ export default function ReportedProductsPage() {
 
                           {/* Link Xianyu */}
                           <button
-                            onClick={() => window.open(product.original_link, '_blank')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(product.original_link, '_blank');
+                            }}
                             className="p-2 text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
                             title="Abrir link original (Xianyu)"
                           >
@@ -336,7 +389,10 @@ export default function ReportedProductsPage() {
 
                           {/* Toggle Esgotado/Disponível */}
                           <button
-                            onClick={() => handleToggleSoldOut(product.id, product.is_sold_out)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleSoldOut(product.id, product.is_sold_out);
+                            }}
                             className={`p-2 rounded-lg transition-colors ${
                               product.is_sold_out
                                 ? 'text-green-600 hover:bg-green-600/10'
@@ -357,7 +413,10 @@ export default function ReportedProductsPage() {
 
                           {/* Limpar Reports */}
                           <button
-                            onClick={() => handleClearReports(product.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClearReports(product.id);
+                            }}
                             className="p-2 text-sky-600 hover:bg-sky-600/10 rounded-lg transition-colors"
                             title="Limpar reports"
                           >
@@ -375,6 +434,137 @@ export default function ReportedProductsPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalhes dos Reports */}
+      {selectedProduct && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedProduct(null)}
+        >
+          <div
+            className="bg-surface rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start gap-4 p-6 border-b border-border">
+              <img
+                src={selectedProduct.image_main}
+                alt={selectedProduct.title}
+                className="w-16 h-16 rounded-xl object-cover"
+              />
+              <div className="flex-1">
+                <h2 className="text-lg font-bold text-text-primary mb-1">
+                  {selectedProduct.title}
+                </h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                    {selectedProduct.broken_link_reports} Link OFF
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                    {selectedProduct.out_of_stock_reports} S/Estoque
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                    {selectedProduct.seller_not_responding_reports} Vendedor
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-purple-500/10 text-purple-500 border border-purple-500/20">
+                    {selectedProduct.wrong_price_reports} Preço
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-pink-500/10 text-pink-500 border border-pink-500/20">
+                    {selectedProduct.other_reports} Outros
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedProduct(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-elevated hover:bg-surface-overlay transition-colors"
+              >
+                <svg className="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body - Lista de Reports */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingReports ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : productReports.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-text-muted">Nenhum report detalhado encontrado</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {productReports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="bg-surface-elevated border border-border rounded-xl p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <span className="text-sm font-semibold text-text-primary">
+                          {getReportTypeLabel(report.report_type)}
+                        </span>
+                        <span className="text-xs text-text-muted">
+                          {new Date(report.created_at).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      {report.description && (
+                        <p className="text-sm text-text-secondary bg-background rounded-lg p-3 border border-border">
+                          {report.description}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-text-muted">IP:</span>
+                        <code className="text-xs bg-background px-2 py-0.5 rounded border border-border text-text-muted">
+                          {report.user_ip}
+                        </code>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer - Ações */}
+            <div className="flex items-center gap-3 p-6 border-t border-border">
+              <button
+                onClick={() => window.open(selectedProduct.affiliate_link, '_blank')}
+                className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600/20 transition-colors font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Afiliado
+              </button>
+              <button
+                onClick={() => window.open(selectedProduct.original_link, '_blank')}
+                className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-colors font-medium"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Xianyu
+              </button>
+              <button
+                onClick={() => handleClearReports(selectedProduct.id)}
+                className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-sky-600/10 text-sky-600 hover:bg-sky-600/20 transition-colors font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Limpar Reports
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
