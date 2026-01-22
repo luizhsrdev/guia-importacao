@@ -115,7 +115,7 @@ export default function ReportedProductsPage() {
 
       if (res.ok) {
         toast.success(newStatus ? 'Produto marcado como esgotado' : 'Produto retornado ao estoque');
-        fetchReportedProducts();
+        fetchReportedData();
       } else {
         toast.error('Erro ao atualizar produto');
       }

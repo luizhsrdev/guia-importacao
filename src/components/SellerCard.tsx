@@ -47,7 +47,7 @@ export default function SellerCard({ seller, onEdit }: SellerCardProps) {
             itemId={seller.id}
             itemType="seller"
             isFavorite={isFavorite(seller.id)}
-            onToggleFavorite={() => toggleFavorite(seller.id)}
+            onToggleFavorite={async () => { await toggleFavorite(seller.id); }}
             className="top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10"
           />
           {isFavorite(seller.id) && <FavoriteBadge className="top-3 left-3 z-10" />}
