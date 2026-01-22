@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 
 export function AdminReportsNotification() {
   const [reportCount, setReportCount] = useState(0);
   const router = useRouter();
+  const { isAdminModeActive } = useAdminMode();
 
   const fetchReportCount = async () => {
     try {
@@ -33,13 +35,14 @@ export function AdminReportsNotification() {
     router.push('/admin/reported-products');
   };
 
-  if (reportCount === 0) return null;
+  // Só mostrar se admin mode estiver ativo e houver reports
+  if (!isAdminModeActive || reportCount === 0) return null;
 
   return (
     <button
       onClick={handleClick}
       className="relative w-9 h-9 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 transition-colors flex items-center justify-center group"
-      title={`${reportCount} produto${reportCount > 1 ? 's' : ''} reportado${reportCount > 1 ? 's' : ''}`}
+      title={`${reportCount} item${reportCount > 1 ? 's' : ''} reportado${reportCount > 1 ? 's' : ''}`}
     >
       {/* Bell Icon */}
       <svg

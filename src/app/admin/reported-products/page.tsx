@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { ProductFormModal } from '@/components/ProductFormModal';
+import { SellerFormModal } from '@/components/SellerFormModal';
+import { getCategories as getProductCategories } from '@/lib/actions/products';
+import { getCategories as getSellerCategories } from '@/lib/actions/sellers';
 
 interface ReportedProduct {
   id: string;
@@ -60,10 +64,31 @@ export default function ReportedProductsPage() {
   const [productReports, setProductReports] = useState<ProductReport[]>([]);
   const [sellerReports, setSellerReports] = useState<SellerReport[]>([]);
   const [loadingReports, setLoadingReports] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
+  const [productCategories, setProductCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [sellerCategories, setSellerCategories] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
     checkAdminStatus();
+    loadCategories();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      console.log('[REPORTED PRODUCTS] Carregando categorias...');
+      const [productCats, sellerCats] = await Promise.all([
+        getProductCategories(),
+        getSellerCategories()
+      ]);
+      console.log('[REPORTED PRODUCTS] Product categories:', productCats.length);
+      console.log('[REPORTED PRODUCTS] Seller categories:', sellerCats.length);
+      setProductCategories(productCats);
+      setSellerCategories(sellerCats);
+    } catch (error) {
+      console.error('[REPORTED PRODUCTS] Erro ao carregar categorias:', error);
+    }
+  };
 
   const checkAdminStatus = async () => {
     try {
@@ -82,7 +107,7 @@ export default function ReportedProductsPage() {
 
   const fetchReportedData = async () => {
     try {
-      // Buscar produtos e vendedores em paralelo
+      // Buscar produtos e vendedores via API
       const [productsRes, sellersRes] = await Promise.all([
         fetch('/api/admin/reported-products'),
         fetch('/api/admin/reported-sellers')
@@ -207,6 +232,20 @@ export default function ReportedProductsPage() {
     setSelectedSeller(seller);
     setSelectedProduct(null);
     fetchSellerReports(seller.id);
+  };
+
+  const handleEditProduct = (productId: string) => {
+    console.log('[REPORTED PRODUCTS] Clicou em editar produto:', productId);
+    console.log('[REPORTED PRODUCTS] Categorias disponíveis:', productCategories.length);
+    setEditingProductId(productId);
+    console.log('[REPORTED PRODUCTS] editingProductId setado para:', productId);
+  };
+
+  const handleEditSeller = (sellerId: string) => {
+    console.log('[REPORTED PRODUCTS] Clicou em editar vendedor:', sellerId);
+    console.log('[REPORTED PRODUCTS] Categorias disponíveis:', sellerCategories.length);
+    setEditingSellerId(sellerId);
+    console.log('[REPORTED PRODUCTS] editingSellerId setado para:', sellerId);
   };
 
   const getReportTypeLabel = (type: string) => {
@@ -474,6 +513,20 @@ export default function ReportedProductsPage() {
                             </svg>
                           </button>
 
+                          {/* Editar Produto */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditProduct(product.id);
+                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-600/10 rounded-lg transition-colors"
+                            title="Editar produto"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+
                           {/* Toggle Esgotado/Disponível */}
                           <button
                             onClick={(e) => {
@@ -641,6 +694,20 @@ export default function ReportedProductsPage() {
                               </svg>
                             </button>
                           )}
+
+                          {/* Editar Vendedor */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditSeller(seller.id);
+                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-600/10 rounded-lg transition-colors"
+                            title="Editar vendedor"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
 
                           {/* Limpar Reports */}
                           <button
@@ -921,6 +988,51 @@ export default function ReportedProductsPage() {
           </div>
         </div>
       )}
+
+      {/* Modais de Edição */}
+      {editingProductId && (() => {
+        console.log('[REPORTED PRODUCTS] Renderizando ProductFormModal para produto:', editingProductId);
+        console.log('[REPORTED PRODUCTS] Categories prop:', productCategories);
+        return (
+          <ProductFormModal
+            isOpen={true}
+            onClose={() => {
+              console.log('[REPORTED PRODUCTS] ProductFormModal fechado');
+              setEditingProductId(null);
+              fetchReportedData();
+            }}
+            productId={editingProductId}
+            categories={productCategories}
+            onSuccess={() => {
+              console.log('[REPORTED PRODUCTS] ProductFormModal sucesso');
+              setEditingProductId(null);
+              fetchReportedData();
+            }}
+          />
+        );
+      })()}
+
+      {editingSellerId && (() => {
+        console.log('[REPORTED PRODUCTS] Renderizando SellerFormModal para vendedor:', editingSellerId);
+        console.log('[REPORTED PRODUCTS] Categories prop:', sellerCategories);
+        return (
+          <SellerFormModal
+            isOpen={true}
+            onClose={() => {
+              console.log('[REPORTED PRODUCTS] SellerFormModal fechado');
+              setEditingSellerId(null);
+              fetchReportedData();
+            }}
+            sellerId={editingSellerId}
+            categories={sellerCategories}
+            onSuccess={() => {
+              console.log('[REPORTED PRODUCTS] SellerFormModal sucesso');
+              setEditingSellerId(null);
+              fetchReportedData();
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }

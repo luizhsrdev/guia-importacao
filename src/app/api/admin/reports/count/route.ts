@@ -22,17 +22,31 @@ export async function GET() {
     }
 
     // Contar produtos com reports
-    const { count, error } = await supabase
+    const { count: productCount, error: productError } = await supabase
       .from('products')
       .select('*', { count: 'exact', head: true })
       .or('broken_link_reports.gt.0,out_of_stock_reports.gt.0,seller_not_responding_reports.gt.0,wrong_price_reports.gt.0,other_reports.gt.0');
 
-    if (error) {
-      console.error('[REPORTS COUNT API] Erro ao contar reports:', error);
+    if (productError) {
+      console.error('[REPORTS COUNT API] Erro ao contar reports de produtos:', productError);
       return NextResponse.json({ error: 'Erro ao buscar contagem' }, { status: 500 });
     }
 
-    return NextResponse.json({ count: count || 0 });
+    // Contar vendedores com reports
+    const { count: sellerCount, error: sellerError } = await supabase
+      .from('sellers')
+      .select('*', { count: 'exact', head: true })
+      .or('broken_link_reports.gt.0,seller_not_responding_reports.gt.0,other_reports.gt.0');
+
+    if (sellerError) {
+      console.error('[REPORTS COUNT API] Erro ao contar reports de vendedores:', sellerError);
+      return NextResponse.json({ error: 'Erro ao buscar contagem' }, { status: 500 });
+    }
+
+    // Somar ambos os contadores
+    const totalCount = (productCount || 0) + (sellerCount || 0);
+
+    return NextResponse.json({ count: totalCount });
 
   } catch (error) {
     console.error('[REPORTS COUNT API] Erro não tratado:', error);
