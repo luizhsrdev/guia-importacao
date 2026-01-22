@@ -24,7 +24,7 @@ export async function GET() {
     // Buscar vendedores com reports
     const { data: sellers, error } = await supabase
       .from('sellers')
-      .select('id, name, status, profile_link, broken_link_reports, seller_not_responding_reports, other_reports, needs_validation')
+      .select('id, name, status, profile_link, image_url, broken_link_reports, seller_not_responding_reports, other_reports, needs_validation')
       .or('broken_link_reports.gt.0,seller_not_responding_reports.gt.0,other_reports.gt.0')
       .order('broken_link_reports', { ascending: false });
 

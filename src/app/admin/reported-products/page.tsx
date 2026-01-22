@@ -36,6 +36,7 @@ interface ReportedSeller {
   name: string;
   status: 'gold' | 'blacklist';
   profile_link: string | null;
+  image_url: string | null;
   broken_link_reports: number;
   seller_not_responding_reports: number;
   other_reports: number;
@@ -618,11 +619,19 @@ export default function ReportedProductsPage() {
                     >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-surface-elevated flex items-center justify-center">
-                            <svg className="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </div>
+                          {seller.image_url ? (
+                            <img
+                              src={seller.image_url}
+                              alt={seller.name}
+                              className="flex-shrink-0 w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-surface-elevated flex items-center justify-center">
+                              <svg className="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                          )}
                           <div className="max-w-[200px]">
                             <p className="text-sm font-medium text-text-primary truncate">
                               {seller.name}
@@ -876,11 +885,19 @@ export default function ReportedProductsPage() {
           >
             {/* Header */}
             <div className="flex items-start gap-4 p-6 border-b border-border">
-              <div className="w-16 h-16 rounded-xl bg-surface-elevated flex items-center justify-center">
-                <svg className="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
+              {selectedSeller.image_url ? (
+                <img
+                  src={selectedSeller.image_url}
+                  alt={selectedSeller.name}
+                  className="w-16 h-16 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-xl bg-surface-elevated flex items-center justify-center">
+                  <svg className="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              )}
               <div className="flex-1">
                 <h2 className="text-lg font-bold text-text-primary mb-1">
                   {selectedSeller.name}
