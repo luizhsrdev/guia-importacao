@@ -35,14 +35,14 @@ export function AdminReportsNotification() {
     router.push('/admin/reported-products');
   };
 
-  // Só mostrar se admin mode estiver ativo e houver reports
-  if (!isAdminModeActive || reportCount === 0) return null;
+  // Só mostrar se admin mode estiver ativo
+  if (!isAdminModeActive) return null;
 
   return (
     <button
       onClick={handleClick}
       className="relative w-9 h-9 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 transition-colors flex items-center justify-center group"
-      title={`${reportCount} item${reportCount > 1 ? 's' : ''} reportado${reportCount > 1 ? 's' : ''}`}
+      title={reportCount > 0 ? `${reportCount} item${reportCount > 1 ? 's' : ''} reportado${reportCount > 1 ? 's' : ''}` : 'Ver reports'}
     >
       {/* Bell Icon */}
       <svg
@@ -59,10 +59,12 @@ export function AdminReportsNotification() {
         />
       </svg>
 
-      {/* Badge */}
-      <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-background">
-        {reportCount > 99 ? '99+' : reportCount}
-      </span>
+      {/* Badge - só mostra se houver reports */}
+      {reportCount > 0 && (
+        <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-background">
+          {reportCount > 99 ? '99+' : reportCount}
+        </span>
+      )}
     </button>
   );
 }

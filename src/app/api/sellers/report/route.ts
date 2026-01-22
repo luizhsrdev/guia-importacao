@@ -8,18 +8,18 @@ export async function POST(request: NextRequest) {
   try {
     // Parse body
     const body = await request.json();
-    const { seller_id, issue_type, description } = body;
+    const { seller_id, report_type, description } = body;
 
     // Validações
     if (!seller_id) {
       return NextResponse.json({ error: 'seller_id é obrigatório' }, { status: 400 });
     }
 
-    if (!issue_type || !VALID_REPORT_TYPES.includes(issue_type)) {
-      return NextResponse.json({ error: 'issue_type inválido' }, { status: 400 });
+    if (!report_type || !VALID_REPORT_TYPES.includes(report_type)) {
+      return NextResponse.json({ error: 'report_type inválido' }, { status: 400 });
     }
 
-    if (issue_type === 'other' && !description) {
+    if (report_type === 'other' && !description) {
       return NextResponse.json({ error: 'Descrição é obrigatória para "Outro motivo"' }, { status: 400 });
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       .from('seller_reports')
       .select('*')
       .eq('seller_id', seller_id)
-      .eq('report_type', issue_type)
+      .eq('report_type', report_type)
       .gte('created_at', sevenDaysAgo.toISOString())
       .or(`user_id.eq.${userId || 'null'},user_ip.eq.${userIp}`);
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         seller_id,
         user_id: userId || null,
         user_ip: userIp,
-        report_type: issue_type,
+        report_type,
         description: description || null
       });
 
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     // Incrementar contador usando função SQL
     const { error: rpcError } = await supabase.rpc('report_seller_issue', {
       p_seller_id: seller_id,
-      p_issue_type: issue_type
+      p_issue_type: report_type
     });
 
     if (rpcError) {

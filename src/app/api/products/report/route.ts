@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   try {
     // Parse do body
     const body = await request.json();
-    const { product_id, issue_type, description } = body;
+    const { product_id, report_type, description } = body;
 
     // Validação 1: product_id é UUID válido
     if (!product_id || !isValidUUID(product_id)) {
@@ -50,16 +50,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validação 2: issue_type está na lista permitida
-    if (!issue_type || !VALID_REPORT_TYPES.includes(issue_type)) {
+    // Validação 2: report_type está na lista permitida
+    if (!report_type || !VALID_REPORT_TYPES.includes(report_type)) {
       return NextResponse.json(
-        { error: 'issue_type inválido' },
+        { error: 'report_type inválido' },
         { status: 400 }
       );
     }
 
     // Validação 3: Se tipo for 'other', description é obrigatória
-    if (issue_type === 'other' && (!description || description.trim().length === 0)) {
+    if (report_type === 'other' && (!description || description.trim().length === 0)) {
       return NextResponse.json(
         { error: 'description é obrigatória para tipo "other"' },
         { status: 400 }
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     console.log('[REPORT API] Novo report recebido:', {
       product_id,
-      issue_type,
+      report_type,
       user_id: userId || 'anônimo',
       user_ip: userIp
     });
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       .from('product_reports')
       .select('*')
       .eq('product_id', product_id)
-      .eq('report_type', issue_type)
+      .eq('report_type', report_type)
       .gte('created_at', sevenDaysAgo.toISOString())
       .or(`user_id.eq.${userId || 'null'},user_ip.eq.${userIp}`);
 
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     } else if (existingReports && existingReports.length > 0) {
       console.log('[REPORT API] Report duplicado bloqueado:', {
         product_id,
-        issue_type,
+        report_type,
         user_id: userId || 'anônimo',
         user_ip: userIp
       });
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         product_id,
         user_id: userId || null,
         user_ip: userIp,
-        report_type: issue_type,
+        report_type,
         description: description || null
       });
 
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     // Chamar função SQL do Supabase para atualizar contadores
     const { data, error: rpcError } = await supabase.rpc('report_product_issue', {
       p_product_id: product_id,
-      p_issue_type: issue_type
+      p_issue_type: report_type
     });
 
     if (rpcError) {

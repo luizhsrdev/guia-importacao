@@ -791,8 +791,8 @@ export default function ReportedProductsPage() {
               </button>
             </div>
 
-            {/* Body - Lista de Reports */}
-            <div className="flex-1 overflow-y-auto p-6">
+            {/* Body - Lista de Reports com scroll */}
+            <div className="flex-1 overflow-y-auto p-6 max-h-[50vh]">
               {loadingReports ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -806,13 +806,13 @@ export default function ReportedProductsPage() {
                   {productReports.map((report) => (
                     <div
                       key={report.id}
-                      className="bg-surface-elevated border border-border rounded-xl p-4"
+                      className="bg-surface-elevated border border-border rounded-xl p-4 hover:bg-surface-overlay transition-colors"
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <span className="text-sm font-semibold text-text-primary">
                           {getReportTypeLabel(report.report_type)}
                         </span>
-                        <span className="text-xs text-text-muted">
+                        <span className="text-xs text-text-muted whitespace-nowrap">
                           {new Date(report.created_at).toLocaleDateString('pt-BR', {
                             day: '2-digit',
                             month: '2-digit',
@@ -823,7 +823,7 @@ export default function ReportedProductsPage() {
                         </span>
                       </div>
                       {report.description && (
-                        <p className="text-sm text-text-secondary bg-background rounded-lg p-3 border border-border">
+                        <p className="text-sm text-text-secondary bg-background rounded-lg p-3 border border-border break-words">
                           {report.description}
                         </p>
                       )}
@@ -931,8 +931,8 @@ export default function ReportedProductsPage() {
               </button>
             </div>
 
-            {/* Body - Lista de Reports */}
-            <div className="flex-1 overflow-y-auto p-6">
+            {/* Body - Lista de Reports com scroll */}
+            <div className="flex-1 overflow-y-auto p-6 max-h-[50vh]">
               {loadingReports ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -946,13 +946,13 @@ export default function ReportedProductsPage() {
                   {sellerReports.map((report) => (
                     <div
                       key={report.id}
-                      className="bg-surface-elevated border border-border rounded-xl p-4"
+                      className="bg-surface-elevated border border-border rounded-xl p-4 hover:bg-surface-overlay transition-colors"
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <span className="text-sm font-semibold text-text-primary">
                           {getReportTypeLabel(report.report_type)}
                         </span>
-                        <span className="text-xs text-text-muted">
+                        <span className="text-xs text-text-muted whitespace-nowrap">
                           {new Date(report.created_at).toLocaleDateString('pt-BR', {
                             day: '2-digit',
                             month: '2-digit',
@@ -963,7 +963,7 @@ export default function ReportedProductsPage() {
                         </span>
                       </div>
                       {report.description && (
-                        <p className="text-sm text-text-secondary bg-background rounded-lg p-3 border border-border">
+                        <p className="text-sm text-text-secondary bg-background rounded-lg p-3 border border-border break-words">
                           {report.description}
                         </p>
                       )}

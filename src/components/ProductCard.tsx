@@ -148,7 +148,7 @@ export default function ProductCard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product_id: id,
-          issue_type: selectedReportType,
+          report_type: selectedReportType,
           description: selectedReportType === 'other' ? reportDescription : null,
         }),
       });

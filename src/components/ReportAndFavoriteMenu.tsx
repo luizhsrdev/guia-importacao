@@ -80,7 +80,7 @@ export default function ReportAndFavoriteMenu({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           [itemIdField]: itemId,
-          issue_type: type,
+          report_type: type,
           description: description || undefined
         })
       });
