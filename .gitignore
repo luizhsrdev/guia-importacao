@@ -16,6 +16,9 @@ dist/
 *.log
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Variáveis de Ambiente (CRÍTICO)
 .env
@@ -39,3 +42,24 @@ coverage/
 
 # Vercel
 .vercel
+
+# Documentação e Instruções Internas (não devem estar no repositório público)
+CLAUDE.md
+CLAUDE_REVISAO.md
+plan.md
+TROUBLESHOOTING_UPLOAD.md
+SETUP_SELLER_REPORTS.md
+TESTE_METRICAS_CATEGORIAS.md
+
+# Arquivos de backup e temporários
+*.bak
+*.tmp
+*.temp
+*~
+
+# Arquivos sensíveis
+credentials.json
+serviceAccountKey.json
+*.pem
+*.key
+*.cert
