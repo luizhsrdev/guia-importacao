@@ -92,8 +92,8 @@ export function CurrencyToggle() {
               }}
               className="group h-10 px-3 bg-surface rounded-xl border border-border shadow-sm hover:bg-surface-elevated hover:border-border-emphasis transition-all duration-200 text-xs flex items-center gap-1.5 whitespace-nowrap"
             >
-              <span className="text-text-tertiary">¥1 =</span>
-              <span className="text-text-primary font-medium">R$ {cnyRate.toFixed(2)}</span>
+              <span className="text-text-tertiary">R$1 =</span>
+              <span className="text-text-primary font-medium">¥ {cnyRate.toFixed(2)}</span>
               <svg
                 className="w-3.5 h-3.5 text-text-muted ml-0.5 group-hover:text-primary transition-colors duration-200"
                 fill="none"
@@ -111,7 +111,7 @@ export function CurrencyToggle() {
           ) : (
             <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 h-10 px-3 bg-surface border border-primary rounded-xl transition-all duration-200">
-              <span className="text-text-tertiary text-xs">R$</span>
+              <span className="text-text-tertiary text-xs">¥</span>
               <input
                 ref={inputRef}
                 type="number"

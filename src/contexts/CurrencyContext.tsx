@@ -16,7 +16,7 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   // Estado persistido no localStorage
   const [currency, setCurrency] = useState<'CNY' | 'BRL'>('CNY');
-  const [cnyRate, setCnyRate] = useState<number>(0.70); // 1 CNY = R$ 0,70
+  const [cnyRate, setCnyRate] = useState<number>(1.20); // 1 BRL = ¥ 1.20
   const [mounted, setMounted] = useState(false);
 
   // Carregar preferências do localStorage
@@ -45,7 +45,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     if (currency === 'CNY') {
       return cny.toFixed(2);
     } else {
-      const brl = cny * cnyRate;
+      const brl = cny / cnyRate;
       return brl.toFixed(2);
     }
   };
