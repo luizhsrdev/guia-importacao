@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
 
     // Buscar estado atualizado do produto
     const { data: product, error: fetchError } = await supabase
-      .from('products')
+      .from('products_public')
       .select('broken_link_reports, out_of_stock_reports, seller_not_responding_reports, wrong_price_reports, other_reports, is_sold_out')
       .eq('id', product_id)
       .single();

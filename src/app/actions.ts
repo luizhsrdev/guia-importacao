@@ -23,7 +23,7 @@ export async function getProductOriginalLink(productId: string): Promise<GetOrig
   }
 
   const { data, error } = await supabase
-    .from('products')
+    .from('products_premium')
     .select('original_link')
     .eq('id', productId)
     .single();
@@ -38,7 +38,7 @@ export async function getProductOriginalLink(productId: string): Promise<GetOrig
 export const getPublicProducts = unstable_cache(
   async () => {
     const { data, error } = await supabase
-      .from('products')
+      .from('products_public')
       .select(`
         id,
         title,

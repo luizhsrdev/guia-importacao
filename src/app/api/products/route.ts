@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || 'card_ctr';
 
   let query = supabase
-    .from('products')
+    .from('products_public')
     .select('id, title, price_cny, image_main, affiliate_link, view_count, card_click_count, purchase_click_count, card_ctr, purchase_ctr, created_at')
     .eq('is_sold_out', false);
 
