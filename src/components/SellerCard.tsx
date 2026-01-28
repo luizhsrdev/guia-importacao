@@ -78,10 +78,10 @@ export default function SellerCard({ seller, onEdit }: SellerCardProps) {
                 e.stopPropagation();
                 onEdit();
               }}
-              className="flex items-center justify-center w-8 h-8 rounded-md bg-red-500/10 hover:bg-red-500/20 transition-colors group/edit"
+              className="flex items-center justify-center w-8 h-8 rounded-md bg-blue-500/10 hover:bg-blue-500/20 transition-colors group/edit"
               title="Editar vendedor"
             >
-              <svg className="w-3.5 h-3.5 text-red-500 group-hover/edit:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 text-blue-500 group-hover/edit:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             </button>

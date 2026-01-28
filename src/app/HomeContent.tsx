@@ -7,6 +7,7 @@ import { ProductFilters } from '@/components/ProductFilters';
 import { ProductFormModal } from '@/components/ProductFormModal';
 import { SellerFormModal } from '@/components/SellerFormModal';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useFavorites } from '@/hooks/useFavorites';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
 type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
@@ -56,6 +57,7 @@ export function HomeContent({
   onPremiumClick,
 }: HomeContentProps) {
   const { isAdminModeActive } = useAdminMode();
+  const { favorites } = useFavorites();
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
   const [filters, setFilters] = useState<ProductFiltersState>(INITIAL_FILTERS);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -142,25 +144,37 @@ export function HomeContent({
       return true;
     });
 
-    // Ordenação
-    if (filters.sortBy === 'price-asc') {
-      result = [...result].sort((a, b) => {
-        const priceA = parseFloat(a.price_cny.replace(/[^0-9.]/g, ''));
-        const priceB = parseFloat(b.price_cny.replace(/[^0-9.]/g, ''));
-        return priceA - priceB;
-      });
-    } else if (filters.sortBy === 'price-desc') {
-      result = [...result].sort((a, b) => {
-        const priceA = parseFloat(a.price_cny.replace(/[^0-9.]/g, ''));
-        const priceB = parseFloat(b.price_cny.replace(/[^0-9.]/g, ''));
-        return priceB - priceA;
-      });
-    } else if (filters.sortBy === 'alphabetical') {
-      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
-    }
+    // Separar favoritos e não-favoritos
+    const favoriteProducts = result.filter(p => favorites.includes(p.id));
+    const nonFavoriteProducts = result.filter(p => !favorites.includes(p.id));
 
-    return result;
-  }, [products, filters, selectedCategories]);
+    // Função para ordenar um array de produtos
+    const sortProducts = (arr: typeof result) => {
+      if (filters.sortBy === 'price-asc') {
+        return [...arr].sort((a, b) => {
+          const priceA = parseFloat(a.price_cny.replace(/[^0-9.]/g, ''));
+          const priceB = parseFloat(b.price_cny.replace(/[^0-9.]/g, ''));
+          return priceA - priceB;
+        });
+      } else if (filters.sortBy === 'price-desc') {
+        return [...arr].sort((a, b) => {
+          const priceA = parseFloat(a.price_cny.replace(/[^0-9.]/g, ''));
+          const priceB = parseFloat(b.price_cny.replace(/[^0-9.]/g, ''));
+          return priceB - priceA;
+        });
+      } else if (filters.sortBy === 'alphabetical') {
+        return [...arr].sort((a, b) => a.title.localeCompare(b.title));
+      }
+      return arr;
+    };
+
+    // Ordenar favoritos e não-favoritos separadamente
+    const sortedFavorites = sortProducts(favoriteProducts);
+    const sortedNonFavorites = sortProducts(nonFavoriteProducts);
+
+    // Juntar: favoritos primeiro, depois não-favoritos
+    return [...sortedFavorites, ...sortedNonFavorites];
+  }, [products, filters, selectedCategories, favorites]);
 
   const filteredSellers = useMemo(() => {
     return sellers.filter((s) => {
