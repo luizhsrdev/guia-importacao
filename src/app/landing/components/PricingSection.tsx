@@ -141,13 +141,13 @@ export default function PricingSection() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="/sign-up?plan=monthly"
+                href="/checkout?plan=monthly"
                 className="btn-secondary flex-1 py-3 text-sm font-semibold inline-flex items-center justify-center"
               >
                 Mensal
               </Link>
               <Link
-                href="/sign-up?plan=lifetime"
+                href="/checkout?plan=lifetime"
                 className="btn-primary flex-1 py-3 text-sm font-semibold inline-flex items-center justify-center"
               >
                 Vitalício

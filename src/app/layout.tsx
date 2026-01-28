@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="pt-BR" suppressHydrationWarning>
+      <html lang="pt-BR" className="scroll-smooth" suppressHydrationWarning>
         <body className={`${inter.className} ${outfit.variable}`}>
           <ThemeProvider>
             <CurrencyProvider>
