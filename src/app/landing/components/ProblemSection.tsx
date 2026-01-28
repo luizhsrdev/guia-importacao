@@ -6,28 +6,28 @@ import { motion } from 'framer-motion';
 const problems = [
   {
     icon: Clock,
-    title: 'Horas pesquisando vendedores confiáveis',
-    description: 'Tempo perdido navegando entre perfis sem saber em quem confiar'
+    title: 'Tempo Perdido',
+    description: 'Passou horas pesquisando vendedores sem saber em quem confiar'
   },
   {
     icon: DollarSign,
-    title: 'Pagou mais caro por não saber onde buscar',
-    description: 'Deixou de economizar por não conhecer os melhores vendedores'
+    title: 'Preços Altos',
+    description: 'Deixou de economizar porque comprou de vendedores que cobram caro'
   },
   {
     icon: AlertTriangle,
-    title: 'Caiu em perfis falsos ou com avaliações ruins',
-    description: 'Risco de golpes e vendedores com histórico negativo'
+    title: 'Perfis Falsos',
+    description: 'Caiu em perfis de vendedores duplicados que ocultam problemas e falsificam avaliações'
   },
   {
     icon: Languages,
-    title: 'Não sabe chinês e tradutor não ajuda',
-    description: 'Dificuldade para entender descrições e se comunicar'
+    title: 'Comunicação',
+    description: 'Não consegue entrar em contato com vendedores para garantir preço e qualidade?'
   },
   {
     icon: AlertCircle,
-    title: 'Lista negra desatualizada',
-    description: 'Informações antigas sobre vendedores problemáticos'
+    title: 'Insegurança',
+    description: 'Não sabe quais vendedores evitar e quais confiar'
   }
 ];
 
@@ -46,7 +46,7 @@ export default function ProblemSection() {
             Cansado de Perder Tempo e Dinheiro?
           </h2>
           <p className="text-base sm:text-lg text-text-secondary max-w-3xl mx-auto">
-            Importadores gastam em média 15-20 horas pesquisando cada produto
+            Importadores gastam em média 5-10 horas pesquisando cada produto
           </p>
         </motion.div>
 
@@ -91,7 +91,7 @@ export default function ProblemSection() {
                 <Clock className="w-8 h-8 text-red-500" />
               </div>
               <div className="text-center sm:text-left">
-                <p className="text-2xl sm:text-3xl font-bold text-text-primary">15-20 horas</p>
+                <p className="text-2xl sm:text-3xl font-bold text-text-primary">5-10 horas</p>
                 <p className="text-sm sm:text-base text-text-secondary">
                   gastas pesquisando <span className="font-semibold">cada produto</span>
                 </p>

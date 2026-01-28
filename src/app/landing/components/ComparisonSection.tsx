@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 const comparisons = [
   {
     label: 'Tempo de pesquisa',
-    without: '15-20 horas por produto',
+    without: '5-10 horas por produto',
     with: '5 minutos por produto'
   },
   {
@@ -16,8 +16,8 @@ const comparisons = [
   },
   {
     label: 'Preço final',
-    without: 'Paga mais (links afiliados)',
-    with: 'Melhor preço (links diretos)'
+    without: 'Preços inflados e caros',
+    with: 'Melhor preço encontrado'
   },
   {
     label: 'Proteção contra golpes',
@@ -27,7 +27,7 @@ const comparisons = [
   {
     label: 'Suporte e comunidade',
     without: 'Pesquisa sozinho',
-    with: 'Comunidade com 1.200+ membros'
+    with: 'Comunidade ativa'
   }
 ];
 

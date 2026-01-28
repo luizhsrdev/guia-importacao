@@ -25,14 +25,14 @@ const solutions = [
   {
     number: '04',
     icon: LinkIcon,
-    title: 'Links Diretos Sem Afiliados',
+    title: 'Links Diretos',
     description: 'Acesse diretamente os vendedores sem intermediários, pagando o menor preço possível'
   },
   {
     number: '05',
     icon: Users,
     title: 'Comunidade Exclusiva',
-    description: 'Grupo Telegram Premium com mais de 1.200 importadores compartilhando experiências e dicas'
+    description: 'Grupo Telegram Premium com membros importadores compartilhando experiências e dicas valiosas'
   }
 ];
 
@@ -63,15 +63,13 @@ export default function SolutionSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 0.4, delay: index * 0.08, ease: 'easeOut' }}
-              className={`card p-6 sm:p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${
-                index === 2 ? 'sm:col-span-2 lg:col-span-1' : ''
-              }`}
+              className="card p-6 sm:p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="flex items-start gap-4 mb-4">
+              <div className="flex items-center gap-4 mb-4">
                 <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
                   <solution.icon className="w-7 h-7 text-primary" />
                 </div>
-                <div className="text-3xl font-bold text-primary/20">
+                <div className="text-3xl font-bold text-primary/20 leading-none">
                   {solution.number}
                 </div>
               </div>
@@ -103,7 +101,7 @@ export default function SolutionSection() {
               Curadoria Feita por Importadores Experientes
             </h3>
             <p className="text-sm sm:text-base text-text-secondary max-w-2xl mx-auto">
-              Nossa equipe testa e valida cada vendedor antes de adicionar à plataforma,
+              Validamos e analisamos cada vendedor antes de adicionar à plataforma,
               garantindo que você tenha acesso apenas aos melhores do mercado
             </p>
           </div>

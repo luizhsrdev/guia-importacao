@@ -16,9 +16,9 @@ const fadeUp = {
 };
 
 const benefits = [
-  { icon: Clock, title: 'Economia de Tempo', desc: '15-20h/produto' },
+  { icon: Clock, title: 'Tempo Economizado', desc: '5-10h/produto' },
   { icon: Shield, title: 'Vendedores Verificados', desc: 'Histórico comprovado' },
-  { icon: TrendingDown, title: 'Links Diretos', desc: 'Sem intermediários' },
+  { icon: TrendingDown, title: 'Links Diretos', desc: 'Praticidade e conveniência' },
 ];
 
 export default function Hero() {
@@ -35,7 +35,7 @@ export default function Hero() {
               custom={0}
               className="text-3xl sm:text-4xl lg:text-5xl font-bold text-text-primary mb-4 sm:mb-6 leading-tight"
             >
-              Encontre os Melhores Vendedores do Xianyu em{' '}
+              Encontre os Melhores Produtos e Vendedores em{' '}
               <span className="text-primary">Segundos</span>
             </motion.h1>
 
@@ -82,7 +82,7 @@ export default function Hero() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/sign-up"
-                  className="btn-primary px-8 py-4 text-base font-semibold inline-flex items-center justify-center"
+                  className="btn-secondary px-8 py-4 text-base font-semibold inline-flex items-center justify-center"
                 >
                   Começar Grátis Agora
                 </Link>
@@ -90,7 +90,7 @@ export default function Hero() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="#pricing"
-                  className="btn-secondary px-8 py-4 text-base font-semibold inline-flex items-center justify-center"
+                  className="btn-primary px-8 py-4 text-base font-semibold inline-flex items-center justify-center text-background"
                 >
                   Ver Planos
                 </Link>
@@ -128,8 +128,7 @@ export default function Hero() {
               transition={{ duration: 0.5, delay: 0.8, ease: 'easeOut' }}
               className="absolute -bottom-6 -left-6 bg-surface border-2 border-primary rounded-2xl p-4 shadow-glow-primary hidden lg:block"
             >
-              <p className="text-sm font-semibold text-text-primary mb-1">1.200+ Membros</p>
-              <p className="text-xs text-text-secondary">Comunidade ativa</p>
+              <p className="text-sm font-semibold text-text-primary">+1000 usuários</p>
             </motion.div>
           </motion.div>
         </div>
