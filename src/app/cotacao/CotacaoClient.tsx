@@ -68,20 +68,17 @@ export default function CotacaoClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary/80 to-emerald-900 py-12 sm:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">
+    <div className="min-h-screen bg-background py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
             Cotação
           </h1>
-          <p className="text-emerald-100 text-sm sm:text-base max-w-2xl mx-auto">
+          <p className="text-text-secondary text-sm sm:text-base">
             Converta valores de Yuan (CNY) para Real (BRL) com a cotação real de importação
           </p>
         </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-8 pb-16 space-y-6">
         {/* Rate Card */}
         <div className="bg-gradient-to-br from-primary/90 to-emerald-950 rounded-2xl p-6 sm:p-8 shadow-xl border border-primary/30">
           {loading ? (
@@ -146,9 +143,10 @@ export default function CotacaoClient() {
             Calculadora
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-end gap-4">
-            <div className="w-full">
-              <label htmlFor="cny-input" className="block text-text-secondary text-sm mb-2 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-0">
+            {/* Yuan Input */}
+            <div className="flex-1">
+              <label htmlFor="cny-input" className="block text-text-secondary text-sm mb-2 text-center">
                 Valor em Yuan (CNY)
               </label>
               <div className="relative">
@@ -162,24 +160,26 @@ export default function CotacaoClient() {
                   value={inputCNY}
                   onChange={handleInputChange}
                   placeholder="0.00"
-                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-text-primary text-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-text-primary text-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
                 />
               </div>
             </div>
 
-            <div className="hidden sm:flex items-center justify-center pb-1.5">
+            {/* Arrow - centered with equal spacing */}
+            <div className="hidden sm:flex items-end justify-center w-20 pb-3">
               <ArrowRight className="w-6 h-6 text-text-tertiary" />
             </div>
 
-            <div className="w-full">
-              <label className="block text-text-secondary text-sm mb-2 text-center sm:text-left">
+            {/* Real Output */}
+            <div className="flex-1">
+              <label className="block text-text-secondary text-sm mb-2 text-center">
                 Valor em Real (BRL)
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-medium">
                   R$
                 </span>
-                <div className="w-full pl-12 pr-4 py-3 bg-primary/10 border border-primary/30 rounded-xl text-primary text-lg font-semibold">
+                <div className="w-full pl-12 pr-4 py-3 bg-primary/10 border border-primary/30 rounded-xl text-primary text-lg font-semibold text-center">
                   {resultBRL !== null ? resultBRL.toFixed(2) : '0.00'}
                 </div>
               </div>
