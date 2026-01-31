@@ -230,7 +230,7 @@ export default function AdminCotacaoPage() {
             {rateData && (
               <div className="bg-surface-elevated rounded-xl p-4 border border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="w-4 h-4 text-blue-500" />
+                  <AlertCircle className="w-4 h-4 text-primary" />
                   <span className="text-text-secondary text-sm">Preview</span>
                 </div>
                 <p className="text-text-primary">

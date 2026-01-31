@@ -70,12 +70,12 @@ export default function CotacaoClient() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-12 sm:py-16">
+      <div className="bg-gradient-to-r from-primary/80 to-emerald-900 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">
             Calculadora de Cotação
           </h1>
-          <p className="text-blue-100 text-sm sm:text-base max-w-2xl mx-auto">
+          <p className="text-emerald-100 text-sm sm:text-base max-w-2xl mx-auto">
             Converta valores de Yuan (CNY) para Real (BRL) com a cotação real de importação
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function CotacaoClient() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-8 pb-16 space-y-6">
         {/* Rate Card */}
-        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div className="bg-gradient-to-br from-primary/90 to-emerald-950 rounded-2xl p-6 sm:p-8 shadow-xl border border-primary/30">
           {loading ? (
             <div className="animate-pulse space-y-4">
               <div className="h-8 bg-white/20 rounded w-1/3 mx-auto" />
@@ -194,7 +194,7 @@ export default function CotacaoClient() {
         {/* How to Get This Rate */}
         <div className="card p-6 sm:p-8">
           <h2 className="text-text-primary font-semibold text-lg mb-4 flex items-center gap-2">
-            <Info className="w-5 h-5 text-blue-500" />
+            <Info className="w-5 h-5 text-primary" />
             Como Conseguir Essa Cotação?
           </h2>
 
@@ -206,7 +206,7 @@ export default function CotacaoClient() {
 
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
                   1
                 </span>
                 <p className="text-text-secondary">
@@ -214,7 +214,7 @@ export default function CotacaoClient() {
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
                   2
                 </span>
                 <p className="text-text-secondary">
@@ -222,7 +222,7 @@ export default function CotacaoClient() {
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
                   3
                 </span>
                 <p className="text-text-secondary">
