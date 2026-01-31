@@ -51,7 +51,7 @@ export default function ProductDetailModal({
   isPremium
 }: ProductDetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const { formatPrice, currency } = useCurrency();
+  const { currency, convertToBRL } = useCurrency();
   const [isClosing, setIsClosing] = useState(false);
   const [isLoadingLink, setIsLoadingLink] = useState(false);
 
@@ -164,14 +164,33 @@ export default function ProductDetailModal({
               <h3 className="text-lg sm:text-xl font-semibold text-text-primary mb-2 sm:mb-3 line-clamp-2 pr-8 sm:pr-0">
                 {product.title}
               </h3>
-              <p className="text-xl sm:text-2xl font-bold text-primary">
-                {formatPrice(product.price_cny)}
-              </p>
-              {currency === 'BRL' && (
-                <p className="text-sm text-text-tertiary mt-1">
-                  ¥ {product.price_cny}
-                </p>
-              )}
+              {(() => {
+                const priceCNY = parseFloat(product.price_cny);
+                const priceBRL = convertToBRL(priceCNY);
+
+                if (currency === 'BRL') {
+                  return (
+                    <>
+                      <p className="text-xl sm:text-2xl font-bold text-primary">
+                        R$ {priceBRL.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-text-tertiary mt-1">
+                        ¥ {priceCNY.toFixed(2)}
+                      </p>
+                    </>
+                  );
+                }
+                return (
+                  <>
+                    <p className="text-xl sm:text-2xl font-bold text-primary">
+                      ¥ {priceCNY.toFixed(2)}
+                    </p>
+                    <p className="text-sm text-text-tertiary mt-1">
+                      R$ {priceBRL.toFixed(2)}
+                    </p>
+                  </>
+                );
+              })()}
             </div>
 
             <div className="space-y-2 sm:space-y-3">

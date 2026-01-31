@@ -1,13 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-interface ExchangeRateData {
-  officialRate: number;
-  manualAdjustment: number;
-  effectiveRate: number;
-  updatedAt: string;
-}
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ExchangeRateBadgeProps {
   priceCNY: number | string;
@@ -20,26 +13,7 @@ export default function ExchangeRateBadge({
   showDetails = false,
   className = '',
 }: ExchangeRateBadgeProps) {
-  const [rateData, setRateData] = useState<ExchangeRateData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        const res = await fetch('/api/exchange-rate');
-        if (res.ok) {
-          const data = await res.json();
-          setRateData(data);
-        }
-      } catch (error) {
-        console.error('Error fetching exchange rate:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRate();
-  }, []);
+  const { currency, effectiveRate, loading, convertToBRL } = useCurrency();
 
   const price = typeof priceCNY === 'string' ? parseFloat(priceCNY) : priceCNY;
 
@@ -51,31 +25,51 @@ export default function ExchangeRateBadge({
     );
   }
 
-  // Fallback: show only CNY if no rate data or invalid price
-  if (!rateData || isNaN(price)) {
+  // Fallback: show only CNY if invalid price
+  if (isNaN(price)) {
     return (
       <div className={`flex flex-col ${className}`}>
         <span className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight">
-          ¥ {isNaN(price) ? '0.00' : price.toFixed(2)}
+          ¥ 0.00
         </span>
       </div>
     );
   }
 
-  // CNY to BRL: priceCNY / effectiveRate
-  const priceBRL = price / rateData.effectiveRate;
+  const priceBRL = convertToBRL(price);
 
+  // Moeda selecionada aparece em destaque (verde, grande)
+  // Moeda secundária aparece menor e cinza
+  if (currency === 'BRL') {
+    return (
+      <div className={`flex flex-col ${className}`}>
+        <span className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight">
+          R$ {priceBRL.toFixed(2)}
+        </span>
+        <span className="text-text-secondary text-xs tabular-nums">
+          ¥ {price.toFixed(2)}
+        </span>
+        {showDetails && (
+          <span className="text-text-tertiary text-[10px] mt-1">
+            Cotação: ¥{effectiveRate.toFixed(2)}/R$
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  // currency === 'CNY'
   return (
     <div className={`flex flex-col ${className}`}>
       <span className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight">
-        R$ {priceBRL.toFixed(2)}
+        ¥ {price.toFixed(2)}
       </span>
       <span className="text-text-secondary text-xs tabular-nums">
-        ¥ {price.toFixed(2)}
+        R$ {priceBRL.toFixed(2)}
       </span>
       {showDetails && (
         <span className="text-text-tertiary text-[10px] mt-1">
-          Cotação: ¥{rateData.effectiveRate.toFixed(3)}/R$
+          Cotação: ¥{effectiveRate.toFixed(2)}/R$
         </span>
       )}
     </div>

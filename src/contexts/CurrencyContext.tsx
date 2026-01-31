@@ -2,73 +2,82 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+interface ExchangeRateData {
+  officialRate: number;
+  manualAdjustment: number;
+  effectiveRate: number;
+  updatedAt: string;
+}
+
 interface CurrencyContextType {
   currency: 'CNY' | 'BRL';
-  cnyRate: number;
+  effectiveRate: number;
+  loading: boolean;
   setCurrency: (currency: 'CNY' | 'BRL') => void;
-  setCnyRate: (rate: number) => void;
-  convertPrice: (priceCNY: string) => string;
-  formatPrice: (priceCNY: string) => string;
+  convertToBRL: (priceCNY: number) => number;
+  convertToCNY: (priceBRL: number) => number;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  // Estado persistido no localStorage
-  const [currency, setCurrency] = useState<'CNY' | 'BRL'>('CNY');
-  const [cnyRate, setCnyRate] = useState<number>(1.20); // 1 BRL = ¥ 1.20
+  const [currency, setCurrencyState] = useState<'CNY' | 'BRL'>('BRL');
+  const [effectiveRate, setEffectiveRate] = useState<number>(1.25);
+  const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // Carregar preferências do localStorage
+  // Buscar taxa da API
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const res = await fetch('/api/exchange-rate');
+        if (res.ok) {
+          const data: ExchangeRateData = await res.json();
+          setEffectiveRate(data.effectiveRate);
+        }
+      } catch (error) {
+        console.error('Error fetching exchange rate:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRate();
+  }, []);
+
+  // Carregar preferência de moeda do localStorage
   useEffect(() => {
     setMounted(true);
     const savedCurrency = localStorage.getItem('currency') as 'CNY' | 'BRL' | null;
-    const savedRate = localStorage.getItem('cnyRate');
-
-    if (savedCurrency) setCurrency(savedCurrency);
-    if (savedRate) setCnyRate(parseFloat(savedRate));
+    if (savedCurrency) setCurrencyState(savedCurrency);
   }, []);
 
-  // Salvar no localStorage ao mudar
-  useEffect(() => {
+  // Salvar preferência no localStorage
+  const setCurrency = (newCurrency: 'CNY' | 'BRL') => {
+    setCurrencyState(newCurrency);
     if (mounted) {
-      localStorage.setItem('currency', currency);
-      localStorage.setItem('cnyRate', cnyRate.toString());
-    }
-  }, [currency, cnyRate, mounted]);
-
-  // Converter preço
-  const convertPrice = (priceCNY: string): string => {
-    const cny = parseFloat(priceCNY.replace(/[^0-9.]/g, ''));
-    if (isNaN(cny)) return '0.00';
-
-    if (currency === 'CNY') {
-      return cny.toFixed(2);
-    } else {
-      const brl = cny / cnyRate;
-      return brl.toFixed(2);
+      localStorage.setItem('currency', newCurrency);
     }
   };
 
-  // Formatar com símbolo
-  const formatPrice = (priceCNY: string): string => {
-    const converted = convertPrice(priceCNY);
+  // Converter CNY para BRL
+  const convertToBRL = (priceCNY: number): number => {
+    return priceCNY / effectiveRate;
+  };
 
-    if (currency === 'CNY') {
-      return `¥ ${converted}`;
-    } else {
-      return `R$ ${converted}`;
-    }
+  // Converter BRL para CNY
+  const convertToCNY = (priceBRL: number): number => {
+    return priceBRL * effectiveRate;
   };
 
   return (
     <CurrencyContext.Provider value={{
       currency,
-      cnyRate,
+      effectiveRate,
+      loading,
       setCurrency,
-      setCnyRate,
-      convertPrice,
-      formatPrice
+      convertToBRL,
+      convertToCNY,
     }}>
       {children}
     </CurrencyContext.Provider>
