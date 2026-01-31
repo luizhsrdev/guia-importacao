@@ -41,7 +41,7 @@ export function CurrencyToggle() {
 
       {/* Taxa atual (somente leitura) */}
       <div className="h-10 px-3 bg-surface rounded-xl border border-border shadow-sm text-xs flex items-center gap-1.5 whitespace-nowrap">
-        <span className="text-text-tertiary">R$1 =</span>
+        <span className="text-text-tertiary">R$1 ≈</span>
         {loading ? (
           <span className="text-text-muted">...</span>
         ) : (
