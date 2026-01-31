@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { trackProductView, trackProductCardClick, trackProductPurchaseClick } from '@/lib/analytics';
 import ProductDetailModal from './ProductDetailModal';
 import PremiumUpgradeModal from './PremiumUpgradeModal';
+import ExchangeRateBadge from './ExchangeRateBadge';
 
 interface CategoryLike {
   name: string;
@@ -79,7 +79,6 @@ export default function ProductCard({
   const [selectedReportType, setSelectedReportType] = useState<string | null>(null);
   const [reportDescription, setReportDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { formatPrice } = useCurrency();
   const { isAdminModeActive } = useAdminMode();
   const { toggleFavorite, isFavorite, isSignedIn } = useFavorites();
   const viewTracked = useRef(false);
@@ -251,6 +250,8 @@ export default function ProductCard({
             {title}
           </h3>
 
+          <ExchangeRateBadge priceCNY={price_cny} className="mb-2" />
+
           <div className="mb-2 hidden sm:block min-h-[2.5rem]">
             {observations && (
               <p className="text-[11px] sm:text-xs text-text-muted line-clamp-2 overflow-hidden leading-tight">
@@ -259,11 +260,7 @@ export default function ProductCard({
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-auto">
-            <p className="text-primary font-semibold text-base sm:text-lg tabular-nums tracking-tight">
-              {formatPrice(price_cny)}
-            </p>
-
+          <div className="flex items-center justify-end mt-auto">
             {isAdminModeActive && (onEdit || onDelete) && (
               <div className="flex items-center gap-1.5">
                 {onEdit && (
