@@ -73,7 +73,7 @@ export default function CotacaoClient() {
       <div className="bg-gradient-to-r from-primary/80 to-emerald-900 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">
-            Calculadora de Cotação
+            Cotação
           </h1>
           <p className="text-emerald-100 text-sm sm:text-base max-w-2xl mx-auto">
             Converta valores de Yuan (CNY) para Real (BRL) com a cotação real de importação
@@ -110,21 +110,21 @@ export default function CotacaoClient() {
                 <div>
                   <p className="text-white/70 text-xs sm:text-sm mb-1">Oficial</p>
                   <p className="text-white font-bold text-lg sm:text-2xl">
-                    ¥ {rateData.officialRate.toFixed(3)}
+                    ¥ {rateData.officialRate.toFixed(2)}
                   </p>
                   <p className="text-white/50 text-[10px] sm:text-xs">por R$ 1</p>
                 </div>
                 <div>
-                  <p className="text-white/70 text-xs sm:text-sm mb-1">Ajuste</p>
+                  <p className="text-white/70 text-xs sm:text-sm mb-1">Taxa</p>
                   <p className="text-white font-bold text-lg sm:text-2xl">
-                    {(rateData.manualAdjustment * 100).toFixed(0)}%
+                    {((1 - rateData.manualAdjustment) * 100).toFixed(0)}%
                   </p>
-                  <p className="text-white/50 text-[10px] sm:text-xs">taxa real</p>
+                  <p className="text-white/50 text-[10px] sm:text-xs">taxa aplicada</p>
                 </div>
                 <div>
                   <p className="text-yellow-300 text-xs sm:text-sm mb-1 font-medium">Real</p>
                   <p className="text-yellow-300 font-bold text-lg sm:text-2xl">
-                    ¥ {rateData.effectiveRate.toFixed(3)}
+                    ¥ {rateData.effectiveRate.toFixed(2)}
                   </p>
                   <p className="text-yellow-300/70 text-[10px] sm:text-xs">por R$ 1</p>
                 </div>
@@ -146,9 +146,9 @@ export default function CotacaoClient() {
             Calculadora
           </h2>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="w-full sm:flex-1">
-              <label htmlFor="cny-input" className="block text-text-secondary text-sm mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-end gap-4">
+            <div className="w-full">
+              <label htmlFor="cny-input" className="block text-text-secondary text-sm mb-2 text-center sm:text-left">
                 Valor em Yuan (CNY)
               </label>
               <div className="relative">
@@ -167,10 +167,12 @@ export default function CotacaoClient() {
               </div>
             </div>
 
-            <ArrowRight className="w-6 h-6 text-text-tertiary hidden sm:block flex-shrink-0" />
+            <div className="hidden sm:flex items-center justify-center pb-1.5">
+              <ArrowRight className="w-6 h-6 text-text-tertiary" />
+            </div>
 
-            <div className="w-full sm:flex-1">
-              <label className="block text-text-secondary text-sm mb-2">
+            <div className="w-full">
+              <label className="block text-text-secondary text-sm mb-2 text-center sm:text-left">
                 Valor em Real (BRL)
               </label>
               <div className="relative">
@@ -186,7 +188,7 @@ export default function CotacaoClient() {
 
           {rateData && (
             <p className="text-text-tertiary text-xs mt-4 text-center">
-              Usando cotação efetiva de ¥ {rateData.effectiveRate.toFixed(3)} por R$ 1
+              Usando cotação efetiva de ¥ {rateData.effectiveRate.toFixed(2)} por R$ 1
             </p>
           )}
         </div>
