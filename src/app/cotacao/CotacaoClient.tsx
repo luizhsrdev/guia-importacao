@@ -1,8 +1,104 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowRight, RefreshCw, Info, TrendingDown } from 'lucide-react';
+import { ArrowRight, RefreshCw, Info, TrendingDown, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+
+// Dados dos passos com caminhos de imagem
+const STEPS_DATA = [
+  {
+    number: 1,
+    title: 'Acesse Trade → Spot na Binance',
+    description: 'No app ou site da Binance',
+    image: '/images/cotacao/step-1.png', // Placeholder - substituir pela imagem real
+  },
+  {
+    number: 2,
+    title: 'Selecione USDT/BRL e compre USDT',
+    description: 'Compre a quantia que desejar via PIX',
+    image: '/images/cotacao/step-2.png',
+  },
+  {
+    number: 3,
+    title: 'Aguarde a compra ser concluída',
+    description: 'O valor em USDT aparecerá na aba Ativos',
+    image: '/images/cotacao/step-3.png',
+  },
+  {
+    number: 4,
+    title: 'Acesse a aba de recarga no seu Agente',
+    description: 'CSSBuy ou ACBuy → selecione o método CoinPal',
+    image: '/images/cotacao/step-4.png',
+  },
+  {
+    number: 5,
+    title: 'Insira o valor e selecione Binance Pay',
+    description: 'Use a rede BSC (BEP20) para taxas menores',
+    image: '/images/cotacao/step-5.png',
+  },
+  {
+    number: 6,
+    title: 'Pronto! Saldo convertido automaticamente',
+    description: 'O valor será depositado em CNY na sua conta do agente',
+    image: '/images/cotacao/step-6.png',
+  },
+];
+
+// Componente de cada passo com preview de imagem
+function StepItem({ step }: { step: typeof STEPS_DATA[0] }) {
+  const [showPreview, setShowPreview] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="flex items-start gap-3">
+      <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+        {step.number}
+      </span>
+      <div className="flex-1">
+        <p className="text-text-primary font-medium">{step.title}</p>
+        <p className="text-text-tertiary text-xs mt-0.5">{step.description}</p>
+      </div>
+      {/* Ícone de imagem com preview */}
+      <div className="relative">
+        <button
+          onMouseEnter={() => setShowPreview(true)}
+          onMouseLeave={() => setShowPreview(false)}
+          className="w-7 h-7 rounded-lg bg-surface hover:bg-surface-elevated border border-border hover:border-border-emphasis flex items-center justify-center transition-all flex-shrink-0"
+          aria-label={`Ver imagem do passo ${step.number}`}
+        >
+          <ImageIcon className="w-3.5 h-3.5 text-text-tertiary" />
+        </button>
+
+        {/* Preview popup */}
+        {showPreview && (
+          <div className="absolute right-0 bottom-full mb-2 z-50 animate-fadeIn">
+            <div className="bg-surface border border-border rounded-xl shadow-2xl overflow-hidden">
+              {!imageError ? (
+                <img
+                  src={step.image}
+                  alt={`Passo ${step.number}: ${step.title}`}
+                  className="w-64 sm:w-80 h-auto max-h-48 object-contain bg-background"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-64 sm:w-80 h-32 bg-surface-elevated flex flex-col items-center justify-center gap-2">
+                  <ImageIcon className="w-8 h-8 text-text-tertiary" />
+                  <span className="text-text-tertiary text-xs">Imagem não disponível</span>
+                  <span className="text-text-muted text-[10px]">{step.image}</span>
+                </div>
+              )}
+              <div className="px-3 py-2 bg-surface-elevated border-t border-border">
+                <p className="text-xs text-text-secondary font-medium">Passo {step.number}</p>
+              </div>
+            </div>
+            {/* Seta do tooltip */}
+            <div className="absolute right-3 -bottom-1.5 w-3 h-3 bg-surface-elevated border-r border-b border-border transform rotate-45" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 interface ExchangeRateData {
   officialRate: number;
@@ -228,65 +324,9 @@ export default function CotacaoClient() {
             </p>
 
             <div className="space-y-4 text-sm">
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  1
-                </span>
-                <div>
-                  <p className="text-text-primary font-medium">Acesse Trade → Spot na Binance</p>
-                  <p className="text-text-tertiary text-xs mt-0.5">No app ou site da Binance</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  2
-                </span>
-                <div>
-                  <p className="text-text-primary font-medium">Selecione USDT/BRL e compre USDT</p>
-                  <p className="text-text-tertiary text-xs mt-0.5">Compre a quantia que desejar via PIX</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  3
-                </span>
-                <div>
-                  <p className="text-text-primary font-medium">Aguarde a compra ser concluída</p>
-                  <p className="text-text-tertiary text-xs mt-0.5">O valor em USDT aparecerá na aba Ativos</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  4
-                </span>
-                <div>
-                  <p className="text-text-primary font-medium">Acesse a aba de recarga no seu Agente</p>
-                  <p className="text-text-tertiary text-xs mt-0.5">CSSBuy ou ACBuy → selecione o método CoinPal</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  5
-                </span>
-                <div>
-                  <p className="text-text-primary font-medium">Insira o valor e selecione Binance Pay</p>
-                  <p className="text-text-tertiary text-xs mt-0.5">Use a rede BSC (BEP20) para taxas menores</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  6
-                </span>
-                <div>
-                  <p className="text-text-primary font-medium">Pronto! Saldo convertido automaticamente</p>
-                  <p className="text-text-tertiary text-xs mt-0.5">O valor será depositado em CNY na sua conta do agente</p>
-                </div>
-              </div>
+              {STEPS_DATA.map((step) => (
+                <StepItem key={step.number} step={step} />
+              ))}
             </div>
 
             {/* External Links */}
