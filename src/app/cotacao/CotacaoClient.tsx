@@ -197,45 +197,134 @@ export default function CotacaoClient() {
         <div className="card p-6 sm:p-8">
           <h2 className="text-text-primary font-semibold text-lg mb-4 flex items-center gap-2">
             <Info className="w-5 h-5 text-primary" />
-            Como Conseguir Essa Cotação?
+            Como Recarregar com Essa Cotação?
           </h2>
 
+          {/* Prerequisites Warning Card */}
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium text-yellow-500 mb-1">Pré-requisitos</p>
+                <ul className="text-text-secondary space-y-1 text-xs sm:text-sm">
+                  <li>• Conta verificada na Binance (maior de idade)</li>
+                  <li>• Conta em agente de compras (CSSBuy ou ACBuy)</li>
+                  <li>• Mesma titularidade em todas as contas e pagamentos</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Step by Step */}
           <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-border">
-            <p className="text-text-secondary text-sm leading-relaxed mb-4">
-              A cotação efetiva considera a conversão via Binance (USDT) + CSSBuy, que oferece
-              taxas melhores que a conversão direta de bancos brasileiros.
+            <p className="text-text-secondary text-sm leading-relaxed mb-5">
+              A cotação efetiva considera a conversão via Binance (USDT) + CoinPal, que oferece
+              taxas melhores que a conversão direta de bancos brasileiros. Por segurança, salve
+              todos os comprovantes de transferência entre as plataformas.
             </p>
 
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
               <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                   1
                 </span>
-                <p className="text-text-secondary">
-                  Compre USDT na Binance com PIX (cotação próxima do dólar comercial)
-                </p>
+                <div>
+                  <p className="text-text-primary font-medium">Acesse Trade → Spot na Binance</p>
+                  <p className="text-text-tertiary text-xs mt-0.5">No app ou site da Binance</p>
+                </div>
               </div>
+
               <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                   2
                 </span>
-                <p className="text-text-secondary">
-                  Envie os USDT para sua conta na CSSBuy
-                </p>
+                <div>
+                  <p className="text-text-primary font-medium">Selecione USDT/BRL e compre USDT</p>
+                  <p className="text-text-tertiary text-xs mt-0.5">Compre a quantia que desejar via PIX</p>
+                </div>
               </div>
+
               <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                   3
                 </span>
-                <p className="text-text-secondary">
-                  CSSBuy converte automaticamente para CNY na cotação favorável
-                </p>
+                <div>
+                  <p className="text-text-primary font-medium">Aguarde a compra ser concluída</p>
+                  <p className="text-text-tertiary text-xs mt-0.5">O valor em USDT aparecerá na aba Ativos</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                  4
+                </span>
+                <div>
+                  <p className="text-text-primary font-medium">Acesse a aba de recarga no seu Agente</p>
+                  <p className="text-text-tertiary text-xs mt-0.5">CSSBuy ou ACBuy → selecione o método CoinPal</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                  5
+                </span>
+                <div>
+                  <p className="text-text-primary font-medium">Insira o valor e selecione Binance Pay</p>
+                  <p className="text-text-tertiary text-xs mt-0.5">Use a rede BSC (BEP20) para taxas menores</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                  6
+                </span>
+                <div>
+                  <p className="text-text-primary font-medium">Pronto! Saldo convertido automaticamente</p>
+                  <p className="text-text-tertiary text-xs mt-0.5">O valor será depositado em CNY na sua conta do agente</p>
+                </div>
               </div>
             </div>
 
-            <p className="text-text-tertiary text-xs mt-4">
-              * Passo a passo detalhado em breve. Enquanto isso, consulte nosso grupo no Telegram.
-            </p>
+            {/* External Links */}
+            <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-5 border-t border-border">
+              <a
+                href="https://www.binance.com/pt-BR/trade/USDT_BRL?type=spot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#F0B90B]/10 border border-[#F0B90B]/30 rounded-xl text-[#F0B90B] text-sm font-medium hover:bg-[#F0B90B]/20 transition-colors"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L6.5 7.5L8.7 9.7L12 6.4L15.3 9.7L17.5 7.5L12 2ZM2 12L4.2 9.8L6.4 12L4.2 14.2L2 12ZM12 22L6.5 16.5L8.7 14.3L12 17.6L15.3 14.3L17.5 16.5L12 22ZM17.6 12L19.8 9.8L22 12L19.8 14.2L17.6 12ZM12 9.6L9.6 12L12 14.4L14.4 12L12 9.6Z"/>
+                </svg>
+                Abrir Binance
+              </a>
+              <a
+                href="https://www.cssbuy.com/web/recharge/recharge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Abrir CSSBuy
+              </a>
+              <a
+                href="https://www.acbuy.com/member/wallet"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-400 text-sm font-medium hover:bg-blue-500/20 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Abrir ACBuy
+              </a>
+            </div>
           </div>
         </div>
 
