@@ -176,6 +176,35 @@ export function HeaderNav({
     // Não fecha mais o dropdown para permitir múltiplas seleções
   };
 
+  const handleSelectAll = (dropdownId: string) => {
+    if (activeTab !== 'produtos') {
+      onTabChange('produtos');
+    }
+    const dropdownCategories = getCategoriesForDropdown(dropdownId);
+    const allSelected = dropdownCategories.every((c) => selectedCategories.includes(c.id));
+
+    // Se todos estão selecionados, desmarcar todos; senão, selecionar todos
+    dropdownCategories.forEach((category) => {
+      const isSelected = selectedCategories.includes(category.id);
+      if (allSelected) {
+        // Desmarcar todos
+        if (isSelected) {
+          onCategoryToggle(category.id);
+        }
+      } else {
+        // Selecionar todos que não estão selecionados
+        if (!isSelected) {
+          onCategoryToggle(category.id);
+        }
+      }
+    });
+  };
+
+  const areAllSelected = (dropdownId: string): boolean => {
+    const dropdownCategories = getCategoriesForDropdown(dropdownId);
+    return dropdownCategories.length > 0 && dropdownCategories.every((c) => selectedCategories.includes(c.id));
+  };
+
   const handleVendedoresClick = () => {
     if (!userStatus.isAuthenticated) {
       window.location.href = '/sign-in';
@@ -244,13 +273,23 @@ export function HeaderNav({
             onMouseEnter={() => openDropdown && handleMouseEnter(openDropdown)}
             onMouseLeave={handleMouseLeave}
           >
-            {/* Título */}
-            <div className="max-w-7xl mx-auto px-6 pt-1 pb-2">
+            {/* Título e Selecionar Todos */}
+            <div className="max-w-7xl mx-auto px-6 pt-1 pb-2 flex items-center justify-between">
               <h2 className={`text-2xl font-semibold text-text-primary transition-opacity duration-200 ${
                 !isFirstOpen ? 'animate-fadeIn' : ''
               }`}>
                 {getDropdownTitle(openDropdown)}
               </h2>
+              <button
+                onClick={() => handleSelectAll(openDropdown)}
+                className={`text-sm font-medium transition-all duration-150 px-3 py-1.5 rounded-lg ${
+                  areAllSelected(openDropdown)
+                    ? 'text-primary bg-primary/10 hover:bg-primary/20'
+                    : 'text-text-secondary hover:text-primary hover:bg-surface-elevated'
+                }`}
+              >
+                {areAllSelected(openDropdown) ? 'Desmarcar todos' : 'Selecionar todos'}
+              </button>
             </div>
 
             {/* Grid 3 colunas estilo Apple */}
