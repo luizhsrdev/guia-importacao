@@ -356,6 +356,17 @@ export function HeaderNav({
         <span className="hidden lg:inline">Cotação</span>
       </a>
 
+      {/* Calculadora Link */}
+      <a
+        href="/calculator"
+        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        <span className="hidden lg:inline">Calculadora</span>
+      </a>
+
       <div className="w-px h-5 bg-border mx-2" />
 
       <button
