@@ -51,7 +51,20 @@ interface SellerReport {
   user_ip: string;
 }
 
-type TabType = 'products' | 'sellers';
+interface Suggestion {
+  id: string;
+  text: string;
+  page_url: string;
+  trigger_type: 'floating_button' | 'nudge_time' | 'nudge_visit' | 'nudge_zero_results';
+  search_query: string | null;
+  user_id: string | null;
+  user_ip_hash: string;
+  created_at: string;
+  is_read: boolean;
+  read_at: string | null;
+}
+
+type TabType = 'products' | 'sellers' | 'suggestions';
 
 export default function ReportedProductsPage() {
   const router = useRouter();
@@ -69,6 +82,10 @@ export default function ReportedProductsPage() {
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
   const [productCategories, setProductCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [sellerCategories, setSellerCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestionsTotal, setSuggestionsTotal] = useState(0);
+  const [suggestionsUnread, setSuggestionsUnread] = useState(0);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -108,10 +125,11 @@ export default function ReportedProductsPage() {
 
   const fetchReportedData = async () => {
     try {
-      // Buscar produtos e vendedores via API
-      const [productsRes, sellersRes] = await Promise.all([
+      // Buscar produtos, vendedores e sugestões via API
+      const [productsRes, sellersRes, suggestionsRes] = await Promise.all([
         fetch('/api/admin/reported-products'),
-        fetch('/api/admin/reported-sellers')
+        fetch('/api/admin/reported-sellers'),
+        fetch('/api/admin/suggestions')
       ]);
 
       if (productsRes.ok) {
@@ -122,6 +140,13 @@ export default function ReportedProductsPage() {
       if (sellersRes.ok) {
         const data = await sellersRes.json();
         setSellers(data.sellers || []);
+      }
+
+      if (suggestionsRes.ok) {
+        const data = await suggestionsRes.json();
+        setSuggestions(data.suggestions || []);
+        setSuggestionsTotal(data.total || 0);
+        setSuggestionsUnread(data.unread || 0);
       }
     } catch (error) {
       console.error('Erro ao buscar dados reportados:', error);
@@ -193,6 +218,50 @@ export default function ReportedProductsPage() {
     }
   };
 
+  const handleToggleSuggestionRead = async (suggestionId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch('/api/admin/suggestions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suggestion_id: suggestionId, is_read: !currentStatus }),
+      });
+
+      if (res.ok) {
+        toast.success(currentStatus ? 'Marcado como não lido' : 'Marcado como lido');
+        fetchReportedData();
+        if (selectedSuggestion?.id === suggestionId) {
+          setSelectedSuggestion({ ...selectedSuggestion, is_read: !currentStatus });
+        }
+      } else {
+        toast.error('Erro ao atualizar sugestão');
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao atualizar sugestão');
+    }
+  };
+
+  const handleDeleteSuggestion = async (suggestionId: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta sugestão?')) return;
+
+    try {
+      const res = await fetch(`/api/admin/suggestions?id=${suggestionId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('Sugestão excluída');
+        fetchReportedData();
+        setSelectedSuggestion(null);
+      } else {
+        toast.error('Erro ao excluir sugestão');
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao excluir sugestão');
+    }
+  };
+
   const fetchProductReports = async (productId: string) => {
     setLoadingReports(true);
     try {
@@ -260,6 +329,26 @@ export default function ReportedProductsPage() {
     return labels[type] || type;
   };
 
+  const getTriggerTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      floating_button: 'Botão flutuante',
+      nudge_time: 'Tempo na página',
+      nudge_visit: 'Visita recorrente',
+      nudge_zero_results: 'Busca sem resultados'
+    };
+    return labels[type] || type;
+  };
+
+  const getTriggerTypeColor = (type: string) => {
+    const colors: Record<string, string> = {
+      floating_button: 'bg-green-500/10 text-green-500 border-green-500/30',
+      nudge_time: 'bg-purple-500/10 text-purple-500 border-purple-500/30',
+      nudge_visit: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
+      nudge_zero_results: 'bg-orange-500/10 text-orange-500 border-orange-500/30'
+    };
+    return colors[type] || 'bg-zinc-500/10 text-zinc-500 border-zinc-500/30';
+  };
+
   // Calcular totais
   const totalProductReports = products.reduce(
     (acc, p) => acc + p.broken_link_reports + p.out_of_stock_reports + p.seller_not_responding_reports + p.wrong_price_reports + p.other_reports,
@@ -311,7 +400,7 @@ export default function ReportedProductsPage() {
       {/* Widgets e Abas */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Widgets */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           {/* Widget Produtos */}
           <button
             onClick={() => setActiveTab('products')}
@@ -354,6 +443,34 @@ export default function ReportedProductsPage() {
                 <p className="text-xs text-text-muted font-medium uppercase tracking-wider mb-1">Vendedores</p>
                 <p className="text-3xl font-bold text-text-primary">{totalSellerReports}</p>
                 <p className="text-xs text-text-muted mt-1">{sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''} reportado{sellers.length !== 1 ? 's' : ''}</p>
+              </div>
+            </div>
+          </button>
+
+          {/* Widget Sugestões */}
+          <button
+            onClick={() => setActiveTab('suggestions')}
+            className={`bg-surface border-2 rounded-xl p-6 text-left transition-all ${
+              activeTab === 'suggestions'
+                ? 'border-[#00ff9d]'
+                : 'border-border hover:border-border-emphasis'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#00ff9d]/10 flex items-center justify-center relative">
+                <svg className="w-6 h-6 text-[#00ff9d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                {suggestionsUnread > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    {suggestionsUnread > 9 ? '9+' : suggestionsUnread}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-text-muted font-medium uppercase tracking-wider mb-1">Sugestões</p>
+                <p className="text-3xl font-bold text-text-primary">{suggestionsTotal}</p>
+                <p className="text-xs text-text-muted mt-1">{suggestionsUnread} não lida{suggestionsUnread !== 1 ? 's' : ''}</p>
               </div>
             </div>
           </button>
@@ -740,6 +857,148 @@ export default function ReportedProductsPage() {
             </div>
           </div>
         ))}
+
+        {/* Tabela de Sugestões */}
+        {activeTab === 'suggestions' && (suggestions.length === 0 ? (
+          <div className="bg-surface border border-border rounded-xl p-12 text-center">
+            <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <h3 className="text-lg font-semibold text-text-primary mb-2">Nenhuma sugestão recebida</h3>
+            <p className="text-sm text-text-muted">As sugestões dos usuários aparecerão aqui</p>
+          </div>
+        ) : (
+          <div className="bg-surface border border-border rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-surface-elevated border-b border-border">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Sugestão
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Trigger
+                    </th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Página
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Usuário
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Data
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {suggestions.map((suggestion) => (
+                    <tr
+                      key={suggestion.id}
+                      className={`hover:bg-surface-elevated transition-colors cursor-pointer ${
+                        !suggestion.is_read ? 'bg-[#00ff9d]/5' : ''
+                      }`}
+                      onClick={() => setSelectedSuggestion(suggestion)}
+                    >
+                      <td className="px-4 py-4">
+                        <div className="flex items-start gap-3">
+                          {!suggestion.is_read && (
+                            <span className="w-2 h-2 bg-[#00ff9d] rounded-full mt-2 flex-shrink-0" />
+                          )}
+                          <div className="max-w-[300px]">
+                            <p className={`text-sm text-text-primary line-clamp-2 ${!suggestion.is_read ? 'font-medium' : ''}`}>
+                              {suggestion.text}
+                            </p>
+                            {suggestion.search_query && (
+                              <p className="text-xs text-orange-500 mt-1">
+                                Buscou: &quot;{suggestion.search_query}&quot;
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getTriggerTypeColor(suggestion.trigger_type)}`}>
+                          {getTriggerTypeLabel(suggestion.trigger_type)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4">
+                        <p className="text-xs text-text-muted max-w-[150px] truncate" title={suggestion.page_url}>
+                          {suggestion.page_url.replace(/^https?:\/\/[^/]+/, '')}
+                        </p>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        {suggestion.user_id ? (
+                          <span className="text-xs px-2 py-1 rounded-full bg-blue-500/10 text-blue-500">
+                            Autenticado
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded-full bg-zinc-500/10 text-zinc-400">
+                            Anônimo
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <p className="text-xs text-text-muted">
+                          {new Date(suggestion.created_at).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </td>
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Marcar como lido/não lido */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleSuggestionRead(suggestion.id, suggestion.is_read);
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${
+                              suggestion.is_read
+                                ? 'text-zinc-500 hover:bg-zinc-500/10'
+                                : 'text-[#00ff9d] hover:bg-[#00ff9d]/10'
+                            }`}
+                            title={suggestion.is_read ? 'Marcar como não lido' : 'Marcar como lido'}
+                          >
+                            {suggestion.is_read ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                          </button>
+
+                          {/* Excluir */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSuggestion(suggestion.id);
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Excluir sugestão"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Modal de Detalhes dos Reports de Produtos */}
@@ -1000,6 +1259,150 @@ export default function ReportedProductsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Limpar Reports
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Detalhes da Sugestão */}
+      {selectedSuggestion && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedSuggestion(null)}
+        >
+          <div
+            className="bg-surface rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start gap-4 p-6 border-b border-border">
+              <div className="w-12 h-12 rounded-xl bg-[#00ff9d]/10 flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-[#00ff9d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <h2 className="text-lg font-bold text-text-primary">Sugestão</h2>
+                  {!selectedSuggestion.is_read && (
+                    <span className="px-2 py-0.5 bg-[#00ff9d]/10 text-[#00ff9d] text-xs font-medium rounded-full">
+                      Não lida
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-xs px-2 py-1 rounded-full border ${getTriggerTypeColor(selectedSuggestion.trigger_type)}`}>
+                    {getTriggerTypeLabel(selectedSuggestion.trigger_type)}
+                  </span>
+                  <span className="text-xs text-text-muted">
+                    {new Date(selectedSuggestion.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedSuggestion(null)}
+                className="p-2 text-text-muted hover:text-text-primary transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {/* Texto da sugestão */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
+                  Texto da Sugestão
+                </h4>
+                <div className="bg-background rounded-xl p-4 border border-border">
+                  <p className="text-text-primary whitespace-pre-wrap">
+                    {selectedSuggestion.text}
+                  </p>
+                </div>
+              </div>
+
+              {/* Query de busca (se houver) */}
+              {selectedSuggestion.search_query && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
+                    Termo Buscado
+                  </h4>
+                  <div className="bg-orange-500/10 rounded-xl p-4 border border-orange-500/20">
+                    <p className="text-orange-500 font-medium">
+                      &quot;{selectedSuggestion.search_query}&quot;
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Detalhes */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">
+                    Página
+                  </h4>
+                  <a
+                    href={selectedSuggestion.page_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline break-all"
+                  >
+                    {selectedSuggestion.page_url}
+                  </a>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">
+                    Usuário
+                  </h4>
+                  <p className="text-sm text-text-primary">
+                    {selectedSuggestion.user_id ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full" />
+                        Autenticado
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2 h-2 bg-zinc-500 rounded-full" />
+                        Anônimo
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer - Ações */}
+            <div className="flex items-center gap-3 p-6 border-t border-border">
+              <button
+                onClick={() => handleToggleSuggestionRead(selectedSuggestion.id, selectedSuggestion.is_read)}
+                className={`flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl transition-colors font-medium ${
+                  selectedSuggestion.is_read
+                    ? 'bg-zinc-500/10 text-zinc-400 hover:bg-zinc-500/20'
+                    : 'bg-[#00ff9d]/10 text-[#00ff9d] hover:bg-[#00ff9d]/20'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {selectedSuggestion.is_read ? 'Marcar não lido' : 'Marcar lido'}
+              </button>
+              <button
+                onClick={() => handleDeleteSuggestion(selectedSuggestion.id)}
+                className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Excluir
               </button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import ProductCard from '@/components/ProductCard';
 import SellerCard from '@/components/SellerCard';
 import { ProductFilters } from '@/components/ProductFilters';
@@ -8,6 +8,7 @@ import { ProductFormModal } from '@/components/ProductFormModal';
 import { SellerFormModal } from '@/components/SellerFormModal';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useSuggestionNudge } from '@/hooks/useSuggestionNudge';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
 
 type SortOption = 'none' | 'price-asc' | 'price-desc' | 'alphabetical';
@@ -58,6 +59,8 @@ export function HomeContent({
 }: HomeContentProps) {
   const { isAdminModeActive } = useAdminMode();
   const { favorites } = useFavorites();
+  const { triggerZeroResultsNudge } = useSuggestionNudge();
+  const zeroResultsTriggeredRef = useRef<string | null>(null);
   const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
   const [filters, setFilters] = useState<ProductFiltersState>(INITIAL_FILTERS);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -191,6 +194,26 @@ export function HomeContent({
       .map((id) => productCategories.find((c) => c.id === id)?.name)
       .filter((name): name is string => name !== undefined);
   }, [selectedCategories, productCategories]);
+
+  // Zero results nudge trigger
+  useEffect(() => {
+    // Only trigger if there's a search query and zero results
+    if (
+      filters.search.trim().length >= 3 &&
+      filteredProducts.length === 0 &&
+      activeTab === 'produtos'
+    ) {
+      // Don't trigger again for the same search
+      if (zeroResultsTriggeredRef.current !== filters.search) {
+        zeroResultsTriggeredRef.current = filters.search;
+        // Small delay to ensure the user sees the zero results first
+        const timer = setTimeout(() => {
+          triggerZeroResultsNudge(filters.search);
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [filters.search, filteredProducts.length, activeTab, triggerZeroResultsNudge]);
 
   const formattedCategoryText = useMemo(() => {
     if (selectedCategoryNames.length === 0) return null;

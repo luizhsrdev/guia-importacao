@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from 'react-hot-toast';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { SuggestionProvider, SuggestionWrapper } from '@/components/suggestions';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -38,31 +39,34 @@ export default function RootLayout({
         <body className={`${inter.className} ${outfit.variable}`}>
           <ThemeProvider>
             <CurrencyProvider>
-              {children}
+              <SuggestionProvider>
+                {children}
+                <SuggestionWrapper />
 
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: 'var(--surface)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border)',
-                  },
-                  success: {
-                    iconTheme: {
-                      primary: '#10B981',
-                      secondary: 'var(--surface)',
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: 'var(--surface)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border)',
                     },
-                  },
-                  error: {
-                    iconTheme: {
-                      primary: '#EF4444',
-                      secondary: 'var(--surface)',
+                    success: {
+                      iconTheme: {
+                        primary: '#10B981',
+                        secondary: 'var(--surface)',
+                      },
                     },
-                  },
-                }}
-              />
+                    error: {
+                      iconTheme: {
+                        primary: '#EF4444',
+                        secondary: 'var(--surface)',
+                      },
+                    },
+                  }}
+                />
+              </SuggestionProvider>
             </CurrencyProvider>
           </ThemeProvider>
         </body>
