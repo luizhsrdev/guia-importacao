@@ -10,6 +10,8 @@ export function SuggestionModal() {
   const [honeypot, setHoneypot] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalOpenTime, setModalOpenTime] = useState<number>(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -17,10 +19,17 @@ export function SuggestionModal() {
       setModalOpenTime(Date.now());
       setText('');
       setHoneypot('');
+      setIsClosing(false);
+      // Trigger animation after mount
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
       // Focus textarea after animation
       setTimeout(() => {
         textareaRef.current?.focus();
-      }, 100);
+      }, 200);
+    } else {
+      setIsVisible(false);
     }
   }, [isModalOpen]);
 
@@ -36,9 +45,16 @@ export function SuggestionModal() {
   }, [isModalOpen]);
 
   const handleClose = () => {
-    // Mark dismissal in localStorage for cooldown
-    localStorage.setItem('suggestion_nudge_dismissed_at', Date.now().toString());
-    closeModal();
+    if (isClosing) return;
+    setIsClosing(true);
+    setIsVisible(false);
+    // Wait for animation to complete before closing
+    setTimeout(() => {
+      // Mark dismissal in localStorage for cooldown
+      localStorage.setItem('suggestion_nudge_dismissed_at', Date.now().toString());
+      closeModal();
+      setIsClosing(false);
+    }, 200);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,8 +65,8 @@ export function SuggestionModal() {
       return;
     }
 
-    if (text.trim().length > 2000) {
-      toast.error('Sugestão deve ter no máximo 2000 caracteres.');
+    if (text.trim().length > 150) {
+      toast.error('Sugestão deve ter no máximo 150 caracteres.');
       return;
     }
 
@@ -83,7 +99,12 @@ export function SuggestionModal() {
       localStorage.setItem('suggestion_nudge_submitted_at', Date.now().toString());
 
       toast.success('Sugestão enviada com sucesso! Obrigado pelo feedback.');
-      closeModal();
+
+      // Animate out before closing
+      setIsVisible(false);
+      setTimeout(() => {
+        closeModal();
+      }, 200);
     } catch (error) {
       console.error('Error submitting suggestion:', error);
       toast.error('Erro ao enviar sugestão. Tente novamente.');
@@ -109,12 +130,18 @@ export function SuggestionModal() {
       onClick={handleClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200 ease-out
+                    ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+      />
 
       {/* Modal */}
       <div
-        className="relative bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl
-                   animate-in fade-in zoom-in-95 duration-200"
+        className={`relative bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl
+                    transition-all duration-200 ease-out
+                    ${isVisible
+                      ? 'opacity-100 scale-100 translate-y-0'
+                      : 'opacity-0 scale-95 translate-y-4'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -171,14 +198,14 @@ export function SuggestionModal() {
             className="w-full h-32 bg-zinc-800 border border-zinc-600 rounded-lg p-3 text-white
                        placeholder-zinc-500 resize-none focus:outline-none focus:border-[#00ff9d]
                        transition-colors"
-            maxLength={2000}
+            maxLength={150}
           />
 
           {/* Character count */}
           <div className="flex justify-between items-center mt-2 mb-4">
             <span className="text-xs text-zinc-500">Mínimo 10 caracteres</span>
-            <span className={`text-xs ${text.length > 1900 ? 'text-yellow-500' : 'text-zinc-500'}`}>
-              {text.length}/2000
+            <span className={`text-xs ${text.length > 130 ? 'text-yellow-500' : 'text-zinc-500'}`}>
+              {text.length}/150
             </span>
           </div>
 

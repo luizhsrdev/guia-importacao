@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (text.trim().length > 2000) {
+    if (text.trim().length > 150) {
       return NextResponse.json(
-        { error: 'Sugestão deve ter no máximo 2000 caracteres.' },
+        { error: 'Sugestão deve ter no máximo 150 caracteres.' },
         { status: 400 }
       );
     }
