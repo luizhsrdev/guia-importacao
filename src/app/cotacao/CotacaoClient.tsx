@@ -46,7 +46,7 @@ const STEPS_DATA = [
 ];
 
 // Componente de cada passo com preview de imagem
-function StepItem({ step }: { step: typeof STEPS_DATA[0] }) {
+function StepItem({ step, onImageClick }: { step: typeof STEPS_DATA[0]; onImageClick: (step: typeof STEPS_DATA[0]) => void }) {
   const [showPreview, setShowPreview] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -57,8 +57,8 @@ function StepItem({ step }: { step: typeof STEPS_DATA[0] }) {
       <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
         {step.number}
       </span>
-      <div className="flex-1">
-        <p className="text-text-primary font-medium">{step.title}</p>
+      <div className="flex-1 min-w-0">
+        <p className="text-text-primary font-medium text-sm sm:text-base">{step.title}</p>
         <p className="text-text-tertiary text-xs mt-0.5">{step.description}</p>
       </div>
       {/* Ícone de imagem com preview - só mostra se tiver imagem configurada */}
@@ -68,16 +68,17 @@ function StepItem({ step }: { step: typeof STEPS_DATA[0] }) {
           onMouseEnter={() => setShowPreview(true)}
           onMouseLeave={() => setShowPreview(false)}
         >
-          <div
-            className="w-7 h-7 rounded-lg bg-surface hover:bg-surface-elevated border border-border hover:border-border-emphasis flex items-center justify-center transition-all flex-shrink-0 cursor-default"
+          <button
+            onClick={() => onImageClick(step)}
+            className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-surface hover:bg-surface-elevated border border-border hover:border-border-emphasis flex items-center justify-center transition-all flex-shrink-0 cursor-pointer active:scale-95"
             aria-label={`Ver imagem do passo ${step.number}`}
           >
-            <ImageIcon className="w-3.5 h-3.5 text-text-tertiary" />
-          </div>
+            <ImageIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-text-tertiary" />
+          </button>
 
-          {/* Preview popup */}
+          {/* Preview popup - só no desktop (hidden em mobile) */}
           <div
-            className={`absolute right-0 bottom-full mb-2 z-50 transition-all duration-200 ease-out ${
+            className={`hidden sm:block absolute right-0 bottom-full mb-2 z-50 transition-all duration-200 ease-out ${
               showPreview
                 ? 'opacity-100 translate-y-0 pointer-events-auto'
                 : 'opacity-0 translate-y-2 pointer-events-none'
@@ -111,6 +112,62 @@ function StepItem({ step }: { step: typeof STEPS_DATA[0] }) {
   );
 }
 
+// Modal de imagem para mobile
+function ImageModal({ step, onClose }: { step: typeof STEPS_DATA[0] | null; onClose: () => void }) {
+  const [imageError, setImageError] = useState(false);
+
+  if (!step) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-lg bg-surface border border-border rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-surface-elevated border-b border-border">
+          <p className="text-sm font-medium text-text-primary">Passo {step.number}</p>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-surface hover:bg-background flex items-center justify-center transition-colors"
+            aria-label="Fechar"
+          >
+            <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Image */}
+        <div className="bg-background">
+          {!imageError ? (
+            <img
+              src={step.image}
+              alt={`Passo ${step.number}: ${step.title}`}
+              className="w-full h-auto max-h-[60vh] object-contain"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-48 flex flex-col items-center justify-center gap-2 bg-surface-elevated">
+              <ImageIcon className="w-10 h-10 text-text-tertiary" />
+              <span className="text-text-tertiary text-sm">Imagem não disponível</span>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-4 py-3 bg-surface-elevated border-t border-border">
+          <p className="text-sm font-medium text-text-primary">{step.title}</p>
+          <p className="text-xs text-text-tertiary mt-0.5">{step.description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface ExchangeRateData {
   officialRate: number;
   manualAdjustment: number;
@@ -124,6 +181,7 @@ export default function CotacaoClient() {
   const [loading, setLoading] = useState(true);
   const [inputCNY, setInputCNY] = useState('');
   const [resultBRL, setResultBRL] = useState<number | null>(null);
+  const [selectedStep, setSelectedStep] = useState<typeof STEPS_DATA[0] | null>(null);
 
   useEffect(() => {
     fetchRate();
@@ -343,7 +401,7 @@ export default function CotacaoClient() {
 
             <div className="space-y-4 text-sm">
               {STEPS_DATA.map((step) => (
-                <StepItem key={step.number} step={step} />
+                <StepItem key={step.number} step={step} onImageClick={setSelectedStep} />
               ))}
             </div>
 
@@ -387,6 +445,9 @@ export default function CotacaoClient() {
         </div>
 
       </div>
+
+      {/* Modal de imagem para mobile/touch */}
+      <ImageModal step={selectedStep} onClose={() => setSelectedStep(null)} />
     </div>
   );
 }
