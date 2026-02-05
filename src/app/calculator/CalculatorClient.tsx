@@ -243,7 +243,7 @@ export default function CalculatorClient() {
             Calculadora de Custo
           </h1>
           <p className="text-text-secondary text-sm sm:text-base">
-            Calcule o custo total de importação via CSSBuy com frete JD Express
+            Calcule o custo total de importação via CSSBuy com diferentes fretes
           </p>
         </div>
 
