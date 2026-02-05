@@ -335,8 +335,7 @@ export default function CalculatorClient() {
 
             {/* Shipping Line - Custom Dropdown */}
             <div ref={freightDropdownRef} className="relative">
-              <label className="block text-text-secondary text-sm mb-2 flex items-center gap-2">
-                <Truck className="w-4 h-4 text-text-tertiary" />
+              <label className="block text-text-secondary text-sm mb-2">
                 Frete
               </label>
               <button
@@ -395,7 +394,6 @@ export default function CalculatorClient() {
             {/* Service Fee Level - Custom Dropdown */}
             <div ref={serviceFeeDropdownRef} className="relative">
               <label className="text-text-secondary text-sm mb-2 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-text-tertiary" />
                 Nível e Taxa de Serviço
                 {/* Image Reference Button with Hover Preview */}
                 <div
@@ -554,8 +552,7 @@ export default function CalculatorClient() {
                 )}
               </div>
               <div className="flex-1">
-                <span className="flex items-center gap-2 text-text-primary font-medium">
-                  <Shield className={`w-4 h-4 ${formData.includeInsurance ? 'text-primary' : 'text-text-tertiary'}`} />
+                <span className="text-text-primary font-medium">
                   Incluir Seguro (3%)
                 </span>
                 <p className="text-text-tertiary text-xs mt-1">
