@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Calculator, Package, Scale, Truck, Shield, Receipt, RefreshCw, Info, AlertTriangle, CheckCircle, ChevronDown, Box } from 'lucide-react';
+import { Package, Scale, Truck, Shield, Receipt, RefreshCw, Info, AlertTriangle, CheckCircle, ChevronDown, Box, Check, ImageIcon } from 'lucide-react';
 
 // Service fee levels
 const SERVICE_FEE_LEVELS = [
@@ -18,6 +18,9 @@ const SERVICE_FEE_LEVELS = [
 const SHIPPING_LINES = [
   { label: 'JD Express (0-3kg) - 12-20 dias', value: 'JD-0-3kg' },
 ];
+
+// URL da imagem de referência para identificar o nível no CSSBuy
+const CSSBUY_LEVEL_REFERENCE_IMAGE = 'https://res.cloudinary.com/importacao/image/upload/v1770257427/WhatsApp_Image_2026-02-04_at_23.09.29_ixvcgo.jpg';
 
 interface CalculationResult {
   weight_analysis: {
@@ -78,6 +81,29 @@ export default function CalculatorClient() {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isShippingExpanded, setIsShippingExpanded] = useState(false);
+
+  // Dropdown states
+  const [isFreightDropdownOpen, setIsFreightDropdownOpen] = useState(false);
+  const [isServiceFeeDropdownOpen, setIsServiceFeeDropdownOpen] = useState(false);
+  const [showLevelImage, setShowLevelImage] = useState(false);
+
+  const freightDropdownRef = useRef<HTMLDivElement>(null);
+  const serviceFeeDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (freightDropdownRef.current && !freightDropdownRef.current.contains(event.target as Node)) {
+        setIsFreightDropdownOpen(false);
+      }
+      if (serviceFeeDropdownRef.current && !serviceFeeDropdownRef.current.contains(event.target as Node)) {
+        setIsServiceFeeDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleInputChange = (field: keyof FormData, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -208,8 +234,7 @@ export default function CalculatorClient() {
 
         {/* Title */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2 flex items-center justify-center gap-3">
-            <Calculator className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
             Calculadora de Custo
           </h1>
           <p className="text-text-secondary text-sm sm:text-base">
@@ -228,178 +253,298 @@ export default function CalculatorClient() {
             {/* Product Price */}
             <div>
               <label htmlFor="product-price" className="block text-text-secondary text-sm mb-2">
-                Preço do Produto
+                Preço do Produto <span className="text-text-tertiary">(¥)</span>
               </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary font-medium">
-                  ¥
-                </span>
-                <input
-                  id="product-price"
-                  type="text"
-                  inputMode="decimal"
-                  value={formData.productPrice}
-                  onChange={(e) => handleNumericInput('productPrice', e.target.value)}
-                  placeholder="Ex: 4570.00"
-                  className="w-full pl-10 pr-16 py-3 bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary text-sm">
-                  CNY
-                </span>
-              </div>
+              <input
+                id="product-price"
+                type="text"
+                inputMode="decimal"
+                value={formData.productPrice}
+                onChange={(e) => handleNumericInput('productPrice', e.target.value)}
+                placeholder="Ex: 4570.00"
+                className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                style={{ outline: 'none' }}
+              />
             </div>
 
             {/* Weight */}
             <div>
-              <label htmlFor="weight" className="block text-text-secondary text-sm mb-2 flex items-center gap-2">
-                Peso Real do Produto
-                <span className="group relative cursor-help">
-                  <Info className="w-4 h-4 text-text-tertiary" />
-                  <span className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs text-text-secondary whitespace-nowrap z-10">
-                    Peso informado no anúncio do Xianyu
-                  </span>
-                </span>
+              <label htmlFor="weight" className="block text-text-secondary text-sm mb-2">
+                Peso do Produto <span className="text-text-tertiary">(g)</span>
               </label>
-              <div className="relative">
-                <input
-                  id="weight"
-                  type="text"
-                  inputMode="numeric"
-                  value={formData.weightGrams}
-                  onChange={(e) => handleNumericInput('weightGrams', e.target.value, false)}
-                  placeholder="Ex: 206"
-                  className="w-full pr-16 py-3 px-4 bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary text-sm">
-                  gramas
-                </span>
-              </div>
+              <input
+                id="weight"
+                type="text"
+                inputMode="numeric"
+                value={formData.weightGrams}
+                onChange={(e) => handleNumericInput('weightGrams', e.target.value, false)}
+                placeholder="Ex: 206"
+                className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                style={{ outline: 'none' }}
+              />
             </div>
 
             {/* Dimensions */}
             <div>
-              <label className="block text-text-secondary text-sm mb-2 flex items-center gap-2">
-                Dimensões da Caixa
-                <span className="group relative cursor-help">
-                  <Info className="w-4 h-4 text-text-tertiary" />
-                  <span className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs text-text-secondary whitespace-nowrap z-10">
-                    Pergunte ao vendedor se necessário
-                  </span>
-                </span>
+              <label className="block text-text-secondary text-sm mb-2">
+                Dimensões do Produto <span className="text-text-tertiary">(cm)</span>
               </label>
               <div className="grid grid-cols-3 gap-3">
-                <div className="relative">
+                <div>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={formData.lengthCm}
                     onChange={(e) => handleNumericInput('lengthCm', e.target.value)}
                     placeholder="16.0"
-                    className="w-full pr-10 py-3 px-4 bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    style={{ outline: 'none' }}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary text-xs">
-                    cm
-                  </span>
                   <span className="block text-text-tertiary text-xs text-center mt-1">Comprimento</span>
                 </div>
-                <div className="relative">
+                <div>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={formData.widthCm}
                     onChange={(e) => handleNumericInput('widthCm', e.target.value)}
                     placeholder="8.0"
-                    className="w-full pr-10 py-3 px-4 bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    style={{ outline: 'none' }}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary text-xs">
-                    cm
-                  </span>
                   <span className="block text-text-tertiary text-xs text-center mt-1">Largura</span>
                 </div>
-                <div className="relative">
+                <div>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={formData.heightCm}
                     onChange={(e) => handleNumericInput('heightCm', e.target.value)}
                     placeholder="3.0"
-                    className="w-full pr-10 py-3 px-4 bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    style={{ outline: 'none' }}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary text-xs">
-                    cm
-                  </span>
                   <span className="block text-text-tertiary text-xs text-center mt-1">Altura</span>
                 </div>
               </div>
             </div>
 
-            {/* Shipping Line */}
-            <div>
-              <label htmlFor="shipping-line" className="block text-text-secondary text-sm mb-2 flex items-center gap-2">
+            {/* Shipping Line - Custom Dropdown */}
+            <div ref={freightDropdownRef} className="relative">
+              <label className="block text-text-secondary text-sm mb-2 flex items-center gap-2">
                 <Truck className="w-4 h-4 text-text-tertiary" />
-                Linha de Frete
+                Frete
               </label>
-              <select
-                id="shipping-line"
-                value={formData.shippingLine}
-                onChange={(e) => handleInputChange('shippingLine', e.target.value)}
-                className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none cursor-pointer"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.25rem' }}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsFreightDropdownOpen(!isFreightDropdownOpen);
+                  setIsServiceFeeDropdownOpen(false);
+                }}
+                className={`w-full py-3 px-4 bg-surface border rounded-xl text-text-primary outline-none transition-colors flex items-center justify-between ${
+                  isFreightDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border'
+                }`}
               >
-                {SHIPPING_LINES.map((line) => (
-                  <option key={line.value} value={line.value}>
-                    {line.label}
-                  </option>
-                ))}
-              </select>
+                <span>{SHIPPING_LINES.find(l => l.value === formData.shippingLine)?.label}</span>
+                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-200 ${isFreightDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isFreightDropdownOpen && (
+                <div className="absolute z-50 w-full mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                  {SHIPPING_LINES.map((line) => (
+                    <button
+                      key={line.value}
+                      type="button"
+                      onClick={() => {
+                        handleInputChange('shippingLine', line.value);
+                        setIsFreightDropdownOpen(false);
+                      }}
+                      className={`w-full py-3 px-4 text-left flex items-center justify-between hover:bg-surface-elevated transition-colors ${
+                        formData.shippingLine === line.value ? 'bg-primary/10 text-primary' : 'text-text-primary'
+                      }`}
+                    >
+                      <span>{line.label}</span>
+                      {formData.shippingLine === line.value && (
+                        <Check className="w-4 h-4 text-primary" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Service Fee Level */}
-            <div>
-              <label htmlFor="service-fee" className="block text-text-secondary text-sm mb-2 flex items-center gap-2">
+            {/* Service Fee Level - Custom Dropdown */}
+            <div ref={serviceFeeDropdownRef} className="relative">
+              <label className="text-text-secondary text-sm mb-2 flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-text-tertiary" />
-                Seu Nível no CSSBuy
-                <span className="group relative cursor-help">
-                  <Info className="w-4 h-4 text-text-tertiary" />
-                  <span className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs text-text-secondary whitespace-nowrap z-10">
-                    Taxa cobrada conforme seu nível de membro
-                  </span>
-                </span>
+                Nível e Taxa de Serviço
+                {/* Image Reference Button with Hover Preview */}
+                <div
+                  className="relative"
+                  onMouseEnter={() => setShowLevelImage(true)}
+                  onMouseLeave={() => setShowLevelImage(false)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setShowLevelImage(true)}
+                    className="w-6 h-6 rounded-md bg-surface hover:bg-surface-elevated border border-border hover:border-border-emphasis flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                    aria-label="Ver onde encontrar seu nível no CSSBuy"
+                  >
+                    <ImageIcon className="w-3 h-3 text-text-tertiary" />
+                  </button>
+
+                  {/* Preview popup - desktop only (hover) */}
+                  <div
+                    className={`hidden sm:block absolute left-0 bottom-full mb-2 z-50 transition-all duration-200 ease-out ${
+                      showLevelImage
+                        ? 'opacity-100 translate-y-0 pointer-events-auto'
+                        : 'opacity-0 translate-y-2 pointer-events-none'
+                    }`}
+                  >
+                    <div className="bg-surface border border-border rounded-xl shadow-2xl overflow-hidden" style={{ minWidth: '320px' }}>
+                      {CSSBUY_LEVEL_REFERENCE_IMAGE ? (
+                        <img
+                          src={CSSBUY_LEVEL_REFERENCE_IMAGE}
+                          alt="Onde encontrar seu nível no CSSBuy"
+                          style={{ width: '320px', height: 'auto', maxHeight: '240px' }}
+                          className="object-contain bg-background"
+                        />
+                      ) : (
+                        <div style={{ width: '320px', height: '160px' }} className="bg-surface-elevated flex flex-col items-center justify-center gap-2">
+                          <ImageIcon className="w-8 h-8 text-text-tertiary" />
+                          <span className="text-text-tertiary text-xs">Imagem de referência</span>
+                        </div>
+                      )}
+                      <div className="px-3 py-2 bg-surface-elevated border-t border-border">
+                        <p className="text-xs text-text-secondary">Onde encontrar seu nível no CSSBuy</p>
+                      </div>
+                    </div>
+                    {/* Tooltip arrow */}
+                    <div className="absolute left-2 -bottom-1.5 w-3 h-3 bg-surface-elevated border-r border-b border-border transform rotate-45" />
+                  </div>
+                </div>
               </label>
-              <select
-                id="service-fee"
-                value={formData.serviceFeeRate}
-                onChange={(e) => handleInputChange('serviceFeeRate', parseFloat(e.target.value))}
-                className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none cursor-pointer"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.25rem' }}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsServiceFeeDropdownOpen(!isServiceFeeDropdownOpen);
+                  setIsFreightDropdownOpen(false);
+                }}
+                className={`w-full py-3 px-4 bg-surface border rounded-xl text-text-primary outline-none transition-colors flex items-center justify-between ${
+                  isServiceFeeDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border'
+                }`}
               >
-                {SERVICE_FEE_LEVELS.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
-              </select>
+                <span>{SERVICE_FEE_LEVELS.find(l => l.value === formData.serviceFeeRate)?.label}</span>
+                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-200 ${isServiceFeeDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isServiceFeeDropdownOpen && (
+                <div className="absolute z-50 w-full mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                  {SERVICE_FEE_LEVELS.map((level) => (
+                    <button
+                      key={level.value}
+                      type="button"
+                      onClick={() => {
+                        handleInputChange('serviceFeeRate', level.value);
+                        setIsServiceFeeDropdownOpen(false);
+                      }}
+                      className={`w-full py-3 px-4 text-left flex items-center justify-between hover:bg-surface-elevated transition-colors ${
+                        formData.serviceFeeRate === level.value ? 'bg-primary/10 text-primary' : 'text-text-primary'
+                      }`}
+                    >
+                      <span>{level.label}</span>
+                      {formData.serviceFeeRate === level.value && (
+                        <Check className="w-4 h-4 text-primary" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
             </div>
 
-            {/* Insurance Checkbox */}
-            <div className="flex items-start gap-3 p-4 bg-surface-elevated rounded-xl border border-border">
-              <input
-                type="checkbox"
-                id="insurance"
-                checked={formData.includeInsurance}
-                onChange={(e) => handleInputChange('includeInsurance', e.target.checked)}
-                className="mt-0.5 w-5 h-5 rounded border-border text-primary focus:ring-primary/50 bg-surface cursor-pointer"
-              />
-              <label htmlFor="insurance" className="flex-1 cursor-pointer">
+            {/* Level Reference Image Modal - Mobile only (click) */}
+            {showLevelImage && (
+              <div
+                className="sm:hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                onClick={() => setShowLevelImage(false)}
+              >
+                <div
+                  className="relative w-full max-w-lg bg-surface border border-border rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-3 bg-surface-elevated border-b border-border">
+                    <p className="text-sm font-medium text-text-primary">Onde encontrar seu nível</p>
+                    <button
+                      onClick={() => setShowLevelImage(false)}
+                      className="w-8 h-8 rounded-full bg-surface hover:bg-background flex items-center justify-center transition-colors"
+                      aria-label="Fechar"
+                    >
+                      <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Image */}
+                  <div className="bg-background">
+                    {CSSBUY_LEVEL_REFERENCE_IMAGE ? (
+                      <img
+                        src={CSSBUY_LEVEL_REFERENCE_IMAGE}
+                        alt="Onde encontrar seu nível no CSSBuy"
+                        className="w-full h-auto max-h-[50vh] object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-40 flex flex-col items-center justify-center gap-2 bg-surface-elevated">
+                        <ImageIcon className="w-10 h-10 text-text-tertiary" />
+                        <p className="text-text-tertiary text-sm text-center px-4">
+                          Imagem de referência
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-4 py-3 bg-surface-elevated border-t border-border">
+                    <p className="text-xs text-text-secondary">
+                      Acesse seu perfil no CSSBuy para verificar seu nível de membro.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Insurance Checkbox - Custom */}
+            <button
+              type="button"
+              onClick={() => handleInputChange('includeInsurance', !formData.includeInsurance)}
+              className="flex items-start gap-3 p-4 bg-surface-elevated rounded-xl border border-border hover:border-border-emphasis transition-colors w-full text-left"
+            >
+              {/* Custom Checkbox */}
+              <div
+                className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
+                  formData.includeInsurance
+                    ? 'bg-primary border-primary'
+                    : 'bg-surface border-2 border-border-emphasis'
+                }`}
+              >
+                {formData.includeInsurance && (
+                  <Check className="w-3.5 h-3.5 text-black" />
+                )}
+              </div>
+              <div className="flex-1">
                 <span className="flex items-center gap-2 text-text-primary font-medium">
-                  <Shield className="w-4 h-4 text-primary" />
+                  <Shield className={`w-4 h-4 ${formData.includeInsurance ? 'text-primary' : 'text-text-tertiary'}`} />
                   Incluir Seguro (3%)
                 </span>
                 <p className="text-text-tertiary text-xs mt-1">
                   Proteção até ¥3.000 contra perda/dano (máximo ¥90)
                 </p>
-              </label>
-            </div>
+              </div>
+            </button>
 
             {/* Error Message */}
             {error && (
@@ -432,10 +577,7 @@ export default function CalculatorClient() {
                     Calculando...
                   </>
                 ) : (
-                  <>
-                    <Calculator className="w-5 h-5" />
-                    Calcular Custo Total
-                  </>
+                  'Calcular Custo Total'
                 )}
               </button>
             </div>
@@ -507,7 +649,6 @@ export default function CalculatorClient() {
                 {(() => {
                   const shippingTotal = result.costs_cny.freight + result.costs_cny.insurance + result.costs_cny.service_fee;
                   const shippingTotalBrl = result.costs_brl.freight + result.costs_brl.insurance + result.costs_brl.service_fee;
-                  const insuranceMax = 90;
                   const maxCoverage = 3000; // Insurance covers up to ¥3000
                   const uncoveredAmount = result.costs_cny.product > maxCoverage ? result.costs_cny.product - maxCoverage : 0;
                   const uncoveredAmountBrl = uncoveredAmount * result.exchange_rates.cny_to_brl;

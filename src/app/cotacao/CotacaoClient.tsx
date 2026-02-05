@@ -258,7 +258,7 @@ export default function CotacaoClient() {
           </p>
         </div>
         {/* Rate Card */}
-        <div className="bg-gradient-to-br from-primary/90 to-emerald-950 rounded-2xl p-6 sm:p-8 shadow-xl border border-primary/30">
+        <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 dark:from-primary/90 dark:to-emerald-950 rounded-2xl p-6 sm:p-8 shadow-xl border border-emerald-600/50 dark:border-primary/30">
           {loading ? (
             <div className="animate-pulse space-y-4">
               <div className="h-8 bg-white/20 rounded w-1/3 mx-auto" />
@@ -312,7 +312,7 @@ export default function CotacaoClient() {
         <div className="card p-6 sm:p-8">
           <h2 className="text-text-primary font-semibold text-lg mb-6 flex items-center gap-2">
             <TrendingDown className="w-5 h-5 text-primary" />
-            Calculadora
+            Conversão
           </h2>
 
           <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-0">

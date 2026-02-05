@@ -703,6 +703,49 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* Remove browser default focus outline for inputs */
+input,
+textarea,
+select,
+button {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-color: transparent !important;
+}
+
+/* Safari/WebKit specific focus ring removal */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: none !important;
+  outline-width: 0 !important;
+  -webkit-focus-ring-color: transparent;
+}
+
+/* Additional override for all focused elements */
+*:focus {
+  outline: none !important;
+  outline-width: 0 !important;
+}
+
+*:focus-visible {
+  outline: none !important;
+  outline-width: 0 !important;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
