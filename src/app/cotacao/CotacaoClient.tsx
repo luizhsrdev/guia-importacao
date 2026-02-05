@@ -331,8 +331,8 @@ export default function CotacaoClient() {
                   inputMode="decimal"
                   value={inputCNY}
                   onChange={handleInputChange}
-                  placeholder="0.00"
-                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-text-primary text-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                  placeholder=""
+                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border-emphasis rounded-xl text-text-primary text-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
                 />
               </div>
             </div>

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Package, Scale, Truck, Shield, Receipt, RefreshCw, Info, AlertTriangle, CheckCircle, ChevronDown, Box, Check, ImageIcon } from 'lucide-react';
+import { Truck, Shield, Receipt, RefreshCw, Info, AlertTriangle, CheckCircle, ChevronDown, Check, ImageIcon } from 'lucide-react';
 
 // Service fee levels
 const SERVICE_FEE_LEVELS = [
@@ -16,8 +16,13 @@ const SERVICE_FEE_LEVELS = [
 
 // Shipping lines (prepared for future expansion)
 const SHIPPING_LINES = [
-  { label: 'JD Express (0-3kg) - 12-20 dias', value: 'JD-0-3kg' },
+  { label: 'JD Express (0-3kg)', value: 'JD-0-3kg' },
 ];
+
+// Shipping restrictions per line
+const SHIPPING_RESTRICTIONS: Record<string, string[]> = {
+  'JD-0-3kg': ['Pólvora'],
+};
 
 // URL da imagem de referência para identificar o nível no CSSBuy
 const CSSBUY_LEVEL_REFERENCE_IMAGE = 'https://res.cloudinary.com/importacao/image/upload/v1770257427/WhatsApp_Image_2026-02-04_at_23.09.29_ixvcgo.jpg';
@@ -244,8 +249,7 @@ export default function CalculatorClient() {
 
         {/* Form Card */}
         <div className="card p-6 sm:p-8">
-          <h2 className="text-text-primary font-semibold text-lg mb-6 flex items-center gap-2">
-            <Package className="w-5 h-5 text-primary" />
+          <h2 className="text-text-primary font-semibold text-lg mb-6">
             Dados do Produto
           </h2>
 
@@ -261,8 +265,8 @@ export default function CalculatorClient() {
                 inputMode="decimal"
                 value={formData.productPrice}
                 onChange={(e) => handleNumericInput('productPrice', e.target.value)}
-                placeholder="Ex: 4570.00"
-                className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                placeholder=""
+                className="w-full py-3 px-4 bg-surface border border-border-emphasis rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
                 style={{ outline: 'none' }}
               />
             </div>
@@ -278,8 +282,8 @@ export default function CalculatorClient() {
                 inputMode="numeric"
                 value={formData.weightGrams}
                 onChange={(e) => handleNumericInput('weightGrams', e.target.value, false)}
-                placeholder="Ex: 206"
-                className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                placeholder=""
+                className="w-full py-3 px-4 bg-surface border border-border-emphasis rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
                 style={{ outline: 'none' }}
               />
             </div>
@@ -296,8 +300,8 @@ export default function CalculatorClient() {
                     inputMode="decimal"
                     value={formData.lengthCm}
                     onChange={(e) => handleNumericInput('lengthCm', e.target.value)}
-                    placeholder="16.0"
-                    className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    placeholder=""
+                    className="w-full py-3 px-4 bg-surface border border-border-emphasis rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
                     style={{ outline: 'none' }}
                   />
                   <span className="block text-text-tertiary text-xs text-center mt-1">Comprimento</span>
@@ -308,8 +312,8 @@ export default function CalculatorClient() {
                     inputMode="decimal"
                     value={formData.widthCm}
                     onChange={(e) => handleNumericInput('widthCm', e.target.value)}
-                    placeholder="8.0"
-                    className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    placeholder=""
+                    className="w-full py-3 px-4 bg-surface border border-border-emphasis rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
                     style={{ outline: 'none' }}
                   />
                   <span className="block text-text-tertiary text-xs text-center mt-1">Largura</span>
@@ -320,8 +324,8 @@ export default function CalculatorClient() {
                     inputMode="decimal"
                     value={formData.heightCm}
                     onChange={(e) => handleNumericInput('heightCm', e.target.value)}
-                    placeholder="3.0"
-                    className="w-full py-3 px-4 bg-surface border border-border rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
+                    placeholder=""
+                    className="w-full py-3 px-4 bg-surface border border-border-emphasis rounded-xl text-text-primary outline-none outline-0 focus:outline-none focus:outline-0 ring-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-center"
                     style={{ outline: 'none' }}
                   />
                   <span className="block text-text-tertiary text-xs text-center mt-1">Altura</span>
@@ -342,7 +346,7 @@ export default function CalculatorClient() {
                   setIsServiceFeeDropdownOpen(false);
                 }}
                 className={`w-full py-3 px-4 bg-surface border rounded-xl text-text-primary outline-none transition-colors flex items-center justify-between ${
-                  isFreightDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border'
+                  isFreightDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border-emphasis'
                 }`}
               >
                 <span>{SHIPPING_LINES.find(l => l.value === formData.shippingLine)?.label}</span>
@@ -370,6 +374,20 @@ export default function CalculatorClient() {
                       )}
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* Shipping Restrictions */}
+              {SHIPPING_RESTRICTIONS[formData.shippingLine] && (
+                <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                  <p className="text-red-400 text-xs font-medium mb-2">Restrições do Frete</p>
+                  <div className="flex flex-wrap gap-3">
+                    {SHIPPING_RESTRICTIONS[formData.shippingLine].map((restriction) => (
+                      <span key={restriction} className="text-text-secondary text-xs">
+                        {restriction}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -432,7 +450,7 @@ export default function CalculatorClient() {
                   setIsFreightDropdownOpen(false);
                 }}
                 className={`w-full py-3 px-4 bg-surface border rounded-xl text-text-primary outline-none transition-colors flex items-center justify-between ${
-                  isServiceFeeDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border'
+                  isServiceFeeDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border-emphasis'
                 }`}
               >
                 <span>{SERVICE_FEE_LEVELS.find(l => l.value === formData.serviceFeeRate)?.label}</span>
@@ -541,7 +559,7 @@ export default function CalculatorClient() {
                   Incluir Seguro (3%)
                 </span>
                 <p className="text-text-tertiary text-xs mt-1">
-                  Proteção até ¥3.000 contra perda/dano (máximo ¥90)
+                  Proteção até ¥3.000 do valor total (produto + frete), máximo ¥90
                 </p>
               </div>
             </button>
@@ -558,7 +576,7 @@ export default function CalculatorClient() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handleReset}
-                className="flex-1 py-3 px-4 bg-surface hover:bg-surface-elevated border border-border rounded-xl text-text-secondary font-medium transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-4 bg-surface hover:bg-surface-elevated border border-border-emphasis rounded-xl text-text-secondary font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
                 Limpar
@@ -589,8 +607,7 @@ export default function CalculatorClient() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Weight Analysis */}
             <div className="card p-6">
-              <h3 className="text-text-primary font-semibold mb-4 flex items-center gap-2">
-                <Scale className="w-5 h-5 text-primary" />
+              <h3 className="text-text-primary font-semibold mb-4">
                 Análise de Peso
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -628,18 +645,14 @@ export default function CalculatorClient() {
 
             {/* Cost Breakdown */}
             <div className="card p-6">
-              <h3 className="text-text-primary font-semibold mb-4 flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-primary" />
+              <h3 className="text-text-primary font-semibold mb-4">
                 Detalhamento de Custos
               </h3>
               <div className="space-y-3">
                 {/* Product */}
-                <div className="flex items-center justify-between py-3 border-b border-border">
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-text-tertiary" />
-                    <span className="text-text-secondary">Produto</span>
-                  </div>
-                  <div className="text-right">
+                <div className="flex items-center justify-between py-3 border-b border-border-emphasis">
+                  <span className="text-text-secondary">Produto</span>
+                  <div className="text-right min-w-[120px]">
                     <p className="text-text-primary font-medium">{formatCurrency(result.costs_cny.product, 'CNY')}</p>
                     <p className="text-text-tertiary text-sm">{formatCurrency(result.costs_brl.product, 'BRL')}</p>
                   </div>
@@ -649,23 +662,23 @@ export default function CalculatorClient() {
                 {(() => {
                   const shippingTotal = result.costs_cny.freight + result.costs_cny.insurance + result.costs_cny.service_fee;
                   const shippingTotalBrl = result.costs_brl.freight + result.costs_brl.insurance + result.costs_brl.service_fee;
-                  const maxCoverage = 3000; // Insurance covers up to ¥3000
-                  const uncoveredAmount = result.costs_cny.product > maxCoverage ? result.costs_cny.product - maxCoverage : 0;
+                  const maxCoverage = 3000; // Insurance covers up to ¥3000 of (product + freight)
+                  const totalCoverable = result.costs_cny.product + result.costs_cny.freight;
+                  const uncoveredAmount = totalCoverable > maxCoverage ? totalCoverable - maxCoverage : 0;
                   const uncoveredAmountBrl = uncoveredAmount * result.exchange_rates.cny_to_brl;
 
                   return (
-                    <div className="border-b border-border">
+                    <div className="border-b border-border-emphasis">
                       {/* Collapsed Header */}
                       <button
                         onClick={() => setIsShippingExpanded(!isShippingExpanded)}
-                        className="flex items-center justify-between py-3 w-full text-left hover:bg-surface-elevated/50 -mx-2 px-2 rounded-lg transition-colors"
+                        className="flex items-center justify-between py-3 w-full text-left hover:bg-surface-elevated/50 rounded-lg transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <Box className="w-4 h-4 text-text-tertiary" />
                           <span className="text-text-secondary">Pacote e Envio</span>
                           <ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform duration-200 ${isShippingExpanded ? 'rotate-180' : ''}`} />
                         </div>
-                        <div className="text-right">
+                        <div className="text-right min-w-[120px]">
                           <p className="text-text-primary font-medium">{formatCurrency(shippingTotal, 'CNY')}</p>
                           <p className="text-text-tertiary text-sm">{formatCurrency(shippingTotalBrl, 'BRL')}</p>
                         </div>
@@ -678,12 +691,9 @@ export default function CalculatorClient() {
                           <div className="flex items-center justify-between py-2">
                             <div className="flex items-center gap-2">
                               <Truck className="w-4 h-4 text-text-tertiary" />
-                              <div>
-                                <span className="text-text-secondary text-sm">Frete JD ({result.weight_analysis.weight_used_g}g)</span>
-                                <p className="text-text-tertiary text-xs">{formatCurrency(result.freight_details.freight_usd, 'USD')} USD</p>
-                              </div>
+                              <span className="text-text-secondary text-sm">Frete JD ({result.weight_analysis.weight_used_g}g)</span>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right min-w-[100px]">
                               <p className="text-text-primary text-sm">{formatCurrency(result.costs_cny.freight, 'CNY')}</p>
                               <p className="text-text-tertiary text-xs">{formatCurrency(result.costs_brl.freight, 'BRL')}</p>
                             </div>
@@ -697,7 +707,7 @@ export default function CalculatorClient() {
                                   <Shield className="w-4 h-4 text-text-tertiary" />
                                   <span className="text-text-secondary text-sm">Seguro (3%)</span>
                                 </div>
-                                <div className="text-right">
+                                <div className="text-right min-w-[100px]">
                                   <p className="text-text-primary text-sm">{formatCurrency(result.costs_cny.insurance, 'CNY')}</p>
                                   <p className="text-text-tertiary text-xs">{formatCurrency(result.costs_brl.insurance, 'BRL')}</p>
                                 </div>
@@ -707,7 +717,7 @@ export default function CalculatorClient() {
                                 <div className="mt-2 p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg flex items-start gap-2">
                                   <AlertTriangle className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
                                   <p className="text-orange-400 text-xs">
-                                    Seguro limitado a ¥{maxCoverage.toLocaleString()}. Valor desprotegido: {formatCurrency(uncoveredAmount, 'CNY')} ({formatCurrency(uncoveredAmountBrl, 'BRL')})
+                                    Seguro cobre até ¥{maxCoverage.toLocaleString()} do total (produto + frete). Valor desprotegido: {formatCurrency(uncoveredAmount, 'CNY')} ({formatCurrency(uncoveredAmountBrl, 'BRL')})
                                   </p>
                                 </div>
                               )}
@@ -720,7 +730,7 @@ export default function CalculatorClient() {
                               <Receipt className="w-4 h-4 text-text-tertiary" />
                               <span className="text-text-secondary text-sm">Taxa de Serviço ({(formData.serviceFeeRate * 100).toFixed(0)}%)</span>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right min-w-[100px]">
                               <p className="text-text-primary text-sm">{formatCurrency(result.costs_cny.service_fee, 'CNY')}</p>
                               <p className="text-text-tertiary text-xs">{formatCurrency(result.costs_brl.service_fee, 'BRL')}</p>
                             </div>
@@ -734,7 +744,7 @@ export default function CalculatorClient() {
                 {/* Total */}
                 <div className="flex items-center justify-between pt-4">
                   <span className="text-text-primary font-bold text-lg">CUSTO TOTAL</span>
-                  <div className="text-right">
+                  <div className="text-right min-w-[120px]">
                     <p className="text-primary font-bold text-xl">{formatCurrency(result.costs_cny.total, 'CNY')}</p>
                     <p className="text-primary/80 font-semibold">{formatCurrency(result.costs_brl.total, 'BRL')}</p>
                   </div>
@@ -746,17 +756,11 @@ export default function CalculatorClient() {
             <div className="card p-6 bg-surface-elevated">
               <h3 className="text-text-secondary font-medium mb-3 flex items-center gap-2">
                 <Info className="w-4 h-4 text-text-tertiary" />
-                Taxas de Câmbio Usadas
+                Taxa de Câmbio Usada
               </h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-text-tertiary">USD → CNY</p>
-                  <p className="text-text-primary font-medium">1 USD = ¥ {result.exchange_rates.usd_to_cny.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-text-tertiary">BRL → CNY</p>
-                  <p className="text-text-primary font-medium">R$ 1,00 = ¥ {(1 / result.exchange_rates.cny_to_brl).toFixed(2)}</p>
-                </div>
+              <div className="text-sm">
+                <p className="text-text-tertiary">BRL → CNY</p>
+                <p className="text-text-primary font-medium">R$ 1,00 = ¥ {(1 / result.exchange_rates.cny_to_brl).toFixed(2)}</p>
               </div>
               <p className="text-text-tertiary text-xs mt-3">
                 Atualizado em: {formatDate(result.exchange_rates.updated_at)}
@@ -766,13 +770,25 @@ export default function CalculatorClient() {
             {/* New Simulation Button */}
             <button
               onClick={handleReset}
-              className="w-full py-3 px-4 bg-surface hover:bg-surface-elevated border border-border rounded-xl text-text-secondary font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-surface hover:bg-surface-elevated border border-border-emphasis rounded-xl text-text-secondary font-medium transition-colors flex items-center justify-center gap-2"
             >
               <RefreshCw className="w-4 h-4" />
               Nova Simulação
             </button>
           </div>
         )}
+
+        {/* Disclaimer */}
+        <div className="mt-8 p-4 bg-surface-elevated rounded-xl border border-border">
+          <div className="flex items-start gap-3">
+            <Info className="w-4 h-4 text-text-tertiary flex-shrink-0 mt-0.5" />
+            <p className="text-text-tertiary text-xs leading-relaxed">
+              Os valores calculados nesta página são aproximados e utilizam as fórmulas disponibilizadas pela CSSBuy.
+              Os resultados podem apresentar pequenas variações em relação aos valores finais cobrados pela plataforma.
+              Não nos responsabilizamos por diferenças nos valores.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -130,9 +130,11 @@ function calculateJDFreight(weightGrams: number): number {
   return JD_BASE_PRICE_USD + additionalCost;
 }
 
-function calculateInsurance(productPrice: number): number {
-  // 3% of product price, max ¥90
-  const insurance = productPrice * 0.03;
+function calculateInsurance(productPrice: number, freightCny: number): number {
+  // 3% of (product + freight), max ¥90
+  // Insurance covers up to ¥3000 of the total (product + freight)
+  const totalValue = productPrice + freightCny;
+  const insurance = totalValue * 0.03;
   return Math.min(insurance, 90);
 }
 
@@ -180,10 +182,12 @@ export async function POST(request: NextRequest) {
     const freightCny = freightUsd * USD_TO_CNY;
 
     // Calculate insurance (if enabled)
-    const insuranceCny = body.include_insurance ? calculateInsurance(body.product_price_cny) : 0;
+    // Insurance is 3% of (product + freight), max ¥90, covers up to ¥3000 of total value
+    const insuranceCny = body.include_insurance ? calculateInsurance(body.product_price_cny, freightCny) : 0;
 
     // Calculate service fee
-    const serviceFeeCny = body.product_price_cny * body.service_fee_rate;
+    // Service fee is % of (product + freight)
+    const serviceFeeCny = (body.product_price_cny + freightCny) * body.service_fee_rate;
 
     // Calculate total in CNY
     const totalCny = body.product_price_cny + freightCny + insuranceCny + serviceFeeCny;
