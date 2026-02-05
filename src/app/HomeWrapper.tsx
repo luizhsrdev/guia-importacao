@@ -111,17 +111,21 @@ export function HomeWrapper({
             </div>
 
             <div className="hidden sm:flex gap-2.5 items-center">
-              {/* Exchange Rate Badge - conditionally shown */}
-              {showExchangeRateOnHome && (
-                <div className="h-10 px-3 bg-surface rounded-xl border border-border shadow-sm text-xs flex items-center gap-1.5 whitespace-nowrap">
-                  <span className="text-text-tertiary">R$1 ≈</span>
-                  {rateLoading ? (
-                    <span className="text-text-muted">...</span>
-                  ) : (
-                    <span className="text-text-primary font-medium">¥ {effectiveRate.toFixed(2)}</span>
-                  )}
-                </div>
-              )}
+              {/* Exchange Rate Badge - conditionally shown with animation */}
+              <div
+                className={`h-10 px-3 bg-surface rounded-xl border border-border shadow-sm text-xs flex items-center gap-1.5 whitespace-nowrap transition-all duration-300 ease-out origin-right ${
+                  showExchangeRateOnHome
+                    ? 'opacity-100 scale-100 translate-x-0'
+                    : 'opacity-0 scale-95 translate-x-2 pointer-events-none w-0 px-0 overflow-hidden'
+                }`}
+              >
+                <span className="text-text-tertiary">R$1 ≈</span>
+                {rateLoading ? (
+                  <span className="text-text-muted">...</span>
+                ) : (
+                  <span className="text-text-primary font-medium">¥ {effectiveRate.toFixed(2)}</span>
+                )}
+              </div>
 
               <SettingsDropdown
                 showExchangeRateOnHome={showExchangeRateOnHome}
