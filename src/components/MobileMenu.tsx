@@ -19,6 +19,8 @@ interface MenuContentProps {
   onTabChange: (tab: string) => void;
   userStatus: UserStatus;
   onPremiumClick: () => void;
+  showExchangeRateOnHome: boolean;
+  onToggleExchangeRateVisibility: () => void;
 }
 
 function MenuContent({
@@ -28,9 +30,11 @@ function MenuContent({
   onTabChange,
   userStatus,
   onPremiumClick,
+  showExchangeRateOnHome,
+  onToggleExchangeRateVisibility,
 }: MenuContentProps) {
   const { setTheme, resolvedTheme } = useTheme();
-  const { currency, setCurrency } = useCurrency();
+  const { currency, effectiveRate, loading: rateLoading, setCurrency } = useCurrency();
   const { isAdminModeActive, toggleAdminMode } = useAdminMode();
   const isDark = resolvedTheme === 'dark';
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -182,13 +186,7 @@ function MenuContent({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                   />
                 </svg>
               </button>
@@ -405,6 +403,30 @@ function MenuContent({
 
         {/* Footer Actions */}
         <div className="border-t border-border px-5 py-4 bg-surface-elevated">
+          {/* Exchange Rate Badge - conditionally shown */}
+          {showExchangeRateOnHome && (
+            <div className="mb-4 p-3 rounded-2xl bg-surface border border-border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <span className="text-xs text-text-tertiary">Cotação Atual</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-text-tertiary">R$1 ≈ </span>
+                  {rateLoading ? (
+                    <span className="text-text-muted">...</span>
+                  ) : (
+                    <span className="text-text-primary font-medium">¥ {effectiveRate.toFixed(2)}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Settings Row */}
           <div className="flex items-center gap-3 mb-4">
             {/* Currency Toggle */}
@@ -412,27 +434,78 @@ function MenuContent({
               onClick={() => setCurrency(currency === 'CNY' ? 'BRL' : 'CNY')}
               className="flex-1 flex items-center justify-between h-14 px-4 rounded-2xl bg-surface active:scale-[0.98] transition-transform"
             >
-              <span className="text-sm text-text-secondary">Moeda</span>
-              <span className="text-sm font-semibold text-primary">{currency}</span>
+              <span className="text-sm text-text-secondary">Moeda de Exibição</span>
+              {/* Animated Currency Toggle */}
+              <div className="relative w-10 h-5 flex items-center justify-center overflow-hidden">
+                <span
+                  className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
+                    currency === 'CNY'
+                      ? 'translate-y-0 opacity-100'
+                      : '-translate-y-full opacity-0'
+                  }`}
+                >
+                  CNY
+                </span>
+                <span
+                  className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
+                    currency === 'BRL'
+                      ? 'translate-y-0 opacity-100'
+                      : 'translate-y-full opacity-0'
+                  }`}
+                >
+                  BRL
+                </span>
+              </div>
             </button>
 
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="w-14 h-14 flex items-center justify-center rounded-2xl bg-surface active:scale-95 transition-transform"
+              className="flex items-center justify-center gap-2 h-14 px-4 rounded-2xl bg-surface active:scale-95 transition-transform"
               aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
             >
               {isDark ? (
-                <svg className="w-6 h-6 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                 </svg>
               )}
+              {/* Theme Toggle Switch */}
+              <div
+                className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 ${
+                  isDark ? 'bg-amber-500' : 'bg-slate-400'
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    isDark ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </div>
             </button>
           </div>
+
+          {/* Exchange Rate Visibility Toggle */}
+          <button
+            onClick={onToggleExchangeRateVisibility}
+            className="w-full flex items-center justify-between h-12 px-4 rounded-2xl bg-surface mb-4 active:scale-[0.98] transition-transform"
+          >
+            <span className="text-sm text-text-secondary">Sempre exibir cotação na home</span>
+            <div
+              className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 ${
+                showExchangeRateOnHome ? 'bg-primary' : 'bg-border-emphasis'
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                  showExchangeRateOnHome ? 'translate-x-4' : 'translate-x-0'
+                }`}
+              />
+            </div>
+          </button>
 
           {/* Auth Button */}
           <SignedOut>
@@ -457,6 +530,8 @@ interface MobileMenuProps {
   onTabChange: (tab: string) => void;
   userStatus: UserStatus;
   onPremiumClick: () => void;
+  showExchangeRateOnHome: boolean;
+  onToggleExchangeRateVisibility: () => void;
 }
 
 export function MobileMenu({
@@ -465,6 +540,8 @@ export function MobileMenu({
   onTabChange,
   userStatus,
   onPremiumClick,
+  showExchangeRateOnHome,
+  onToggleExchangeRateVisibility,
 }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -510,6 +587,8 @@ export function MobileMenu({
           onTabChange={onTabChange}
           userStatus={userStatus}
           onPremiumClick={onPremiumClick}
+          showExchangeRateOnHome={showExchangeRateOnHome}
+          onToggleExchangeRateVisibility={onToggleExchangeRateVisibility}
         />,
         document.body
       )}

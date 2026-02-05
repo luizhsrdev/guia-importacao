@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   SignInButton,
   SignedIn,
@@ -9,8 +9,7 @@ import {
 } from '@clerk/nextjs';
 import { Logo } from '@/components/Logo';
 import { HeaderNav } from '@/components/HeaderNav';
-import { CurrencyToggle } from '@/components/CurrencyToggle';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { SettingsDropdown } from '@/components/SettingsDropdown';
 import { MobileMenu } from '@/components/MobileMenu';
 import { HomeContent } from './HomeContent';
 import PremiumUpgradeModal from '@/components/PremiumUpgradeModal';
@@ -18,7 +17,10 @@ import { AdminModeProvider } from '@/contexts/AdminModeContext';
 import { AdminToggleSlider } from '@/components/AdminToggleSlider';
 import { AdminReportsNotification } from '@/components/AdminReportsNotification';
 import { trackCategorySelection } from '@/lib/analytics';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
+
+const EXCHANGE_RATE_VISIBILITY_KEY = 'showExchangeRateOnHome';
 
 interface HomeWrapperProps {
   products: PublicProduct[];
@@ -39,6 +41,22 @@ export function HomeWrapper({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showAdminSlider, setShowAdminSlider] = useState(false);
+  const [showExchangeRateOnHome, setShowExchangeRateOnHome] = useState(true);
+  const { effectiveRate, loading: rateLoading } = useCurrency();
+
+  // Load exchange rate visibility preference from localStorage
+  useEffect(() => {
+    const savedPreference = localStorage.getItem(EXCHANGE_RATE_VISIBILITY_KEY);
+    if (savedPreference !== null) {
+      setShowExchangeRateOnHome(savedPreference === 'true');
+    }
+  }, []);
+
+  const handleToggleExchangeRateVisibility = () => {
+    const newValue = !showExchangeRateOnHome;
+    setShowExchangeRateOnHome(newValue);
+    localStorage.setItem(EXCHANGE_RATE_VISIBILITY_KEY, String(newValue));
+  };
 
   const handleLogoClick = () => {
     setActiveTab('produtos');
@@ -93,8 +111,22 @@ export function HomeWrapper({
             </div>
 
             <div className="hidden sm:flex gap-2.5 items-center">
-              <CurrencyToggle />
-              <ThemeToggle />
+              {/* Exchange Rate Badge - conditionally shown */}
+              {showExchangeRateOnHome && (
+                <div className="h-10 px-3 bg-surface rounded-xl border border-border shadow-sm text-xs flex items-center gap-1.5 whitespace-nowrap">
+                  <span className="text-text-tertiary">R$1 ≈</span>
+                  {rateLoading ? (
+                    <span className="text-text-muted">...</span>
+                  ) : (
+                    <span className="text-text-primary font-medium">¥ {effectiveRate.toFixed(2)}</span>
+                  )}
+                </div>
+              )}
+
+              <SettingsDropdown
+                showExchangeRateOnHome={showExchangeRateOnHome}
+                onToggleExchangeRateVisibility={handleToggleExchangeRateVisibility}
+              />
 
               <div className="w-px h-6 bg-border mx-1" />
 
@@ -123,8 +155,7 @@ export function HomeWrapper({
                       title="Painel Admin"
                     >
                       <svg className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                     <AdminReportsNotification />
@@ -144,6 +175,8 @@ export function HomeWrapper({
                 onTabChange={setActiveTab}
                 userStatus={userStatus}
                 onPremiumClick={() => setShowPremiumModal(true)}
+                showExchangeRateOnHome={showExchangeRateOnHome}
+                onToggleExchangeRateVisibility={handleToggleExchangeRateVisibility}
               />
             </div>
           </div>
