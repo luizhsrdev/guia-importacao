@@ -123,25 +123,36 @@ export function SettingsDropdown({
                   <p className="text-text-primary text-sm font-medium">Moeda de Exibição</p>
                 </div>
                 {/* Animated Currency Toggle */}
-                <div className="relative w-10 h-5 flex items-center justify-center overflow-hidden">
-                  <span
-                    className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
-                      currency === 'CNY'
-                        ? 'translate-y-0 opacity-100'
-                        : '-translate-y-full opacity-0'
-                    }`}
+                <div className="flex items-center gap-1.5">
+                  {/* Swap icon */}
+                  <svg
+                    className="w-4 h-4 text-text-muted"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    CNY
-                  </span>
-                  <span
-                    className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
-                      currency === 'BRL'
-                        ? 'translate-y-0 opacity-100'
-                        : 'translate-y-full opacity-0'
-                    }`}
-                  >
-                    BRL
-                  </span>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                  </svg>
+                  <div className="relative w-10 h-5 flex items-center justify-center overflow-hidden">
+                    <span
+                      className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
+                        currency === 'CNY'
+                          ? 'translate-y-0 opacity-100'
+                          : '-translate-y-full opacity-0'
+                      }`}
+                    >
+                      CNY
+                    </span>
+                    <span
+                      className={`absolute text-primary font-semibold text-sm transition-all duration-300 ease-out ${
+                        currency === 'BRL'
+                          ? 'translate-y-0 opacity-100'
+                          : 'translate-y-full opacity-0'
+                      }`}
+                    >
+                      BRL
+                    </span>
+                  </div>
                 </div>
               </div>
             </button>
