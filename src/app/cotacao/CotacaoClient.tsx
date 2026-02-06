@@ -272,7 +272,6 @@ export default function CotacaoClient() {
             <>
               <div className="mb-6">
                 <h2 className="text-white font-semibold text-lg">Cotação Atual</h2>
-                <p className="text-white/50 text-xs mt-1">Atualizada automaticamente 2x ao dia</p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 sm:gap-6 text-center">
