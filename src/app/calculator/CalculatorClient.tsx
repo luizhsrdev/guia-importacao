@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Truck, Shield, Receipt, RefreshCw, Info, AlertTriangle, CheckCircle, ChevronDown, Check, ImageIcon } from 'lucide-react';
+import { Truck, Shield, Receipt, RefreshCw, Info, AlertTriangle, CheckCircle, ChevronDown, Check, ImageIcon, X } from 'lucide-react';
 
 // Service fee levels
 const SERVICE_FEE_LEVELS = [
@@ -14,19 +14,37 @@ const SERVICE_FEE_LEVELS = [
   { label: 'Merchant (1%)', value: 0.01 },
 ];
 
-// Shipping lines configuration
+// Product attributes that can affect shipping eligibility
+const PRODUCT_ATTRIBUTES = [
+  { id: 'electric', label: 'Elétrico' },
+  { id: 'liquid', label: 'Líquido' },
+  { id: 'knives', label: 'Objetos Pontiagudos' },
+  { id: 'powder', label: 'Pólvora' },
+  { id: 'shoes', label: 'Calçados' },
+  { id: 'bags', label: 'Bolsas' },
+  { id: 'food', label: 'Alimentos' },
+  { id: 'battery', label: 'Bateria' },
+  { id: 'cosmetics', label: 'Cosméticos' },
+  { id: 'magnetic', label: 'Magnético' },
+  { id: 'watch', label: 'Relógio' },
+  { id: 'perfume', label: 'Perfume' },
+  { id: 'sea_freight', label: 'Frete Marítimo' },
+  { id: 'electronic', label: 'Eletrônicos' },
+];
+
+// Shipping lines configuration with attribute-based restrictions
 const SHIPPING_LINES = [
   {
     label: 'JD-EXP-EF (0-3kg)',
     value: 'JD-0-3kg',
     deliveryDays: '10-15 dias',
-    restrictions: ['Pólvora'],
+    restrictedAttributes: ['powder'], // IDs dos atributos restritos
   },
   {
     label: 'JD-EXP-EF Battery (0-12kg)',
     value: 'JD-EXP-EF-Battery-0-12kg',
     deliveryDays: '12-20 dias',
-    restrictions: ['Pó', 'Frete Marítimo'],
+    restrictedAttributes: ['powder', 'sea_freight'],
   },
 ];
 
@@ -76,6 +94,7 @@ interface FormData {
   shippingLine: string;
   serviceFeeRate: number;
   includeInsurance: boolean;
+  productAttributes: string[];
 }
 
 export default function CalculatorClient() {
@@ -88,6 +107,7 @@ export default function CalculatorClient() {
     shippingLine: 'JD-0-3kg',
     serviceFeeRate: 0.06,
     includeInsurance: true,
+    productAttributes: [],
   });
 
   const [isCalculating, setIsCalculating] = useState(false);
@@ -98,10 +118,14 @@ export default function CalculatorClient() {
   // Dropdown states
   const [isFreightDropdownOpen, setIsFreightDropdownOpen] = useState(false);
   const [isServiceFeeDropdownOpen, setIsServiceFeeDropdownOpen] = useState(false);
+  const [isAttributesPopupOpen, setIsAttributesPopupOpen] = useState(false);
   const [showLevelImage, setShowLevelImage] = useState(false);
+  const [attributesConfirmed, setAttributesConfirmed] = useState(false);
+  const [highlightAttributes, setHighlightAttributes] = useState(false);
 
   const freightDropdownRef = useRef<HTMLDivElement>(null);
   const serviceFeeDropdownRef = useRef<HTMLDivElement>(null);
+  const attributesPopupRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -112,11 +136,64 @@ export default function CalculatorClient() {
       if (serviceFeeDropdownRef.current && !serviceFeeDropdownRef.current.contains(event.target as Node)) {
         setIsServiceFeeDropdownOpen(false);
       }
+      if (attributesPopupRef.current && !attributesPopupRef.current.contains(event.target as Node)) {
+        setIsAttributesPopupOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Helper function to check if a shipping line has restricted attributes selected
+  const getShippingRestrictions = (shippingLine: typeof SHIPPING_LINES[0]) => {
+    const conflicts = shippingLine.restrictedAttributes.filter(attr =>
+      formData.productAttributes.includes(attr)
+    );
+    return conflicts.map(attrId =>
+      PRODUCT_ATTRIBUTES.find(a => a.id === attrId)?.label || attrId
+    );
+  };
+
+  // Format restrictions list with proper Portuguese grammar (commas and "e")
+  const formatRestrictionsList = (restrictions: string[]) => {
+    if (restrictions.length === 0) return '';
+    if (restrictions.length === 1) return restrictions[0];
+    if (restrictions.length === 2) return `${restrictions[0]} e ${restrictions[1]}`;
+    const lastItem = restrictions[restrictions.length - 1];
+    const otherItems = restrictions.slice(0, -1);
+    return `${otherItems.join(', ')} e ${lastItem}`;
+  };
+
+  // Toggle attribute selection
+  const handleAttributeToggle = (attributeId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      productAttributes: prev.productAttributes.includes(attributeId)
+        ? prev.productAttributes.filter(id => id !== attributeId)
+        : [...prev.productAttributes, attributeId]
+    }));
+    setResult(null);
+    setError(null);
+  };
+
+  // Handle freight dropdown click - highlight attributes if not confirmed
+  const handleFreightClick = () => {
+    if (!attributesConfirmed) {
+      setHighlightAttributes(true);
+      setTimeout(() => setHighlightAttributes(false), 2000);
+      return;
+    }
+    setIsFreightDropdownOpen(!isFreightDropdownOpen);
+    setIsServiceFeeDropdownOpen(false);
+    setIsAttributesPopupOpen(false);
+  };
+
+  // Confirm attributes selection
+  const handleConfirmAttributes = () => {
+    setAttributesConfirmed(true);
+    setIsAttributesPopupOpen(false);
+  };
 
   const handleInputChange = (field: keyof FormData, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -208,10 +285,12 @@ export default function CalculatorClient() {
       shippingLine: 'JD-0-3kg',
       serviceFeeRate: 0.06,
       includeInsurance: true,
+      productAttributes: [],
     });
     setResult(null);
     setError(null);
     setIsShippingExpanded(false);
+    setAttributesConfirmed(false);
   };
 
   const formatCurrency = (value: number, currency: 'CNY' | 'BRL' | 'USD') => {
@@ -341,6 +420,145 @@ export default function CalculatorClient() {
               </div>
             </div>
 
+            {/* Product Attributes */}
+            <div ref={attributesPopupRef} className="relative">
+              <label className={`block text-sm mb-2 transition-colors duration-500 ${highlightAttributes ? 'text-primary font-medium' : 'text-text-secondary'}`}>
+                Atributos do Produto {!attributesConfirmed && <span className="text-primary">*</span>}
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAttributesPopupOpen(!isAttributesPopupOpen);
+                  setIsFreightDropdownOpen(false);
+                  setIsServiceFeeDropdownOpen(false);
+                }}
+                className={`w-full py-3 px-4 bg-surface border rounded-xl text-left outline-none transition-all duration-500 ease-out ${
+                  highlightAttributes
+                    ? 'border-primary ring-2 ring-primary/30'
+                    : isAttributesPopupOpen
+                    ? 'border-primary ring-2 ring-primary/50'
+                    : attributesConfirmed
+                    ? 'border-border-emphasis'
+                    : 'border-border-emphasis'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {!attributesConfirmed ? (
+                      <span className={`transition-colors duration-300 ${highlightAttributes ? 'text-primary' : 'text-text-tertiary'}`}>
+                        Clique para selecionar os atributos
+                      </span>
+                    ) : formData.productAttributes.length === 0 ? (
+                      <span className="text-text-secondary">Nenhum atributo especial</span>
+                    ) : (
+                      formData.productAttributes.map(attrId => {
+                        const attr = PRODUCT_ATTRIBUTES.find(a => a.id === attrId);
+                        return attr ? (
+                          <span
+                            key={attrId}
+                            className="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-lg"
+                          >
+                            {attr.label}
+                          </span>
+                        ) : null;
+                      })
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                    {attributesConfirmed && (
+                      <Check className="w-4 h-4 text-primary" />
+                    )}
+                    <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-300 ${isAttributesPopupOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </div>
+              </button>
+
+              {/* Attributes Popup */}
+              <div
+                className={`absolute z-50 w-full mt-2 bg-surface border border-border rounded-2xl shadow-lg transition-all duration-300 ease-out origin-top overflow-hidden ${
+                  isAttributesPopupOpen
+                    ? 'opacity-100 max-h-[400px] translate-y-0'
+                    : 'opacity-0 max-h-0 -translate-y-1 pointer-events-none'
+                }`}
+              >
+                <div className="px-4 py-3 border-b border-border bg-surface-elevated">
+                  <p className="text-text-primary font-medium text-sm">Selecione os atributos do produto</p>
+                  <p className="text-text-tertiary text-xs mt-1">Isso ajuda a identificar fretes compatíveis</p>
+                </div>
+                <div className="p-3 space-y-3 max-h-64 overflow-y-auto">
+                  {/* None option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, productAttributes: [] }));
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                      formData.productAttributes.length === 0
+                        ? 'bg-primary/15 text-primary border border-primary/50'
+                        : 'bg-surface-elevated text-text-secondary border border-border hover:border-border-emphasis'
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
+                        formData.productAttributes.length === 0
+                          ? 'bg-primary border-2 border-primary shadow-[0_0_0_2px_rgba(0,255,157,0.3)]'
+                          : 'bg-transparent border-2 border-text-tertiary'
+                      }`}
+                    >
+                      {formData.productAttributes.length === 0 && (
+                        <div className="w-2 h-2 rounded-full bg-black" />
+                      )}
+                    </div>
+                    <span>Nenhum atributo especial</span>
+                  </button>
+
+                  {/* Divider */}
+                  <div className="border-t border-border" />
+
+                  {/* Attributes grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {PRODUCT_ATTRIBUTES.map((attr) => {
+                      const isSelected = formData.productAttributes.includes(attr.id);
+                      return (
+                        <button
+                          key={attr.id}
+                          type="button"
+                          onClick={() => handleAttributeToggle(attr.id)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                            isSelected
+                              ? 'bg-primary/15 text-primary border border-primary/50'
+                              : 'bg-surface-elevated text-text-secondary border border-border hover:border-border-emphasis'
+                          }`}
+                        >
+                          <div
+                            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
+                              isSelected
+                                ? 'bg-primary border-2 border-primary shadow-[0_0_0_2px_rgba(0,255,157,0.3)]'
+                                : 'bg-transparent border-2 border-text-tertiary'
+                            }`}
+                          >
+                            {isSelected && (
+                              <div className="w-2 h-2 rounded-full bg-black" />
+                            )}
+                          </div>
+                          <span>{attr.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="px-4 py-3 border-t border-border bg-surface-elevated flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleConfirmAttributes}
+                    className="px-4 py-2 bg-primary text-black font-medium text-sm rounded-lg hover:bg-primary/90 transition-all duration-200 active:scale-95"
+                  >
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Shipping Line - Custom Dropdown */}
             <div ref={freightDropdownRef} className="relative">
               <label className="block text-text-secondary text-sm mb-2">
@@ -348,69 +566,85 @@ export default function CalculatorClient() {
               </label>
               <button
                 type="button"
-                onClick={() => {
-                  setIsFreightDropdownOpen(!isFreightDropdownOpen);
-                  setIsServiceFeeDropdownOpen(false);
-                }}
-                className={`w-full py-3 px-4 bg-surface border rounded-xl text-text-primary outline-none transition-colors flex items-center justify-between ${
-                  isFreightDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border-emphasis'
+                onClick={handleFreightClick}
+                className={`w-full py-3 px-4 bg-surface border rounded-xl outline-none transition-all duration-200 flex items-center justify-between ${
+                  isFreightDropdownOpen
+                    ? 'border-primary ring-2 ring-primary/50'
+                    : 'border-border-emphasis'
                 }`}
               >
-                <span>{SHIPPING_LINES.find(l => l.value === formData.shippingLine)?.label}</span>
-                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-200 ${isFreightDropdownOpen ? 'rotate-180' : ''}`} />
+                <span className={!attributesConfirmed ? 'text-text-tertiary' : 'text-text-primary'}>
+                  {!attributesConfirmed ? 'Selecione os atributos primeiro' : SHIPPING_LINES.find(l => l.value === formData.shippingLine)?.label}
+                </span>
+                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-300 ${isFreightDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
-              {isFreightDropdownOpen && (
-                <div className="absolute z-50 w-full mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                  {SHIPPING_LINES.map((line) => (
+              <div
+                className={`absolute z-50 w-full mt-2 bg-surface border border-border rounded-2xl shadow-lg transition-all duration-300 ease-out origin-top overflow-hidden ${
+                  isFreightDropdownOpen
+                    ? 'opacity-100 max-h-[300px] translate-y-0'
+                    : 'opacity-0 max-h-0 -translate-y-1 pointer-events-none'
+                }`}
+              >
+                {SHIPPING_LINES.map((line) => {
+                  const restrictions = getShippingRestrictions(line);
+                  const isRestricted = restrictions.length > 0;
+                  const isSelected = formData.shippingLine === line.value;
+
+                  return (
                     <button
                       key={line.value}
                       type="button"
                       onClick={() => {
-                        handleInputChange('shippingLine', line.value);
-                        setIsFreightDropdownOpen(false);
+                        if (!isRestricted) {
+                          handleInputChange('shippingLine', line.value);
+                          setIsFreightDropdownOpen(false);
+                        }
                       }}
-                      className={`w-full py-3 px-4 text-left hover:bg-surface-elevated transition-colors ${
-                        formData.shippingLine === line.value ? 'bg-primary/10' : ''
+                      disabled={isRestricted}
+                      className={`w-full py-3 px-4 text-left transition-all duration-200 ${
+                        isRestricted
+                          ? 'bg-red-500/5 cursor-not-allowed'
+                          : isSelected
+                          ? 'bg-primary/10 hover:bg-primary/15'
+                          : 'hover:bg-surface-elevated'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <div>
-                          <span className={formData.shippingLine === line.value ? 'text-primary font-medium' : 'text-text-primary'}>{line.label}</span>
-                          <p className="text-xs text-text-tertiary mt-1">{line.deliveryDays}</p>
+                        <div className="flex-1">
+                          <span className={
+                            isRestricted
+                              ? 'text-red-400 font-medium'
+                              : isSelected
+                              ? 'text-primary font-medium'
+                              : 'text-text-primary'
+                          }>
+                            {line.label}
+                          </span>
+                          <p className={`text-xs mt-1 ${isRestricted ? 'text-red-400/70' : 'text-text-tertiary'}`}>
+                            {line.deliveryDays}
+                          </p>
+                          {isRestricted && (
+                            <div className="flex items-center gap-1.5 mt-2">
+                              <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+                              <span className="text-red-400 text-xs">
+                                Incompatível: {formatRestrictionsList(restrictions)}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                        {formData.shippingLine === line.value && (
+                        {isSelected && !isRestricted && (
                           <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                        )}
+                        {isRestricted && (
+                          <X className="w-4 h-4 text-red-400 flex-shrink-0" />
                         )}
                       </div>
                     </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Shipping Info and Restrictions */}
-              {(() => {
-                const selectedLine = SHIPPING_LINES.find(l => l.value === formData.shippingLine);
-                if (!selectedLine) return null;
-                return (
-                  <div className="mt-3 space-y-2">
-                    {/* Restrictions */}
-                    {selectedLine.restrictions.length > 0 && (
-                      <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
-                        <p className="text-red-400 text-xs font-medium mb-2">Restrições do Frete</p>
-                        <div className="flex flex-wrap gap-3">
-                          {selectedLine.restrictions.map((restriction) => (
-                            <span key={restriction} className="text-text-secondary text-xs">
-                              • {restriction}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+                  );
+                })}
+              </div>
             </div>
 
             {/* Service Fee Level - Custom Dropdown */}
@@ -468,38 +702,43 @@ export default function CalculatorClient() {
                 onClick={() => {
                   setIsServiceFeeDropdownOpen(!isServiceFeeDropdownOpen);
                   setIsFreightDropdownOpen(false);
+                  setIsAttributesPopupOpen(false);
                 }}
-                className={`w-full py-3 px-4 bg-surface border rounded-xl text-text-primary outline-none transition-colors flex items-center justify-between ${
+                className={`w-full py-3 px-4 bg-surface border rounded-xl text-text-primary outline-none transition-all duration-200 flex items-center justify-between ${
                   isServiceFeeDropdownOpen ? 'border-primary ring-2 ring-primary/50' : 'border-border-emphasis'
                 }`}
               >
                 <span>{SERVICE_FEE_LEVELS.find(l => l.value === formData.serviceFeeRate)?.label}</span>
-                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-200 ${isServiceFeeDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-300 ${isServiceFeeDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
-              {isServiceFeeDropdownOpen && (
-                <div className="absolute z-50 w-full mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                  {SERVICE_FEE_LEVELS.map((level) => (
-                    <button
-                      key={level.value}
-                      type="button"
-                      onClick={() => {
-                        handleInputChange('serviceFeeRate', level.value);
-                        setIsServiceFeeDropdownOpen(false);
-                      }}
-                      className={`w-full py-3 px-4 text-left flex items-center justify-between hover:bg-surface-elevated transition-colors ${
-                        formData.serviceFeeRate === level.value ? 'bg-primary/10 text-primary' : 'text-text-primary'
-                      }`}
-                    >
-                      <span>{level.label}</span>
-                      {formData.serviceFeeRate === level.value && (
-                        <Check className="w-4 h-4 text-primary" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div
+                className={`absolute z-50 w-full mt-2 bg-surface border border-border rounded-2xl shadow-lg transition-all duration-300 ease-out origin-top overflow-hidden ${
+                  isServiceFeeDropdownOpen
+                    ? 'opacity-100 max-h-[350px] translate-y-0'
+                    : 'opacity-0 max-h-0 -translate-y-1 pointer-events-none'
+                }`}
+              >
+                {SERVICE_FEE_LEVELS.map((level) => (
+                  <button
+                    key={level.value}
+                    type="button"
+                    onClick={() => {
+                      handleInputChange('serviceFeeRate', level.value);
+                      setIsServiceFeeDropdownOpen(false);
+                    }}
+                    className={`w-full py-3 px-4 text-left flex items-center justify-between hover:bg-surface-elevated transition-all duration-200 ${
+                      formData.serviceFeeRate === level.value ? 'bg-primary/10 text-primary' : 'text-text-primary'
+                    }`}
+                  >
+                    <span>{level.label}</span>
+                    {formData.serviceFeeRate === level.value && (
+                      <Check className="w-4 h-4 text-primary" />
+                    )}
+                  </button>
+                ))}
+              </div>
 
             </div>
 

@@ -14,7 +14,7 @@ interface ShippingLineConfig {
   maxDimensionSumCm: number;
   volumetricDivisor: number; // e.g. 8000 for formula (L*W*H*1000)/8000
   maxInsuredValueCny: number;
-  restrictions: string[];
+  restrictedAttributes: string[]; // Attribute IDs that are restricted
   deliveryDays: string;
 }
 
@@ -29,7 +29,7 @@ const SHIPPING_LINES: Record<string, ShippingLineConfig> = {
     maxDimensionSumCm: 200,
     volumetricDivisor: 8000,
     maxInsuredValueCny: 3000,
-    restrictions: ['Pólvora'],
+    restrictedAttributes: ['powder'],
     deliveryDays: '10-15',
   },
   'JD-EXP-EF-Battery-0-12kg': {
@@ -42,7 +42,7 @@ const SHIPPING_LINES: Record<string, ShippingLineConfig> = {
     maxDimensionSumCm: 200,
     volumetricDivisor: 8000,
     maxInsuredValueCny: 3000,
-    restrictions: ['Pó', 'Frete Marítimo'],
+    restrictedAttributes: ['powder', 'sea_freight'],
     deliveryDays: '12-20',
   },
 };
