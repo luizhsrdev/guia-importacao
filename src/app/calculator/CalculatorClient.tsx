@@ -38,7 +38,7 @@ const SHIPPING_LINES = [
     label: 'JD-EXP-EF (0-3kg)',
     value: 'JD-0-3kg',
     deliveryDays: '10-15 dias',
-    restrictedAttributes: ['powder'], // IDs dos atributos restritos
+    restrictedAttributes: ['powder', 'sea_freight'], // IDs dos atributos restritos
   },
   {
     label: 'JD-EXP-EF Battery (0-12kg)',
@@ -451,17 +451,13 @@ export default function CalculatorClient() {
                     ) : formData.productAttributes.length === 0 ? (
                       <span className="text-text-secondary">Nenhum atributo especial</span>
                     ) : (
-                      formData.productAttributes.map(attrId => {
-                        const attr = PRODUCT_ATTRIBUTES.find(a => a.id === attrId);
-                        return attr ? (
-                          <span
-                            key={attrId}
-                            className="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-lg"
-                          >
-                            {attr.label}
-                          </span>
-                        ) : null;
-                      })
+                      <span className="text-text-primary">
+                        {formatRestrictionsList(
+                          formData.productAttributes.map(attrId =>
+                            PRODUCT_ATTRIBUTES.find(a => a.id === attrId)?.label || attrId
+                          )
+                        )}
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0 ml-2">
