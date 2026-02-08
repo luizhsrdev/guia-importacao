@@ -14,15 +14,21 @@ const SERVICE_FEE_LEVELS = [
   { label: 'Merchant (1%)', value: 0.01 },
 ];
 
-// Shipping lines (prepared for future expansion)
+// Shipping lines configuration
 const SHIPPING_LINES = [
-  { label: 'JD Express (0-3kg)', value: 'JD-0-3kg' },
+  {
+    label: 'JD-EXP-EF (0-3kg)',
+    value: 'JD-0-3kg',
+    deliveryDays: '10-15 dias',
+    restrictions: ['Pólvora'],
+  },
+  {
+    label: 'JD-EXP-EF Battery (0-12kg)',
+    value: 'JD-EXP-EF-Battery-0-12kg',
+    deliveryDays: '12-20 dias',
+    restrictions: ['Pó', 'Frete Marítimo'],
+  },
 ];
-
-// Shipping restrictions per line
-const SHIPPING_RESTRICTIONS: Record<string, string[]> = {
-  'JD-0-3kg': ['Pólvora'],
-};
 
 // URL da imagem de referência para identificar o nível no CSSBuy
 const CSSBUY_LEVEL_REFERENCE_IMAGE = 'https://res.cloudinary.com/importacao/image/upload/v1770257427/WhatsApp_Image_2026-02-04_at_23.09.29_ixvcgo.jpg';
@@ -56,6 +62,8 @@ interface CalculationResult {
   freight_details: {
     freight_usd: number;
     shipping_line: string;
+    delivery_days: string;
+    max_insured_value_cny: number;
   };
 }
 
@@ -363,32 +371,46 @@ export default function CalculatorClient() {
                         handleInputChange('shippingLine', line.value);
                         setIsFreightDropdownOpen(false);
                       }}
-                      className={`w-full py-3 px-4 text-left flex items-center justify-between hover:bg-surface-elevated transition-colors ${
-                        formData.shippingLine === line.value ? 'bg-primary/10 text-primary' : 'text-text-primary'
+                      className={`w-full py-3 px-4 text-left hover:bg-surface-elevated transition-colors ${
+                        formData.shippingLine === line.value ? 'bg-primary/10' : ''
                       }`}
                     >
-                      <span>{line.label}</span>
-                      {formData.shippingLine === line.value && (
-                        <Check className="w-4 h-4 text-primary" />
-                      )}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className={formData.shippingLine === line.value ? 'text-primary font-medium' : 'text-text-primary'}>{line.label}</span>
+                          <p className="text-xs text-text-tertiary mt-1">{line.deliveryDays}</p>
+                        </div>
+                        {formData.shippingLine === line.value && (
+                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                        )}
+                      </div>
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Shipping Restrictions */}
-              {SHIPPING_RESTRICTIONS[formData.shippingLine] && (
-                <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
-                  <p className="text-red-400 text-xs font-medium mb-2">Restrições do Frete</p>
-                  <div className="flex flex-wrap gap-3">
-                    {SHIPPING_RESTRICTIONS[formData.shippingLine].map((restriction) => (
-                      <span key={restriction} className="text-text-secondary text-xs">
-                        {restriction}
-                      </span>
-                    ))}
+              {/* Shipping Info and Restrictions */}
+              {(() => {
+                const selectedLine = SHIPPING_LINES.find(l => l.value === formData.shippingLine);
+                if (!selectedLine) return null;
+                return (
+                  <div className="mt-3 space-y-2">
+                    {/* Restrictions */}
+                    {selectedLine.restrictions.length > 0 && (
+                      <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                        <p className="text-red-400 text-xs font-medium mb-2">Restrições do Frete</p>
+                        <div className="flex flex-wrap gap-3">
+                          {selectedLine.restrictions.map((restriction) => (
+                            <span key={restriction} className="text-text-secondary text-xs">
+                              • {restriction}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* Service Fee Level - Custom Dropdown */}
@@ -659,7 +681,7 @@ export default function CalculatorClient() {
                 {(() => {
                   const shippingTotal = result.costs_cny.freight + result.costs_cny.insurance + result.costs_cny.service_fee;
                   const shippingTotalBrl = result.costs_brl.freight + result.costs_brl.insurance + result.costs_brl.service_fee;
-                  const maxCoverage = 3000; // Insurance covers up to ¥3000 of (product + freight)
+                  const maxCoverage = result.freight_details.max_insured_value_cny;
                   const totalCoverable = result.costs_cny.product + result.costs_cny.freight;
                   const uncoveredAmount = totalCoverable > maxCoverage ? totalCoverable - maxCoverage : 0;
                   const uncoveredAmountBrl = uncoveredAmount * result.exchange_rates.cny_to_brl;
@@ -688,7 +710,7 @@ export default function CalculatorClient() {
                           <div className="flex items-center justify-between py-2">
                             <div className="flex items-center gap-2">
                               <Truck className="w-4 h-4 text-text-tertiary" />
-                              <span className="text-text-secondary text-sm">Frete JD ({result.weight_analysis.weight_used_g}g)</span>
+                              <span className="text-text-secondary text-sm">Frete ({result.weight_analysis.weight_used_g}g)</span>
                             </div>
                             <div className="text-right min-w-[100px]">
                               <p className="text-text-primary text-sm">{formatCurrency(result.costs_cny.freight, 'CNY')}</p>

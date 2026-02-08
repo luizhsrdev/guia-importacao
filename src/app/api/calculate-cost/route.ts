@@ -3,14 +3,49 @@ import { NextRequest, NextResponse } from 'next/server';
 // Fixed exchange rate USD -> CNY (for now)
 const USD_TO_CNY = 7.2;
 
-// JD Express (0-3kg) shipping rates
-const JD_BASE_PRICE_USD = 7.94; // First 100g
-const JD_ADDITIONAL_PER_100G_USD = 1.73; // Each additional 100g
+// Shipping line configurations
+interface ShippingLineConfig {
+  id: string;
+  label: string;
+  firstWeightPriceUsd: number; // Price per first 100g in USD
+  additionalWeightPriceUsd: number; // Price per additional 100g in USD
+  maxWeightGrams: number;
+  maxDimensionCm: number;
+  maxDimensionSumCm: number;
+  volumetricDivisor: number; // e.g. 8000 for formula (L*W*H*1000)/8000
+  maxInsuredValueCny: number;
+  restrictions: string[];
+  deliveryDays: string;
+}
 
-// Validation limits
-const MAX_WEIGHT_GRAMS = 3000;
-const MAX_DIMENSION_CM = 70;
-const MAX_DIMENSION_SUM_CM = 200;
+const SHIPPING_LINES: Record<string, ShippingLineConfig> = {
+  'JD-0-3kg': {
+    id: 'JD-0-3kg',
+    label: 'JD-EXP-EF (0-3kg)',
+    firstWeightPriceUsd: 7.94,
+    additionalWeightPriceUsd: 1.73,
+    maxWeightGrams: 3000,
+    maxDimensionCm: 70,
+    maxDimensionSumCm: 200,
+    volumetricDivisor: 8000,
+    maxInsuredValueCny: 3000,
+    restrictions: ['Pólvora'],
+    deliveryDays: '10-15',
+  },
+  'JD-EXP-EF-Battery-0-12kg': {
+    id: 'JD-EXP-EF-Battery-0-12kg',
+    label: 'JD-EXP-EF Battery (0-12kg)',
+    firstWeightPriceUsd: 11.55,
+    additionalWeightPriceUsd: 2.16,
+    maxWeightGrams: 12000,
+    maxDimensionCm: 75,
+    maxDimensionSumCm: 200,
+    volumetricDivisor: 8000,
+    maxInsuredValueCny: 3000,
+    restrictions: ['Pó', 'Frete Marítimo'],
+    deliveryDays: '12-20',
+  },
+};
 
 interface CalculateRequest {
   product_price_cny: number;
@@ -29,7 +64,7 @@ interface ValidationError {
   message: string;
 }
 
-function validateInput(body: CalculateRequest): ValidationError | null {
+function validateInput(body: CalculateRequest, shippingConfig: ShippingLineConfig): ValidationError | null {
   // Validate price
   if (!body.product_price_cny || body.product_price_cny <= 0) {
     return {
@@ -56,11 +91,11 @@ function validateInput(body: CalculateRequest): ValidationError | null {
     };
   }
 
-  if (body.weight_grams > MAX_WEIGHT_GRAMS) {
+  if (body.weight_grams > shippingConfig.maxWeightGrams) {
     return {
       type: 'validation_error',
       field: 'weight_grams',
-      message: `Peso excede limite de ${MAX_WEIGHT_GRAMS.toLocaleString()}g do frete JD`,
+      message: `Peso excede limite de ${shippingConfig.maxWeightGrams.toLocaleString()}g do frete ${shippingConfig.label}`,
     };
   }
 
@@ -80,22 +115,22 @@ function validateInput(body: CalculateRequest): ValidationError | null {
       };
     }
 
-    if (dim.value > MAX_DIMENSION_CM) {
+    if (dim.value > shippingConfig.maxDimensionCm) {
       return {
         type: 'validation_error',
         field: dim.name,
-        message: `${dim.label} não pode exceder ${MAX_DIMENSION_CM}cm (limite JD)`,
+        message: `${dim.label} não pode exceder ${shippingConfig.maxDimensionCm}cm (limite ${shippingConfig.label})`,
       };
     }
   }
 
   // Validate dimension sum
   const dimensionSum = body.length_cm + body.width_cm + body.height_cm;
-  if (dimensionSum > MAX_DIMENSION_SUM_CM) {
+  if (dimensionSum > shippingConfig.maxDimensionSumCm) {
     return {
       type: 'validation_error',
       field: 'dimensions',
-      message: `Soma das dimensões (${dimensionSum.toFixed(1)}cm) excede ${MAX_DIMENSION_SUM_CM}cm (limite JD)`,
+      message: `Soma das dimensões (${dimensionSum.toFixed(1)}cm) excede ${shippingConfig.maxDimensionSumCm}cm (limite ${shippingConfig.label})`,
     };
   }
 
@@ -112,22 +147,22 @@ function validateInput(body: CalculateRequest): ValidationError | null {
   return null;
 }
 
-function calculateVolumetricWeight(length: number, width: number, height: number): number {
-  // Formula: (L × W × H × 1000) / 8000
-  return (length * width * height * 1000) / 8000;
+function calculateVolumetricWeight(length: number, width: number, height: number, divisor: number): number {
+  // Formula: (L × W × H × 1000) / divisor
+  return (length * width * height * 1000) / divisor;
 }
 
-function calculateJDFreight(weightGrams: number): number {
+function calculateFreight(weightGrams: number, config: ShippingLineConfig): number {
   // Base price for first 100g
   if (weightGrams <= 100) {
-    return JD_BASE_PRICE_USD;
+    return config.firstWeightPriceUsd;
   }
 
   // Additional cost for weight above 100g
   const additionalWeight = weightGrams - 100;
-  const additionalCost = (additionalWeight / 100) * JD_ADDITIONAL_PER_100G_USD;
+  const additionalCost = (additionalWeight / 100) * config.additionalWeightPriceUsd;
 
-  return JD_BASE_PRICE_USD + additionalCost;
+  return config.firstWeightPriceUsd + additionalCost;
 }
 
 function calculateInsurance(productPrice: number, freightCny: number): number {
@@ -142,8 +177,24 @@ export async function POST(request: NextRequest) {
   try {
     const body: CalculateRequest = await request.json();
 
+    // Get shipping line config
+    const shippingConfig = SHIPPING_LINES[body.shipping_line];
+    if (!shippingConfig) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            type: 'validation_error',
+            field: 'shipping_line',
+            message: 'Linha de frete inválida',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     // Validate input
-    const validationError = validateInput(body);
+    const validationError = validateInput(body, shippingConfig);
     if (validationError) {
       return NextResponse.json(
         { success: false, error: validationError },
@@ -155,18 +206,19 @@ export async function POST(request: NextRequest) {
     const volumetricWeight = calculateVolumetricWeight(
       body.length_cm,
       body.width_cm,
-      body.height_cm
+      body.height_cm,
+      shippingConfig.volumetricDivisor
     );
 
     // Check if volumetric weight exceeds limit
-    if (volumetricWeight > MAX_WEIGHT_GRAMS) {
+    if (volumetricWeight > shippingConfig.maxWeightGrams) {
       return NextResponse.json(
         {
           success: false,
           error: {
             type: 'validation_error',
             field: 'volumetric_weight',
-            message: `Peso volumétrico (${volumetricWeight.toFixed(0)}g) excede limite de ${MAX_WEIGHT_GRAMS.toLocaleString()}g do frete JD`,
+            message: `Peso volumétrico (${volumetricWeight.toFixed(0)}g) excede limite de ${shippingConfig.maxWeightGrams.toLocaleString()}g do frete ${shippingConfig.label}`,
           },
         },
         { status: 400 }
@@ -178,7 +230,7 @@ export async function POST(request: NextRequest) {
     const weightUsed = Math.max(body.weight_grams, volumetricWeight);
 
     // Calculate freight in USD, then convert to CNY
-    const freightUsd = calculateJDFreight(weightUsed);
+    const freightUsd = calculateFreight(weightUsed, shippingConfig);
     const freightCny = freightUsd * USD_TO_CNY;
 
     // Calculate insurance (if enabled)
@@ -254,7 +306,9 @@ export async function POST(request: NextRequest) {
         },
         freight_details: {
           freight_usd: Math.round(freightUsd * 100) / 100,
-          shipping_line: 'JD Express (0-3kg)',
+          shipping_line: shippingConfig.label,
+          delivery_days: shippingConfig.deliveryDays,
+          max_insured_value_cny: shippingConfig.maxInsuredValueCny,
         },
       },
     });
