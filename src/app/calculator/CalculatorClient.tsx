@@ -41,10 +41,34 @@ const SHIPPING_LINES = [
     restrictedAttributes: ['powder', 'sea_freight'], // IDs dos atributos restritos
   },
   {
-    label: 'JD-EXP-EF Battery (0-12kg)',
+    label: 'JD-EXP-EF (0-12kg)',
     value: 'JD-EXP-EF-Battery-0-12kg',
     deliveryDays: '12-20 dias',
     restrictedAttributes: ['powder', 'sea_freight'],
+  },
+  {
+    label: 'TYG-BR-EXP-F (0-3kg)',
+    value: 'TYG-BR-EXP-F-0-3kg',
+    deliveryDays: '12-30 dias',
+    restrictedAttributes: ['liquid', 'electric', 'food', 'knives', 'powder', 'battery', 'cosmetics', 'magnetic', 'watch', 'perfume', 'electronic', 'sea_freight'],
+  },
+  {
+    label: 'GZ-BR-F : B (0-20kg)',
+    value: 'GZ-BR-F-B-0-20kg',
+    deliveryDays: '15-30 dias',
+    restrictedAttributes: ['powder', 'sea_freight'],
+  },
+  {
+    label: 'FJ-BR-EXP-F (0-3kg)',
+    value: 'FJ-BR-EXP-F-0-3kg',
+    deliveryDays: '12-30 dias',
+    restrictedAttributes: ['liquid', 'electric', 'food', 'knives', 'powder', 'battery', 'cosmetics', 'magnetic', 'watch', 'perfume', 'electronic', 'sea_freight'],
+  },
+  {
+    label: 'FJ-BR-EXP-F (3-20kg)',
+    value: 'FJ-BR-EXP-F-3-20kg',
+    deliveryDays: '12-30 dias',
+    restrictedAttributes: ['liquid', 'electric', 'food', 'knives', 'powder', 'battery', 'cosmetics', 'magnetic', 'watch', 'perfume', 'electronic', 'sea_freight'],
   },
 ];
 
@@ -57,6 +81,7 @@ interface CalculationResult {
     volumetric_weight_g: number;
     weight_used_g: number;
     was_volumetric: boolean;
+    uses_volumetric_weight: boolean;
   };
   costs_cny: {
     product: number;
@@ -628,11 +653,19 @@ export default function CalculatorClient() {
               <div
                 className={`absolute z-50 w-full mt-2 bg-surface border border-border rounded-2xl shadow-lg transition-all duration-300 ease-out origin-top overflow-hidden ${
                   isFreightDropdownOpen
-                    ? 'opacity-100 max-h-[300px] translate-y-0'
+                    ? 'opacity-100 max-h-[300px] translate-y-0 overflow-y-auto'
                     : 'opacity-0 max-h-0 -translate-y-1 pointer-events-none'
                 }`}
               >
-                {SHIPPING_LINES.map((line) => {
+                {/* Sort shipping lines: available first, restricted last */}
+                {[...SHIPPING_LINES]
+                  .sort((a, b) => {
+                    const aRestricted = getShippingRestrictions(a).length > 0;
+                    const bRestricted = getShippingRestrictions(b).length > 0;
+                    if (aRestricted === bRestricted) return 0;
+                    return aRestricted ? 1 : -1;
+                  })
+                  .map((line) => {
                   const restrictions = getShippingRestrictions(line);
                   const isRestricted = restrictions.length > 0;
                   const isSelected = formData.shippingLine === line.value;
@@ -921,37 +954,62 @@ export default function CalculatorClient() {
               <h3 className="text-text-primary font-semibold mb-4">
                 Análise de Peso
               </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-surface-elevated rounded-xl border border-border">
-                  <p className="text-text-tertiary text-xs mb-1">Peso Real</p>
-                  <p className="text-text-primary font-bold text-lg">
-                    {result.weight_analysis.real_weight_g.toLocaleString()}g
+              {result.weight_analysis.uses_volumetric_weight ? (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-surface-elevated rounded-xl border border-border">
+                      <p className="text-text-tertiary text-xs mb-1">Peso Real</p>
+                      <p className="text-text-primary font-bold text-lg">
+                        {result.weight_analysis.real_weight_g.toLocaleString()}g
+                      </p>
+                    </div>
+                    <div className="p-4 bg-surface-elevated rounded-xl border border-border">
+                      <p className="text-text-tertiary text-xs mb-1">Peso Volumétrico</p>
+                      <p className="text-text-primary font-bold text-lg flex items-center gap-2">
+                        {result.weight_analysis.volumetric_weight_g.toLocaleString()}g
+                        {result.weight_analysis.was_volumetric && (
+                          <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 text-xs font-medium rounded-full">
+                            VOLUMÉTRICO
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-surface rounded-xl border border-border flex items-center gap-3">
+                    <CheckCircle className={`w-5 h-5 flex-shrink-0 ${result.weight_analysis.was_volumetric ? 'text-orange-400' : 'text-primary'}`} />
+                    <p className="text-text-secondary text-sm">
+                      Frete baseado em: <span className="font-semibold text-text-primary">{result.weight_analysis.weight_used_g.toLocaleString()}g</span>
+                      {result.weight_analysis.was_volumetric && (
+                        <span className="text-orange-400"> (o maior)</span>
+                      )}
+                    </p>
+                  </div>
+                  <p className="text-text-tertiary text-xs mt-3">
+                    Fórmula volumétrico: (C × L × A × 1000) / 8000
                   </p>
-                </div>
-                <div className="p-4 bg-surface-elevated rounded-xl border border-border">
-                  <p className="text-text-tertiary text-xs mb-1">Peso Volumétrico</p>
-                  <p className="text-text-primary font-bold text-lg flex items-center gap-2">
-                    {result.weight_analysis.volumetric_weight_g.toLocaleString()}g
-                    {result.weight_analysis.was_volumetric && (
-                      <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 text-xs font-medium rounded-full">
-                        VOLUMÉTRICO
+                </>
+              ) : (
+                <>
+                  <div className="p-4 bg-surface-elevated rounded-xl border border-border">
+                    <p className="text-text-tertiary text-xs mb-1">Peso Real</p>
+                    <p className="text-text-primary font-bold text-lg flex items-center gap-2">
+                      {result.weight_analysis.real_weight_g.toLocaleString()}g
+                      <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs font-medium rounded-full">
+                        PESO PURO
                       </span>
-                    )}
+                    </p>
+                  </div>
+                  <div className="mt-4 p-3 bg-surface rounded-xl border border-border flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0 text-primary" />
+                    <p className="text-text-secondary text-sm">
+                      Frete baseado em: <span className="font-semibold text-text-primary">{result.weight_analysis.weight_used_g.toLocaleString()}g</span>
+                    </p>
+                  </div>
+                  <p className="text-text-tertiary text-xs mt-3">
+                    Este frete usa apenas o peso real (não calcula peso volumétrico)
                   </p>
-                </div>
-              </div>
-              <div className="mt-4 p-3 bg-surface rounded-xl border border-border flex items-center gap-3">
-                <CheckCircle className={`w-5 h-5 flex-shrink-0 ${result.weight_analysis.was_volumetric ? 'text-orange-400' : 'text-primary'}`} />
-                <p className="text-text-secondary text-sm">
-                  Frete baseado em: <span className="font-semibold text-text-primary">{result.weight_analysis.weight_used_g.toLocaleString()}g</span>
-                  {result.weight_analysis.was_volumetric && (
-                    <span className="text-orange-400"> (o maior)</span>
-                  )}
-                </p>
-              </div>
-              <p className="text-text-tertiary text-xs mt-3">
-                Fórmula volumétrico: (C × L × A × 1000) / 8000
-              </p>
+                </>
+              )}
             </div>
 
             {/* Cost Breakdown */}

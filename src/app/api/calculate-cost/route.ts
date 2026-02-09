@@ -7,12 +7,14 @@ const USD_TO_CNY = 7.2;
 interface ShippingLineConfig {
   id: string;
   label: string;
-  firstWeightPriceUsd: number; // Price per first 100g in USD
+  firstWeightGrams: number; // How many grams the first weight price covers (e.g. 100 or 200)
+  firstWeightPriceUsd: number; // Price for first weight in USD
   additionalWeightPriceUsd: number; // Price per additional 100g in USD
   maxWeightGrams: number;
   maxDimensionCm: number;
   maxDimensionSumCm: number;
-  volumetricDivisor: number; // e.g. 8000 for formula (L*W*H*1000)/8000
+  volumetricDivisor: number; // e.g. 8000 for formula (L*W*H*1000)/8000, 0 = pure weight only
+  usesVolumetricWeight: boolean; // Whether to calculate volumetric weight
   maxInsuredValueCny: number;
   restrictedAttributes: string[]; // Attribute IDs that are restricted
   deliveryDays: string;
@@ -22,28 +24,92 @@ const SHIPPING_LINES: Record<string, ShippingLineConfig> = {
   'JD-0-3kg': {
     id: 'JD-0-3kg',
     label: 'JD-EXP-EF (0-3kg)',
+    firstWeightGrams: 100,
     firstWeightPriceUsd: 7.94,
     additionalWeightPriceUsd: 1.73,
     maxWeightGrams: 3000,
     maxDimensionCm: 70,
     maxDimensionSumCm: 200,
     volumetricDivisor: 8000,
+    usesVolumetricWeight: true,
     maxInsuredValueCny: 3000,
-    restrictedAttributes: ['powder'],
+    restrictedAttributes: ['powder', 'sea_freight'],
     deliveryDays: '10-15',
   },
   'JD-EXP-EF-Battery-0-12kg': {
     id: 'JD-EXP-EF-Battery-0-12kg',
-    label: 'JD-EXP-EF Battery (0-12kg)',
+    label: 'JD-EXP-EF (0-12kg)',
+    firstWeightGrams: 100,
     firstWeightPriceUsd: 11.55,
     additionalWeightPriceUsd: 2.16,
     maxWeightGrams: 12000,
     maxDimensionCm: 75,
     maxDimensionSumCm: 200,
     volumetricDivisor: 8000,
+    usesVolumetricWeight: true,
     maxInsuredValueCny: 3000,
     restrictedAttributes: ['powder', 'sea_freight'],
     deliveryDays: '12-20',
+  },
+  'TYG-BR-EXP-F-0-3kg': {
+    id: 'TYG-BR-EXP-F-0-3kg',
+    label: 'TYG-BR-EXP-F (0-3kg)',
+    firstWeightGrams: 100,
+    firstWeightPriceUsd: 7.22,
+    additionalWeightPriceUsd: 1.46,
+    maxWeightGrams: 3000,
+    maxDimensionCm: 59,
+    maxDimensionSumCm: 999, // No sum restriction mentioned
+    volumetricDivisor: 0,
+    usesVolumetricWeight: false, // Pure weight only
+    maxInsuredValueCny: 4000,
+    restrictedAttributes: ['liquid', 'electric', 'food', 'knives', 'powder', 'battery', 'cosmetics', 'magnetic', 'watch', 'perfume', 'electronic', 'sea_freight'],
+    deliveryDays: '12-30',
+  },
+  'GZ-BR-F-B-0-20kg': {
+    id: 'GZ-BR-F-B-0-20kg',
+    label: 'GZ-BR-F : B (0-20kg)',
+    firstWeightGrams: 200, // First 200g
+    firstWeightPriceUsd: 14.43,
+    additionalWeightPriceUsd: 2.11,
+    maxWeightGrams: 20000,
+    maxDimensionCm: 120,
+    maxDimensionSumCm: 200,
+    volumetricDivisor: 8000,
+    usesVolumetricWeight: true,
+    maxInsuredValueCny: 3500,
+    restrictedAttributes: ['powder', 'sea_freight'],
+    deliveryDays: '15-30',
+  },
+  'FJ-BR-EXP-F-0-3kg': {
+    id: 'FJ-BR-EXP-F-0-3kg',
+    label: 'FJ-BR-EXP-F (0-3kg)',
+    firstWeightGrams: 100,
+    firstWeightPriceUsd: 7.22,
+    additionalWeightPriceUsd: 1.70,
+    maxWeightGrams: 3000,
+    maxDimensionCm: 59,
+    maxDimensionSumCm: 999,
+    volumetricDivisor: 0,
+    usesVolumetricWeight: false, // Pure weight only
+    maxInsuredValueCny: 2000,
+    restrictedAttributes: ['liquid', 'electric', 'food', 'knives', 'powder', 'battery', 'cosmetics', 'magnetic', 'watch', 'perfume', 'electronic', 'sea_freight'],
+    deliveryDays: '12-30',
+  },
+  'FJ-BR-EXP-F-3-20kg': {
+    id: 'FJ-BR-EXP-F-3-20kg',
+    label: 'FJ-BR-EXP-F (3-20kg)',
+    firstWeightGrams: 100,
+    firstWeightPriceUsd: 7.22,
+    additionalWeightPriceUsd: 1.70,
+    maxWeightGrams: 20000,
+    maxDimensionCm: 80,
+    maxDimensionSumCm: 210,
+    volumetricDivisor: 0,
+    usesVolumetricWeight: false, // Pure weight only
+    maxInsuredValueCny: 5000,
+    restrictedAttributes: ['liquid', 'electric', 'food', 'knives', 'powder', 'battery', 'cosmetics', 'magnetic', 'watch', 'perfume', 'electronic', 'sea_freight'],
+    deliveryDays: '12-30',
   },
 };
 
@@ -153,13 +219,13 @@ function calculateVolumetricWeight(length: number, width: number, height: number
 }
 
 function calculateFreight(weightGrams: number, config: ShippingLineConfig): number {
-  // Base price for first 100g
-  if (weightGrams <= 100) {
+  // Base price for first weight (e.g. 100g or 200g depending on shipping line)
+  if (weightGrams <= config.firstWeightGrams) {
     return config.firstWeightPriceUsd;
   }
 
-  // Additional cost for weight above 100g
-  const additionalWeight = weightGrams - 100;
+  // Additional cost for weight above first weight threshold
+  const additionalWeight = weightGrams - config.firstWeightGrams;
   const additionalCost = (additionalWeight / 100) * config.additionalWeightPriceUsd;
 
   return config.firstWeightPriceUsd + additionalCost;
@@ -202,32 +268,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate volumetric weight
-    const volumetricWeight = calculateVolumetricWeight(
-      body.length_cm,
-      body.width_cm,
-      body.height_cm,
-      shippingConfig.volumetricDivisor
-    );
+    // Calculate volumetric weight (only if shipping line uses it)
+    let volumetricWeight = 0;
+    let wasVolumetric = false;
+    let weightUsed = body.weight_grams;
 
-    // Check if volumetric weight exceeds limit
-    if (volumetricWeight > shippingConfig.maxWeightGrams) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            type: 'validation_error',
-            field: 'volumetric_weight',
-            message: `Peso volumétrico (${volumetricWeight.toFixed(0)}g) excede limite de ${shippingConfig.maxWeightGrams.toLocaleString()}g do frete ${shippingConfig.label}`,
-          },
-        },
-        { status: 400 }
+    if (shippingConfig.usesVolumetricWeight && shippingConfig.volumetricDivisor > 0) {
+      volumetricWeight = calculateVolumetricWeight(
+        body.length_cm,
+        body.width_cm,
+        body.height_cm,
+        shippingConfig.volumetricDivisor
       );
-    }
 
-    // Determine which weight to use (higher of real vs volumetric)
-    const wasVolumetric = volumetricWeight > body.weight_grams;
-    const weightUsed = Math.max(body.weight_grams, volumetricWeight);
+      // Check if volumetric weight exceeds limit
+      if (volumetricWeight > shippingConfig.maxWeightGrams) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              type: 'validation_error',
+              field: 'volumetric_weight',
+              message: `Peso volumétrico (${volumetricWeight.toFixed(0)}g) excede limite de ${shippingConfig.maxWeightGrams.toLocaleString()}g do frete ${shippingConfig.label}`,
+            },
+          },
+          { status: 400 }
+        );
+      }
+
+      // Determine which weight to use (higher of real vs volumetric)
+      wasVolumetric = volumetricWeight > body.weight_grams;
+      weightUsed = Math.max(body.weight_grams, volumetricWeight);
+    }
 
     // Calculate freight in USD, then convert to CNY
     const freightUsd = calculateFreight(weightUsed, shippingConfig);
@@ -284,6 +356,7 @@ export async function POST(request: NextRequest) {
           volumetric_weight_g: Math.round(volumetricWeight * 100) / 100,
           weight_used_g: Math.round(weightUsed * 100) / 100,
           was_volumetric: wasVolumetric,
+          uses_volumetric_weight: shippingConfig.usesVolumetricWeight,
         },
         costs_cny: {
           product: Math.round(body.product_price_cny * 100) / 100,
