@@ -122,6 +122,7 @@ export default function CalculatorClient() {
   const [showLevelImage, setShowLevelImage] = useState(false);
   const [attributesConfirmed, setAttributesConfirmed] = useState(false);
   const [highlightAttributes, setHighlightAttributes] = useState(false);
+  const [freightWarning, setFreightWarning] = useState<string | null>(null);
 
   const freightDropdownRef = useRef<HTMLDivElement>(null);
   const serviceFeeDropdownRef = useRef<HTMLDivElement>(null);
@@ -165,14 +166,57 @@ export default function CalculatorClient() {
     return `${otherItems.join(', ')} e ${lastItem}`;
   };
 
+  // Check if shipping line is compatible with given attributes
+  const checkShippingCompatibility = (shippingLineValue: string, attributes: string[]) => {
+    const shippingLine = SHIPPING_LINES.find(l => l.value === shippingLineValue);
+    if (!shippingLine) return { isCompatible: true, conflicts: [] };
+
+    const conflicts = shippingLine.restrictedAttributes.filter(attr =>
+      attributes.includes(attr)
+    );
+    return {
+      isCompatible: conflicts.length === 0,
+      conflicts: conflicts.map(attrId =>
+        PRODUCT_ATTRIBUTES.find(a => a.id === attrId)?.label || attrId
+      ),
+      shippingLabel: shippingLine.label
+    };
+  };
+
   // Toggle attribute selection
   const handleAttributeToggle = (attributeId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      productAttributes: prev.productAttributes.includes(attributeId)
-        ? prev.productAttributes.filter(id => id !== attributeId)
-        : [...prev.productAttributes, attributeId]
-    }));
+    const newAttributes = formData.productAttributes.includes(attributeId)
+      ? formData.productAttributes.filter(id => id !== attributeId)
+      : [...formData.productAttributes, attributeId];
+
+    // Check if current shipping line is still compatible
+    const compatibility = checkShippingCompatibility(formData.shippingLine, newAttributes);
+
+    if (!compatibility.isCompatible && attributesConfirmed) {
+      // Shipping line is no longer compatible, reset it and warn user
+      setFormData(prev => ({
+        ...prev,
+        productAttributes: newAttributes,
+        shippingLine: '' // Clear shipping line
+      }));
+      setFreightWarning(
+        `Frete "${compatibility.shippingLabel}" removido: incompatível com ${formatRestrictionsList(compatibility.conflicts)}`
+      );
+      setTimeout(() => setFreightWarning(null), 5000);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        productAttributes: newAttributes
+      }));
+    }
+
+    setResult(null);
+    setError(null);
+  };
+
+  // Clear all attributes
+  const handleClearAttributes = () => {
+    setFormData(prev => ({ ...prev, productAttributes: [] }));
     setResult(null);
     setError(null);
   };
@@ -226,6 +270,9 @@ export default function CalculatorClient() {
     }
     if (!formData.heightCm || parseFloat(formData.heightCm) <= 0) {
       return 'Informe a altura da caixa';
+    }
+    if (!formData.shippingLine) {
+      return 'Selecione um tipo de frete';
     }
     return null;
   };
@@ -485,9 +532,7 @@ export default function CalculatorClient() {
                   {/* None option */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setFormData(prev => ({ ...prev, productAttributes: [] }));
-                    }}
+                    onClick={handleClearAttributes}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
                       formData.productAttributes.length === 0
                         ? 'bg-primary/15 text-primary border border-primary/50'
@@ -569,8 +614,12 @@ export default function CalculatorClient() {
                     : 'border-border-emphasis'
                 }`}
               >
-                <span className={!attributesConfirmed ? 'text-text-tertiary' : 'text-text-primary'}>
-                  {!attributesConfirmed ? 'Selecione os atributos primeiro' : SHIPPING_LINES.find(l => l.value === formData.shippingLine)?.label}
+                <span className={!attributesConfirmed || !formData.shippingLine ? 'text-text-tertiary' : 'text-text-primary'}>
+                  {!attributesConfirmed
+                    ? 'Selecione os atributos primeiro'
+                    : !formData.shippingLine
+                    ? 'Selecione um frete'
+                    : SHIPPING_LINES.find(l => l.value === formData.shippingLine)?.label}
                 </span>
                 <ChevronDown className={`w-5 h-5 text-text-tertiary transition-transform duration-300 ${isFreightDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -641,6 +690,14 @@ export default function CalculatorClient() {
                   );
                 })}
               </div>
+
+              {/* Freight Warning Message */}
+              {freightWarning && (
+                <div className="mt-2 p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <AlertTriangle className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-orange-400 text-sm">{freightWarning}</p>
+                </div>
+              )}
             </div>
 
             {/* Service Fee Level - Custom Dropdown */}
