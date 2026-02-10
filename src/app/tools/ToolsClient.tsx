@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 
@@ -87,6 +87,8 @@ export function ToolsClient() {
   const [idError, setIdError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState(false);
   const [activeMessageTab, setActiveMessageTab] = useState<MessageTab>('photos');
+  const [tabsScrollProgress, setTabsScrollProgress] = useState(0);
+  const [showTabsScrollbar, setShowTabsScrollbar] = useState(false);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
 
   const handleTabsWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -95,6 +97,30 @@ export function ToolsClient() {
       tabsContainerRef.current.scrollLeft += e.deltaY;
     }
   };
+
+  const handleTabsScroll = () => {
+    if (tabsContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
+      setTabsScrollProgress(progress);
+      setShowTabsScrollbar(scrollWidth > clientWidth);
+    }
+  };
+
+  // Check if scrollbar should be shown on mount and resize
+  useEffect(() => {
+    const checkScrollbar = () => {
+      if (tabsContainerRef.current) {
+        const { scrollWidth, clientWidth } = tabsContainerRef.current;
+        setShowTabsScrollbar(scrollWidth > clientWidth);
+      }
+    };
+
+    checkScrollbar();
+    window.addEventListener('resize', checkScrollbar);
+    return () => window.removeEventListener('resize', checkScrollbar);
+  }, []);
 
   const handleGenerateId = async () => {
     setIsLoadingId(true);
@@ -393,25 +419,40 @@ export function ToolsClient() {
               </div>
 
               {/* Tabs */}
-              <div
-                ref={tabsContainerRef}
-                onWheel={handleTabsWheel}
-                className="flex gap-1 overflow-x-auto pb-2 mb-4 -mx-1 px-1 scrollbar-hide"
-              >
-                {messageTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveMessageTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                      activeMessageTab === tab.id
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </button>
-                ))}
+              <div className="mb-4">
+                <div
+                  ref={tabsContainerRef}
+                  onWheel={handleTabsWheel}
+                  onScroll={handleTabsScroll}
+                  className="flex gap-1 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide"
+                >
+                  {messageTabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveMessageTab(tab.id)}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                        activeMessageTab === tab.id
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
+                      }`}
+                    >
+                      {tab.icon}
+                      <span className="hidden sm:inline">{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {/* Custom scroll indicator */}
+                {showTabsScrollbar && (
+                  <div className="h-0.5 bg-border/50 rounded-full mt-1 mx-1">
+                    <div
+                      className="h-full bg-primary/40 rounded-full transition-all duration-150"
+                      style={{
+                        width: '30%',
+                        marginLeft: `${tabsScrollProgress * 70}%`,
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Messages List Placeholder */}
