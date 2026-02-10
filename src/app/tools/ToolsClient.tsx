@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 
@@ -8,7 +8,241 @@ interface ChineseId {
   identity_number: string;
 }
 
-type MessageTab = 'photos' | 'inspection' | 'packaging' | 'negotiation' | 'general' | 'favorites';
+type MessageTab = 'photos-inspection' | 'general-shipping' | 'favorites';
+type TranslationMode = 'pt-en' | 'pt-zh';
+
+interface Message {
+  id: string;
+  title: string;
+  pt: string;
+  en: string;
+  zh: string;
+}
+
+// Messages data - Photos and Inspection category
+const photosInspectionMessages: Message[] = [
+  {
+    id: 'scratches',
+    title: 'Arranhões e Marcas de Uso',
+    pt: 'Por favor, tire fotos claras e nítidas de quaisquer arranhões ou marcas de uso, se houver. Se o aparelho estiver em perfeito estado, confirme isso também.',
+    zh: '请拍摄清晰的照片，显示任何划痕或使用痕迹（如果有的话）。如果设备状况完美，也请确认。',
+    en: 'Please take clear and sharp photos of any scratches or signs of use, if any. If the device is in perfect condition, please confirm that as well.',
+  },
+  {
+    id: 'serial-box',
+    title: 'Número de Série na Caixa',
+    pt: 'Tire uma foto do número de série impresso na lateral ou parte inferior da caixa do produto.',
+    zh: '请拍摄产品包装盒侧面或底部印刷的序列号照片。',
+    en: 'Take a photo of the serial number printed on the side or bottom of the product box.',
+  },
+  {
+    id: 'serial-iphone',
+    title: 'Número de Série - iPhone (Sistema)',
+    pt: `iPhone - Tire uma foto da tela mostrando o número de série nas configurações.
+
+Passo a passo:
+1. Abra "Ajustes"
+2. Toque em "Geral"
+3. Toque em "Sobre"
+4. Role até "Número de Série"
+5. Tire uma foto da tela mostrando essa informação`,
+    zh: `iPhone - 请拍摄屏幕上显示序列号的设置页面。
+
+步骤：
+1. 打开"设置"
+2. 点击"通用"
+3. 点击"关于本机"
+4. 向下滚动找到"序列号"
+5. 拍摄屏幕显示此信息的照片`,
+    en: `iPhone - Take a photo of the screen showing the serial number in settings.
+
+Steps:
+1. Open "Settings"
+2. Tap "General"
+3. Tap "About"
+4. Scroll down to "Serial Number"
+5. Take a photo of the screen showing this information`,
+  },
+  {
+    id: 'imei-iphone',
+    title: 'IMEI e IMEI2 - iPhone',
+    pt: `iPhone - Tire uma foto da tela mostrando IMEI e IMEI2.
+
+Passo a passo:
+1. Abra "Ajustes"
+2. Toque em "Geral"
+3. Toque em "Sobre"
+4. Role até "IMEI" e "IMEI 2" (modelos dual SIM)
+5. Tire uma foto da tela mostrando ambos os números`,
+    zh: `iPhone - 请拍摄屏幕上显示IMEI和IMEI2的照片。
+
+步骤：
+1. 打开"设置"
+2. 点击"通用"
+3. 点击"关于本机"
+4. 向下滚动找到"IMEI"和"IMEI 2"（双卡机型）
+5. 拍摄屏幕显示两个号码的照片`,
+    en: `iPhone - Take a photo of the screen showing IMEI and IMEI2.
+
+Steps:
+1. Open "Settings"
+2. Tap "General"
+3. Tap "About"
+4. Scroll down to "IMEI" and "IMEI 2" (dual SIM models)
+5. Take a photo of the screen showing both numbers`,
+  },
+  {
+    id: 'repair-history',
+    title: 'Histórico de Reparos - iPhone',
+    pt: `iPhone - Tire uma foto da tela "Peças e Histórico de Serviço".
+
+Passo a passo:
+1. Abra "Ajustes"
+2. Toque em "Geral"
+3. Toque em "Sobre"
+4. Role até o final e toque em "Peças e Histórico de Serviço"
+5. Tire uma foto da tela completa
+
+Se essa opção não aparecer, significa que não há reparos registrados. Confirme isso.`,
+    zh: `iPhone - 请拍摄"部件和服务历史记录"页面的照片。
+
+步骤：
+1. 打开"设置"
+2. 点击"通用"
+3. 点击"关于本机"
+4. 滚动到底部，点击"部件和服务历史记录"
+5. 拍摄整个屏幕的照片
+
+如果没有此选项，说明没有维修记录。请确认这一点。`,
+    en: `iPhone - Take a photo of the "Parts and Service History" screen.
+
+Steps:
+1. Open "Settings"
+2. Tap "General"
+3. Tap "About"
+4. Scroll to the bottom and tap "Parts and Service History"
+5. Take a photo of the entire screen
+
+If this option doesn't appear, it means there are no recorded repairs. Please confirm this.`,
+  },
+  {
+    id: 'truetone-iphone',
+    title: 'True Tone - iPhone',
+    pt: `iPhone - Tire uma foto da tela mostrando a opção True Tone.
+
+Passo a passo:
+1. Abra "Ajustes"
+2. Toque em "Tela e Brilho"
+3. Localize a opção "True Tone"
+4. Tire uma foto da tela mostrando essa opção`,
+    zh: `iPhone - 请拍摄屏幕显示原彩显示选项的照片。
+
+步骤：
+1. 打开"设置"
+2. 点击"显示与亮度"
+3. 找到"原彩显示"选项
+4. 拍摄屏幕显示该选项的照片`,
+    en: `iPhone - Take a photo of the screen showing the True Tone option.
+
+Steps:
+1. Open "Settings"
+2. Tap "Display & Brightness"
+3. Locate the "True Tone" option
+4. Take a photo of the screen showing this option`,
+  },
+  {
+    id: 'truetone-macbook',
+    title: 'True Tone - MacBook',
+    pt: `MacBook - Tire uma foto da tela mostrando a opção True Tone.
+
+Passo a passo:
+1. Clique no menu Apple no canto superior esquerdo
+2. Selecione "Ajustes do Sistema" (ou "Preferências do Sistema")
+3. Clique em "Telas" (ou "Monitores")
+4. Localize a opção "True Tone"
+5. Tire uma foto da tela mostrando essa configuração`,
+    zh: `MacBook - 请拍摄屏幕显示原彩显示选项的照片。
+
+步骤：
+1. 点击左上角的Apple菜单
+2. 选择"系统设置"（或"系统偏好设置"）
+3. 点击"显示器"
+4. 找到"原彩显示"选项
+5. 拍摄屏幕显示此设置的照片`,
+    en: `MacBook - Take a photo of the screen showing the True Tone option.
+
+Steps:
+1. Click the Apple menu in the top-left corner
+2. Select "System Settings" (or "System Preferences")
+3. Click "Displays"
+4. Locate the "True Tone" option
+5. Take a photo of the screen showing this setting`,
+  },
+  {
+    id: 'battery-health',
+    title: 'Saúde da Bateria - iPhone',
+    pt: `iPhone - Tire uma foto da tela mostrando a saúde da bateria.
+
+Passo a passo:
+1. Abra "Ajustes"
+2. Toque em "Bateria"
+3. Toque em "Saúde da Bateria e Carregamento"
+4. Tire uma foto da tela mostrando:
+   - Capacidade Máxima (%)
+   - Ciclos de Carga
+   - Estado de Desempenho Máximo`,
+    zh: `iPhone - 请拍摄屏幕显示电池健康状况的照片。
+
+步骤：
+1. 打开"设置"
+2. 点击"电池"
+3. 点击"电池健康与充电"
+4. 拍摄屏幕显示以下信息的照片：
+   - 最大容量(%)
+   - 充电周期
+   - 峰值性能容量`,
+    en: `iPhone - Take a photo of the screen showing battery health.
+
+Steps:
+1. Open "Settings"
+2. Tap "Battery"
+3. Tap "Battery Health & Charging"
+4. Take a photo of the screen showing:
+   - Maximum Capacity (%)
+   - Cycle Count
+   - Peak Performance Capability`,
+  },
+  {
+    id: 'lockscreen-home',
+    title: 'Tela de Bloqueio e Home - iPhone',
+    pt: 'Tire uma foto do iPhone ligado mostrando a tela de bloqueio e depois uma foto da tela inicial (home), para verificar se a tela funciona perfeitamente e não há manchas ou pixels mortos.',
+    zh: '请拍摄iPhone开机后的锁屏界面照片，然后拍摄主屏幕照片，以确认屏幕完美工作，没有污点或坏点。',
+    en: 'Take a photo of the iPhone turned on showing the lock screen, then take a photo of the home screen, to verify the screen works perfectly and has no stains or dead pixels.',
+  },
+  {
+    id: 'all-sides',
+    title: 'Foto de Todos os Lados - Inspeção Completa',
+    pt: 'Tire fotos de todos os lados do aparelho (frente, traseira, laterais esquerda e direita, topo e base) com boa iluminação para inspeção visual completa.',
+    zh: '请在良好光线下拍摄设备所有侧面的照片（正面、背面、左右侧面、顶部和底部），以便全面检查。',
+    en: 'Take photos of all sides of the device (front, back, left and right sides, top, and bottom) with good lighting for complete visual inspection.',
+  },
+  {
+    id: 'sealed-box',
+    title: 'Caixa Lacrada (Produto Novo)',
+    pt: `Se o produto é novo, tire fotos da caixa completamente lacrada, mostrando:
+1. Lacre da Apple intacto (filme plástico transparente)
+2. Etiqueta com número de série na lateral da caixa
+3. Caixa sem amassados, rasgos ou danos`,
+    zh: `如果产品是全新的，请拍摄完全密封包装盒的照片，显示：
+1. 苹果原装封条完好（透明塑料膜）
+2. 侧面序列号标签
+3. 包装盒无凹陷、撕裂或损坏`,
+    en: `If the product is new, take photos of the completely sealed box, showing:
+1. Apple seal intact (transparent plastic film)
+2. Serial number label on the side of the box
+3. Box without dents, tears, or damage`,
+  },
+];
 
 // SVG Icons
 const Icons = {
@@ -54,24 +288,9 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   ),
-  inspect: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  ),
   package: (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-    </svg>
-  ),
-  money: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  question: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   ),
   star: (
@@ -86,41 +305,9 @@ export function ToolsClient() {
   const [isLoadingId, setIsLoadingId] = useState(false);
   const [idError, setIdError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState(false);
-  const [activeMessageTab, setActiveMessageTab] = useState<MessageTab>('photos');
-  const [tabsScrollProgress, setTabsScrollProgress] = useState(0);
-  const [showTabsScrollbar, setShowTabsScrollbar] = useState(false);
-  const tabsContainerRef = useRef<HTMLDivElement>(null);
-
-  const handleTabsWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (tabsContainerRef.current) {
-      e.preventDefault();
-      tabsContainerRef.current.scrollLeft += e.deltaY;
-    }
-  };
-
-  const handleTabsScroll = () => {
-    if (tabsContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
-      const maxScroll = scrollWidth - clientWidth;
-      const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
-      setTabsScrollProgress(progress);
-      setShowTabsScrollbar(scrollWidth > clientWidth);
-    }
-  };
-
-  // Check if scrollbar should be shown on mount and resize
-  useEffect(() => {
-    const checkScrollbar = () => {
-      if (tabsContainerRef.current) {
-        const { scrollWidth, clientWidth } = tabsContainerRef.current;
-        setShowTabsScrollbar(scrollWidth > clientWidth);
-      }
-    };
-
-    checkScrollbar();
-    window.addEventListener('resize', checkScrollbar);
-    return () => window.removeEventListener('resize', checkScrollbar);
-  }, []);
+  const [activeMessageTab, setActiveMessageTab] = useState<MessageTab>('photos-inspection');
+  const [translationMode, setTranslationMode] = useState<TranslationMode>('pt-zh');
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   const handleGenerateId = async () => {
     setIsLoadingId(true);
@@ -160,12 +347,41 @@ export function ToolsClient() {
     }
   };
 
+  const handleCopyMessage = async (message: Message) => {
+    const textToCopy = translationMode === 'pt-zh' ? message.zh : message.en;
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopiedMessageId(message.id);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = textToCopy;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopiedMessageId(message.id);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    }
+  };
+
+  const getCurrentMessages = (): Message[] => {
+    switch (activeMessageTab) {
+      case 'photos-inspection':
+        return photosInspectionMessages;
+      case 'general-shipping':
+        return []; // TODO: Add general-shipping messages
+      case 'favorites':
+        return []; // TODO: Add favorites functionality
+      default:
+        return [];
+    }
+  };
+
   const messageTabs: { id: MessageTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'photos', label: 'Fotos', icon: Icons.camera },
-    { id: 'inspection', label: 'Inspeção', icon: Icons.inspect },
-    { id: 'packaging', label: 'Embalagem', icon: Icons.package },
-    { id: 'negotiation', label: 'Negociação', icon: Icons.money },
-    { id: 'general', label: 'Gerais', icon: Icons.question },
+    { id: 'photos-inspection', label: 'Fotos e Inspeção', icon: Icons.camera },
+    { id: 'general-shipping', label: 'Comunicação Geral e Envio', icon: Icons.package },
     { id: 'favorites', label: 'Favoritos', icon: Icons.star },
   ];
 
@@ -210,7 +426,7 @@ export function ToolsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Cards 1, 2, 3 */}
           <div className="flex flex-col gap-6">
-            {/* Card 1: IMEI Check */}
+            {/* Card 1: Links Úteis */}
             <div className="bg-surface rounded-2xl border border-border p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -218,25 +434,25 @@ export function ToolsClient() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-text-primary">
-                    Verificação de IMEI e Garantia
+                    Links Úteis
                   </h2>
                   <p className="text-sm text-text-secondary">
-                    Verifique IMEI, status iCloud e garantia Apple
+                    Verificação de IMEI, garantia e remoção de bloqueios
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <a
                   href="https://ifreeicloud.co.uk/free-check"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
                 >
-                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors">
+                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors text-sm">
                     iFreeiCloud
                   </p>
-                  <svg className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -245,12 +461,12 @@ export function ToolsClient() {
                   href="https://sickw.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
                 >
-                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors">
+                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors text-sm">
                     SickW
                   </p>
-                  <svg className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -259,12 +475,54 @@ export function ToolsClient() {
                   href="https://checkcoverage.apple.com/?locale=pt_BR"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
                 >
-                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors">
+                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors text-sm">
                     Apple Check Coverage
                   </p>
-                  <svg className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+
+                <a
+                  href="https://ipsw.me/product/iPhone"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                >
+                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors text-sm">
+                    IPSW Downloads
+                  </p>
+                  <svg className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+
+                <a
+                  href="https://github.com/assafdori/bypass-mdm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                >
+                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors text-sm">
+                    Bypass MDM (MacBooks)
+                  </p>
+                  <svg className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+
+                <a
+                  href="https://github.com/fled-dev/MDMPatcher-Enhanced"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-elevated border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                >
+                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors text-sm">
+                    MDMPatcher Enhanced (iPads/iPhones)
+                  </p>
+                  <svg className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -391,83 +649,150 @@ export function ToolsClient() {
           <div className="lg:row-span-3">
             {/* Card 4: Pre-made Messages */}
             <div className="bg-surface rounded-2xl border border-border p-6 h-full flex flex-col">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                  {Icons.chat}
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                    {Icons.chat}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-text-primary">
+                      Mensagens Pré-Prontas
+                    </h2>
+                    <p className="text-sm text-text-secondary">
+                      Templates para vendedores e agentes
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-text-primary">
-                    Mensagens Pré-Prontas
-                  </h2>
-                  <p className="text-sm text-text-secondary">
-                    Templates para vendedores e agentes
-                  </p>
+
+                {/* Language Toggle */}
+                <div className="flex items-center bg-surface-elevated rounded-lg p-1 border border-border">
+                  <button
+                    onClick={() => setTranslationMode('pt-zh')}
+                    className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      translationMode === 'pt-zh'
+                        ? 'bg-primary text-black'
+                        : 'text-text-secondary hover:text-text-primary'
+                    }`}
+                  >
+                    Chinês
+                  </button>
+                  <button
+                    onClick={() => setTranslationMode('pt-en')}
+                    className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      translationMode === 'pt-en'
+                        ? 'bg-primary text-black'
+                        : 'text-text-secondary hover:text-text-primary'
+                    }`}
+                  >
+                    Inglês
+                  </button>
                 </div>
               </div>
 
-              {/* Search */}
-              <div className="relative mb-4">
-                <input
-                  type="text"
-                  placeholder="Buscar mensagens..."
-                  className="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-elevated border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary/50 transition-colors"
-                  disabled
-                />
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-
-              {/* Tabs */}
-              <div className="mb-4">
-                <div
-                  ref={tabsContainerRef}
-                  onWheel={handleTabsWheel}
-                  onScroll={handleTabsScroll}
-                  className="flex gap-1 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide"
-                >
-                  {messageTabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveMessageTab(tab.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                        activeMessageTab === tab.id
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
-                      }`}
-                    >
+              {/* Category Cards */}
+              <div className="space-y-2 mb-4">
+                {messageTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveMessageTab(tab.id)}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
+                      activeMessageTab === tab.id
+                        ? 'bg-primary/10 border-primary text-primary'
+                        : 'bg-surface-elevated border-border text-text-primary hover:border-primary/50 hover:bg-primary/5'
+                    }`}
+                  >
+                    <span className={activeMessageTab === tab.id ? 'text-primary' : 'text-text-muted'}>
                       {tab.icon}
-                      <span className="hidden sm:inline">{tab.label}</span>
-                    </button>
-                  ))}
-                </div>
-                {/* Custom scroll indicator */}
-                {showTabsScrollbar && (
-                  <div className="h-0.5 bg-border/50 rounded-full mt-1 mx-1">
+                    </span>
+                    <span className="font-medium text-sm">{tab.label}</span>
+                    {activeMessageTab === tab.id && (
+                      <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Messages List */}
+              <div className="flex-1 overflow-y-auto space-y-4 max-h-[500px] pr-1">
+                {getCurrentMessages().length > 0 ? (
+                  getCurrentMessages().map((message) => (
                     <div
-                      className="h-full bg-primary/40 rounded-full transition-all duration-150"
-                      style={{
-                        width: '30%',
-                        marginLeft: `${tabsScrollProgress * 70}%`,
-                      }}
-                    />
+                      key={message.id}
+                      className="bg-surface-elevated rounded-xl border border-border p-4"
+                    >
+                      {/* Title */}
+                      <h3 className="font-medium text-text-primary text-sm mb-3">
+                        {message.title}
+                      </h3>
+
+                      {/* Portuguese text - styled as input field */}
+                      <div className="mb-3">
+                        <label className="text-[11px] font-medium text-text-muted uppercase tracking-wider mb-1.5 block">
+                          Português
+                        </label>
+                        <div className="bg-background border border-border rounded-lg p-3">
+                          <p className="text-sm text-text-primary whitespace-pre-line leading-relaxed select-all">
+                            {message.pt}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Translated text - styled as input field with copy button */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-[11px] font-medium text-primary uppercase tracking-wider">
+                            {translationMode === 'pt-zh' ? 'Chinês' : 'Inglês'}
+                          </label>
+                          <button
+                            onClick={() => handleCopyMessage(message)}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all ${
+                              copiedMessageId === message.id
+                                ? 'bg-primary/20 text-primary'
+                                : 'text-text-muted hover:text-primary hover:bg-primary/10'
+                            }`}
+                          >
+                            {copiedMessageId === message.id ? (
+                              <>
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Copiado!
+                              </>
+                            ) : (
+                              <>
+                                {Icons.copy}
+                                Copiar
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <div className="bg-background border border-primary/30 rounded-lg p-3">
+                          <p className="text-sm text-text-primary whitespace-pre-line leading-relaxed select-all">
+                            {translationMode === 'pt-zh' ? message.zh : message.en}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-surface-elevated flex items-center justify-center mb-4 text-text-muted">
+                      <svg className="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    <p className="text-text-secondary font-medium mb-1">
+                      {activeMessageTab === 'favorites' ? 'Nenhum favorito ainda' : 'Em breve'}
+                    </p>
+                    <p className="text-sm text-text-muted max-w-[200px]">
+                      {activeMessageTab === 'favorites'
+                        ? 'Adicione mensagens aos favoritos para acesso rápido'
+                        : 'Novas mensagens serão adicionadas em breve'}
+                    </p>
                   </div>
                 )}
-              </div>
-
-              {/* Messages List Placeholder */}
-              <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-surface-elevated flex items-center justify-center mb-4 text-text-muted">
-                  <svg className="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <p className="text-text-secondary font-medium mb-1">
-                  Mensagens em breve
-                </p>
-                <p className="text-sm text-text-muted max-w-[200px]">
-                  Templates prontos para copiar e enviar aos vendedores
-                </p>
               </div>
             </div>
           </div>
