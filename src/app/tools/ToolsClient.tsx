@@ -527,24 +527,16 @@ export function ToolsClient() {
       {/* Page Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Page Title */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              {Icons.tools}
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
-              Ferramentas de Importação
-            </h1>
-          </div>
-          <p className="text-text-secondary">
-            Recursos para facilitar suas compras
-          </p>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
+            Ferramentas de Importação
+          </h1>
         </div>
 
         {/* Tools Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Left Column - Cards 1, 2, 3 */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6" id="left-column">
             {/* Card 1: Links Úteis */}
             <div className="bg-surface rounded-2xl border border-border p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -765,9 +757,9 @@ export function ToolsClient() {
           </div>
 
           {/* Right Column - Card 4 */}
-          <div className="lg:row-span-3">
+          <div className="lg:sticky lg:top-20">
             {/* Card 4: Pre-made Messages */}
-            <div className="bg-surface rounded-2xl border border-border p-6 h-full flex flex-col">
+            <div className="bg-surface rounded-2xl border border-border p-6 flex flex-col max-h-[calc(100vh-120px)]">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
@@ -834,7 +826,7 @@ export function ToolsClient() {
               </div>
 
               {/* Messages List */}
-              <div className="flex-1 overflow-y-auto space-y-4 max-h-[500px] pr-1">
+              <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
                 {getCurrentMessages().length > 0 ? (
                   getCurrentMessages().map((message) => (
                     <div
