@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 
@@ -396,6 +396,37 @@ export function ToolsClient() {
   const [activeMessageTab, setActiveMessageTab] = useState<MessageTab>('photos-inspection');
   const [translationMode, setTranslationMode] = useState<TranslationMode>('pt-zh');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('message_favorites');
+    if (savedFavorites) {
+      try {
+        setFavoriteIds(JSON.parse(savedFavorites));
+      } catch {
+        // Invalid JSON, ignore
+      }
+    }
+  }, []);
+
+  // Save favorites to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem('message_favorites', JSON.stringify(favoriteIds));
+  }, [favoriteIds]);
+
+  const toggleFavorite = (messageId: string) => {
+    setFavoriteIds((prev) =>
+      prev.includes(messageId)
+        ? prev.filter((id) => id !== messageId)
+        : [...prev, messageId]
+    );
+  };
+
+  const isFavorite = (messageId: string) => favoriteIds.includes(messageId);
+
+  // Get all messages combined for favorites lookup
+  const allMessages = [...photosInspectionMessages, ...generalShippingMessages];
 
   const handleGenerateId = async () => {
     setIsLoadingId(true);
@@ -461,7 +492,7 @@ export function ToolsClient() {
       case 'general-shipping':
         return generalShippingMessages;
       case 'favorites':
-        return []; // TODO: Add favorites functionality
+        return allMessages.filter((msg) => favoriteIds.includes(msg.id));
       default:
         return [];
     }
@@ -810,10 +841,35 @@ export function ToolsClient() {
                       key={message.id}
                       className="bg-surface-elevated rounded-xl border border-border p-4"
                     >
-                      {/* Title */}
-                      <h3 className="font-medium text-text-primary text-sm mb-3">
-                        {message.title}
-                      </h3>
+                      {/* Title with favorite button */}
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <h3 className="font-medium text-text-primary text-sm">
+                          {message.title}
+                        </h3>
+                        <button
+                          onClick={() => toggleFavorite(message.id)}
+                          className={`flex-shrink-0 p-1.5 rounded-lg transition-all ${
+                            isFavorite(message.id)
+                              ? 'text-amber-400 hover:text-amber-500'
+                              : 'text-text-muted hover:text-amber-400 hover:bg-amber-400/10'
+                          }`}
+                          title={isFavorite(message.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill={isFavorite(message.id) ? 'currentColor' : 'none'}
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
 
                       {/* Portuguese text - styled as input field */}
                       <div className="mb-3">
