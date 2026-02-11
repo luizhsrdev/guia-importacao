@@ -244,6 +244,94 @@ Steps:
   },
 ];
 
+// Messages data - General Communication and Shipping category
+const generalShippingMessages: Message[] = [
+  {
+    id: 'discard-box',
+    title: 'Descartar Caixa Externa (Frete)',
+    pt: 'Por favor, descarte a caixa de papelão usada no frete do vendedor ao armazém. Ela tem volume grande e não é necessária. Mantenha apenas a caixa original do produto.',
+    zh: '请丢弃卖家发货到仓库使用的纸箱。它体积很大且不需要。只保留产品的原装包装盒。',
+    en: 'Please discard the cardboard box used for shipping from the seller to the warehouse. It has a large volume and is not necessary. Keep only the original product box.',
+  },
+  {
+    id: 'protection-packing',
+    title: 'Embalar com Proteção Adequada',
+    pt: 'Por favor, embale o dispositivo de forma que os acessórios inclusos (cabo, carregador, fones) não fiquem em contato direto com superfícies que podem ser arranhadas ou desgastadas pelo atrito. Use plástico bolha ou papel de proteção entre os itens.',
+    zh: '请包装设备时确保随附配件（数据线、充电器、耳机）不会直接接触可能被摩擦划伤或磨损的表面。请在物品之间使用气泡膜或保护纸。',
+    en: 'Please pack the device so that included accessories (cable, charger, earphones) are not in direct contact with surfaces that can be scratched or worn by friction. Use bubble wrap or protective paper between items.',
+  },
+  {
+    id: 'stock-availability',
+    title: 'Disponibilidade em Estoque',
+    pt: 'O produto ainda está disponível e em estoque? Posso comprar e enviar imediatamente?',
+    zh: '产品还有货吗？可以立即购买并发货吗？',
+    en: 'Is the product still available and in stock? Can I buy and ship immediately?',
+  },
+  {
+    id: 'accepts-agents',
+    title: 'Aceita Agentes de Compra',
+    pt: 'Você aceita envio para agentes de compra e intermediação como CSSBuy, Superbuy, Pandabuy ou Wegobuy?',
+    zh: '您接受发货到代购平台吗？例如CSSBuy、Superbuy、Pandabuy或Wegobuy？',
+    en: 'Do you accept shipping to purchasing agents and intermediaries like CSSBuy, Superbuy, Pandabuy, or Wegobuy?',
+  },
+  {
+    id: 'confirm-price',
+    title: 'Confirmar Preço Real',
+    pt: 'O valor anunciado é o preço real? Se não, qual o preço correto para cada modelo/configuração disponível?',
+    zh: '广告价格是真实价格吗？如果不是，每个型号/配置的正确价格是多少？',
+    en: 'Is the advertised price the real price? If not, what is the correct price for each available model/configuration?',
+  },
+  {
+    id: 'invoice-fapiao',
+    title: 'Nota Fiscal (Fapiao)',
+    pt: 'Você pode fornecer nota fiscal (发票 - fapiao) para este produto?',
+    zh: '您可以提供发票吗？',
+    en: 'Can you provide an invoice (发票 - fapiao) for this product?',
+  },
+  {
+    id: 'warranty-return',
+    title: 'Garantia e Política de Devolução',
+    pt: 'Qual é a política de garantia? Se o produto chegar com defeito ou não funcionar, posso devolver ou trocar?',
+    zh: '保修政策是什么？如果产品到达时有缺陷或无法使用，我可以退货或换货吗？',
+    en: 'What is the warranty policy? If the product arrives defective or doesn\'t work, can I return or exchange it?',
+  },
+  {
+    id: 'product-condition',
+    title: 'Condição do Produto (Novo/Usado)',
+    pt: 'O produto é completamente novo e lacrado de fábrica, ou é usado/recondicionado? Se for usado, qual o tempo de uso aproximado?',
+    zh: '产品是全新原厂密封的，还是二手/翻新的？如果是二手，大约使用了多长时间？',
+    en: 'Is the product completely new and factory sealed, or is it used/refurbished? If used, approximately how long has it been used?',
+  },
+  {
+    id: 'accessories-included',
+    title: 'Acessórios Inclusos',
+    pt: 'O produto vem com todos os acessórios originais (cabo, carregador, fones, manual, adesivos)? Está completo na caixa?',
+    zh: '产品是否附带所有原装配件（数据线、充电器、耳机、说明书、贴纸）？包装盒内容完整吗？',
+    en: 'Does the product come with all original accessories (cable, charger, earphones, manual, stickers)? Is everything complete in the box?',
+  },
+  {
+    id: 'carrier-lock',
+    title: 'Bloqueio de Operadora (Carrier Lock)',
+    pt: 'O iPhone está desbloqueado de operadora (unlocked)? Funciona com qualquer chip/operadora?',
+    zh: 'iPhone是否已解除运营商锁定（无锁版）？可以使用任何SIM卡/运营商吗？',
+    en: 'Is the iPhone carrier unlocked? Does it work with any SIM card/carrier?',
+  },
+  {
+    id: 'model-region',
+    title: 'Versão do Modelo (Região)',
+    pt: 'Qual é a região/versão deste modelo? É versão China (CN), Hong Kong (HK), Estados Unidos (US) ou outra? Isso afeta compatibilidade de redes 5G.',
+    zh: '这款型号的地区/版本是什么？是国行(CN)、港版(HK)、美版(US)还是其他？这会影响5G网络兼容性。',
+    en: 'What is the region/version of this model? Is it China (CN), Hong Kong (HK), United States (US), or other? This affects 5G network compatibility.',
+  },
+  {
+    id: 'video-request',
+    title: 'Pedido de Vídeo (Inspeção Dinâmica)',
+    pt: 'Você pode gravar um vídeo curto (30-60 segundos) mostrando o aparelho ligado, navegando nos menus, e demonstrando que tudo funciona corretamente?',
+    zh: '您可以录制一段短视频（30-60秒）展示设备开机、浏览菜单，并演示所有功能正常工作吗？',
+    en: 'Can you record a short video (30-60 seconds) showing the device turned on, navigating the menus, and demonstrating that everything works correctly?',
+  },
+];
+
 // SVG Icons
 const Icons = {
   tools: (
@@ -371,7 +459,7 @@ export function ToolsClient() {
       case 'photos-inspection':
         return photosInspectionMessages;
       case 'general-shipping':
-        return []; // TODO: Add general-shipping messages
+        return generalShippingMessages;
       case 'favorites':
         return []; // TODO: Add favorites functionality
       default:
