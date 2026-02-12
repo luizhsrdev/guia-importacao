@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowRight, Info, TrendingDown, Image as ImageIcon } from 'lucide-react';
-import Link from 'next/link';
+import { GlobalHeader } from '@/components/GlobalHeader';
+import type { UserStatus } from '@/types';
 
 // Dados dos passos com URLs de imagem do Cloudinary
 // Para adicionar imagens: faça upload no Cloudinary e substitua as URLs abaixo
@@ -176,7 +177,11 @@ interface ExchangeRateData {
   notes?: string;
 }
 
-export default function CotacaoClient() {
+interface CotacaoClientProps {
+  userStatus: UserStatus;
+}
+
+export default function CotacaoClient({ userStatus }: CotacaoClientProps) {
   const [rateData, setRateData] = useState<ExchangeRateData | null>(null);
   const [loading, setLoading] = useState(true);
   const [inputCNY, setInputCNY] = useState('');
@@ -233,21 +238,10 @@ export default function CotacaoClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8 sm:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
-        {/* Back Link */}
-        <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Voltar
-          </Link>
-        </div>
+    <main className="min-h-screen bg-background">
+      <GlobalHeader userStatus={userStatus} />
 
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
@@ -447,6 +441,6 @@ export default function CotacaoClient() {
 
       {/* Modal de imagem para mobile/touch */}
       <ImageModal step={selectedStep} onClose={() => setSelectedStep(null)} />
-    </div>
+    </main>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { Logo } from '@/components/Logo';
+import { GlobalHeader } from '@/components/GlobalHeader';
+import type { UserStatus } from '@/types';
 
 interface ChineseId {
   identity_number: string;
@@ -388,7 +388,11 @@ const Icons = {
   ),
 };
 
-export function ToolsClient() {
+interface ToolsClientProps {
+  userStatus: UserStatus;
+}
+
+export function ToolsClient({ userStatus }: ToolsClientProps) {
   const [generatedId, setGeneratedId] = useState<ChineseId | null>(null);
   const [isLoadingId, setIsLoadingId] = useState(false);
   const [idError, setIdError] = useState<string | null>(null);
@@ -530,23 +534,7 @@ export function ToolsClient() {
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background border-b border-border safe-top">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
-          <div className="flex items-center justify-between gap-4">
-            <Logo size="md" onClick={() => window.location.href = '/'} />
-            <Link
-              href="/"
-              className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-text-secondary hover:text-primary hover:bg-surface-elevated transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Voltar
-            </Link>
-          </div>
-        </div>
-      </header>
+      <GlobalHeader userStatus={userStatus} />
 
       {/* Page Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
