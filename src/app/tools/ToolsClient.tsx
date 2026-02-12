@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 
@@ -397,6 +397,21 @@ export function ToolsClient() {
   const [translationMode, setTranslationMode] = useState<TranslationMode>('pt-zh');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [leftColumnHeight, setLeftColumnHeight] = useState<number | null>(null);
+  const leftColumnRef = useRef<HTMLDivElement>(null);
+
+  // Measure left column height
+  useEffect(() => {
+    const measureHeight = () => {
+      if (leftColumnRef.current) {
+        setLeftColumnHeight(leftColumnRef.current.offsetHeight);
+      }
+    };
+
+    measureHeight();
+    window.addEventListener('resize', measureHeight);
+    return () => window.removeEventListener('resize', measureHeight);
+  }, []);
 
   // Load favorites from localStorage on mount
   useEffect(() => {
@@ -536,7 +551,7 @@ export function ToolsClient() {
         {/* Tools Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Left Column - Cards 1, 2, 3 */}
-          <div className="flex flex-col gap-6" id="left-column">
+          <div ref={leftColumnRef} className="flex flex-col gap-6">
             {/* Card 1: Links Úteis */}
             <div className="bg-surface rounded-2xl border border-border p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -757,9 +772,12 @@ export function ToolsClient() {
           </div>
 
           {/* Right Column - Card 4 */}
-          <div className="lg:sticky lg:top-20">
+          <div>
             {/* Card 4: Pre-made Messages */}
-            <div className="bg-surface rounded-2xl border border-border p-6 flex flex-col max-h-[calc(100vh-120px)]">
+            <div
+              className="bg-surface rounded-2xl border border-border p-6 flex flex-col"
+              style={{ height: leftColumnHeight ? `${leftColumnHeight}px` : 'auto' }}
+            >
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
