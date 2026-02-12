@@ -397,7 +397,7 @@ export function ToolsClient() {
   const [translationMode, setTranslationMode] = useState<TranslationMode>('pt-zh');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [leftColumnHeight, setLeftColumnHeight] = useState<number | null>(null);
+  const [leftColumnHeight, setLeftColumnHeight] = useState<number>(0);
   const leftColumnRef = useRef<HTMLDivElement>(null);
 
   // Measure left column height
@@ -408,9 +408,18 @@ export function ToolsClient() {
       }
     };
 
-    measureHeight();
+    // Use requestAnimationFrame to measure after paint
+    const rafId = requestAnimationFrame(() => {
+      measureHeight();
+      // Measure again after fonts/styles settle
+      setTimeout(measureHeight, 100);
+    });
+
     window.addEventListener('resize', measureHeight);
-    return () => window.removeEventListener('resize', measureHeight);
+    return () => {
+      window.removeEventListener('resize', measureHeight);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Load favorites from localStorage on mount
@@ -776,7 +785,7 @@ export function ToolsClient() {
             {/* Card 4: Pre-made Messages */}
             <div
               className="bg-surface rounded-2xl border border-border p-6 flex flex-col"
-              style={{ height: leftColumnHeight ? `${leftColumnHeight}px` : 'auto' }}
+              style={{ height: leftColumnHeight > 0 ? `${leftColumnHeight}px` : '850px' }}
             >
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
