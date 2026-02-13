@@ -237,7 +237,7 @@ export function HeaderNav({
             onMouseLeave={handleMouseLeave}
           >
             <button
-              className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
+              className={`flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive || isDropdownOpen
                   ? 'bg-primary/10 text-primary border border-primary/30'
                   : hasCategories
@@ -348,7 +348,7 @@ export function HeaderNav({
       {/* Cotação Link */}
       <a
         href="/cotacao"
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+        className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -359,7 +359,7 @@ export function HeaderNav({
       {/* Calculadora Link */}
       <a
         href="/calculator"
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+        className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -370,7 +370,7 @@ export function HeaderNav({
       {/* Ferramentas Link */}
       <a
         href="/tools"
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+        className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 11-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 016.336-4.486l-3.276 3.276a3.004 3.004 0 002.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852z" />
@@ -379,11 +379,11 @@ export function HeaderNav({
         <span className="hidden lg:inline">Ferramentas</span>
       </a>
 
-      <div className="w-px h-5 bg-border mx-2" />
+      <div className="w-px h-5 bg-border mx-1" />
 
       <button
         onClick={handleVendedoresClick}
-        className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
+        className={`flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 ${
           activeTab === 'vendedores'
             ? 'bg-primary/10 text-primary'
             : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
