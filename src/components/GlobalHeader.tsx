@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   SignInButton,
   SignedIn,
@@ -22,6 +23,7 @@ interface GlobalHeaderProps {
 }
 
 export function GlobalHeader({ userStatus }: GlobalHeaderProps) {
+  const router = useRouter();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showExchangeRateOnHome, setShowExchangeRateOnHome] = useState(true);
   const { effectiveRate, loading: rateLoading } = useCurrency();
@@ -46,7 +48,7 @@ export function GlobalHeader({ userStatus }: GlobalHeaderProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
-              <Logo size="md" onClick={() => window.location.href = '/'} />
+              <Logo size="md" onClick={() => router.push('/')} />
 
               <div className="hidden md:block">
                 <SimpleNav
@@ -119,9 +121,7 @@ export function GlobalHeader({ userStatus }: GlobalHeaderProps) {
       <PremiumUpgradeModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
-        onUpgrade={() => {
-          window.location.href = '/premium';
-        }}
+        onUpgrade={() => router.push('/premium')}
       />
     </>
   );

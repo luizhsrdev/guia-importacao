@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Category } from '@/types';
 
 interface NavItem {
@@ -46,9 +48,9 @@ export function HeaderNav({
   userStatus,
   onPremiumClick,
 }: HeaderNavProps) {
+  const router = useRouter();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isClosing, setIsClosing] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const [isFirstOpen, setIsFirstOpen] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -207,12 +209,12 @@ export function HeaderNav({
 
   const handleVendedoresClick = () => {
     if (!userStatus.isAuthenticated) {
-      window.location.href = '/sign-in';
+      router.push('/sign-in');
       return;
     }
 
     if (userStatus.isPremium || userStatus.isAdmin) {
-      window.location.href = '/vendedores';
+      router.push('/vendedores');
       return;
     }
 
@@ -345,8 +347,7 @@ export function HeaderNav({
         );
       })()}
 
-      {/* Cotação Link */}
-      <a
+      <Link
         href="/cotacao"
         className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
@@ -354,10 +355,9 @@ export function HeaderNav({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span className="hidden lg:inline">Cotação</span>
-      </a>
+      </Link>
 
-      {/* Calculadora Link */}
-      <a
+      <Link
         href="/calculator"
         className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
@@ -365,10 +365,9 @@ export function HeaderNav({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
         <span className="hidden lg:inline">Calculadora</span>
-      </a>
+      </Link>
 
-      {/* Ferramentas Link */}
-      <a
+      <Link
         href="/tools"
         className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
@@ -377,7 +376,7 @@ export function HeaderNav({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.867 19.125h.008v.008h-.008v-.008z" />
         </svg>
         <span className="hidden lg:inline">Ferramentas</span>
-      </a>
+      </Link>
 
       <div className="w-px h-5 bg-border mx-1" />
 

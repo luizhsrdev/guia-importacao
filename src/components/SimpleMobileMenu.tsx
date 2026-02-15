@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -61,6 +61,7 @@ function MenuContent({
   showExchangeRateOnHome: boolean;
   onToggleExchangeRateVisibility: () => void;
 }) {
+  const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
   const { effectiveRate, loading: rateLoading } = useCurrency();
   const isDark = resolvedTheme === 'dark';
@@ -98,7 +99,7 @@ function MenuContent({
 
   const handleVendedoresClick = () => {
     if (!userStatus.isAuthenticated) {
-      window.location.href = '/sign-in';
+      router.push('/sign-in');
       return;
     }
 
@@ -107,7 +108,7 @@ function MenuContent({
       return;
     }
 
-    window.location.href = '/vendedores';
+    router.push('/vendedores');
     onClose();
   };
 

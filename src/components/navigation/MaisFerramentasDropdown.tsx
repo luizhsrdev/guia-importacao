@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import BaseDropdown from './BaseDropdown';
 
 const ferramentas = [
@@ -16,6 +17,7 @@ interface MaisFerramentasDropdownProps {
 }
 
 export default function MaisFerramentasDropdown({ isPremium }: MaisFerramentasDropdownProps) {
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
 
   const handleClick = (e: React.MouseEvent, item: typeof ferramentas[0]) => {
@@ -65,7 +67,7 @@ export default function MaisFerramentasDropdown({ isPremium }: MaisFerramentasDr
 
             <div className="flex gap-4">
               <button
-                onClick={() => window.location.href = '/premium'}
+                onClick={() => router.push('/premium')}
                 className="flex-1 bg-primary text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-primary-hover transition-all"
               >
                 Assinar Premium - R$ 9,90

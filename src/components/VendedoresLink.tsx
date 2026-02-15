@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 
 interface CheckPremiumResponse {
@@ -24,6 +25,7 @@ async function checkPremiumStatus(userId: string): Promise<boolean> {
 }
 
 export function VendedoresLink() {
+  const router = useRouter();
   const { user, isLoaded } = useUser();
   const [showModal, setShowModal] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
@@ -58,7 +60,7 @@ export function VendedoresLink() {
   };
 
   const handleUpgrade = () => {
-    window.location.href = '/premium';
+    router.push('/premium');
   };
 
   const handleDecline = () => {

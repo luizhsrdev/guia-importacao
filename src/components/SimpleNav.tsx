@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const ICONS = {
   cotacao: (
@@ -46,6 +46,7 @@ interface SimpleNavProps {
 
 export function SimpleNav({ userStatus, onPremiumClick }: SimpleNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const navItems: NavItem[] = [
     { href: '/', label: 'Produtos', icon: ICONS.home, showOnMobile: true },
@@ -59,7 +60,7 @@ export function SimpleNav({ userStatus, onPremiumClick }: SimpleNavProps) {
   const handleVendedoresClick = (e: React.MouseEvent) => {
     if (!userStatus.isAuthenticated) {
       e.preventDefault();
-      window.location.href = '/sign-in';
+      router.push('/sign-in');
       return;
     }
 

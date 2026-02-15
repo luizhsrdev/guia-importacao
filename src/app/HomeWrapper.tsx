@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   SignInButton,
   SignedIn,
@@ -33,6 +34,7 @@ export function HomeWrapper({
   userStatus,
   productCategories,
 }: HomeWrapperProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('produtos');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -198,9 +200,7 @@ export function HomeWrapper({
         <PremiumUpgradeModal
           isOpen={showPremiumModal}
           onClose={() => setShowPremiumModal(false)}
-          onUpgrade={() => {
-            window.location.href = '/premium';
-          }}
+          onUpgrade={() => router.push('/premium')}
         />
 
         {userStatus.isAdmin && (

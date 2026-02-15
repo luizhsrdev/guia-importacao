@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -33,6 +34,7 @@ function MenuContent({
   showExchangeRateOnHome,
   onToggleExchangeRateVisibility,
 }: MenuContentProps) {
+  const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
   const { currency, effectiveRate, loading: rateLoading, setCurrency } = useCurrency();
   const { isAdminModeActive, toggleAdminMode } = useAdminMode();
@@ -109,12 +111,13 @@ function MenuContent({
 
   const handleVendedoresClick = () => {
     if (!userStatus.isAuthenticated) {
-      window.location.href = '/sign-in';
+      router.push('/sign-in');
       return;
     }
 
     if (userStatus.isPremium || userStatus.isAdmin) {
-      window.location.href = '/vendedores';
+      router.push('/vendedores');
+      onClose();
       return;
     }
 
@@ -239,8 +242,8 @@ function MenuContent({
             {/* Cotação */}
             <button
               onClick={() => {
+                router.push('/cotacao');
                 onClose();
-                window.location.href = '/cotacao';
               }}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >
@@ -255,8 +258,8 @@ function MenuContent({
             {/* Calculadora */}
             <button
               onClick={() => {
+                router.push('/calculator');
                 onClose();
-                window.location.href = '/calculator';
               }}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >
@@ -271,8 +274,8 @@ function MenuContent({
             {/* Ferramentas */}
             <button
               onClick={() => {
+                router.push('/tools');
                 onClose();
-                window.location.href = '/tools';
               }}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >

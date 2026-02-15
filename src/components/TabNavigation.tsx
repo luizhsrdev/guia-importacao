@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FeatureItem } from './FeatureItem';
 
 interface Tab {
@@ -29,6 +30,7 @@ export default function TabNavigation({
   activeTab,
   userStatus,
 }: TabNavigationProps) {
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
 
   const handleTabClick = (tab: Tab) => {
@@ -38,7 +40,7 @@ export default function TabNavigation({
     }
 
     if (!userStatus.isAuthenticated) {
-      window.location.href = '/sign-in';
+      router.push('/sign-in');
       return;
     }
 
@@ -57,7 +59,7 @@ export default function TabNavigation({
   };
 
   const handleUpgrade = () => {
-    window.location.href = '/premium';
+    router.push('/premium');
   };
 
   return (

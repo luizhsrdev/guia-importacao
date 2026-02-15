@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -71,6 +72,7 @@ export default function ProductCard({
   card_ctr = 0,
   purchase_ctr = 0,
 }: ProductCardProps) {
+  const router = useRouter();
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
@@ -536,12 +538,8 @@ export default function ProductCard({
 
       <PremiumUpgradeModal
         isOpen={upgradeModalOpen}
-        onClose={() => {
-          setUpgradeModalOpen(false);
-        }}
-        onUpgrade={() => {
-          window.location.href = '/premium';
-        }}
+        onClose={() => setUpgradeModalOpen(false)}
+        onUpgrade={() => router.push('/premium')}
       />
     </>
   );
