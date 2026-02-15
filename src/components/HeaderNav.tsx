@@ -212,7 +212,7 @@ export function HeaderNav({
     }
 
     if (userStatus.isPremium || userStatus.isAdmin) {
-      onTabChange('vendedores');
+      window.location.href = '/vendedores';
       return;
     }
 

@@ -18,24 +18,20 @@ import { AdminToggleSlider } from '@/components/AdminToggleSlider';
 import { AdminReportsNotification } from '@/components/AdminReportsNotification';
 import { trackCategorySelection } from '@/lib/analytics';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
+import type { PublicProduct, Category, UserStatus } from '@/types';
 
 const EXCHANGE_RATE_VISIBILITY_KEY = 'showExchangeRateOnHome';
 
 interface HomeWrapperProps {
   products: PublicProduct[];
-  sellers: Seller[];
   userStatus: UserStatus;
   productCategories: Category[];
-  sellerCategories: Array<{ id: string; name: string }>;
 }
 
 export function HomeWrapper({
   products,
-  sellers,
   userStatus,
   productCategories,
-  sellerCategories,
 }: HomeWrapperProps) {
   const [activeTab, setActiveTab] = useState('produtos');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -189,10 +185,8 @@ export function HomeWrapper({
 
         <HomeContent
           products={products}
-          sellers={sellers}
           userStatus={userStatus}
           productCategories={productCategories}
-          sellerCategories={sellerCategories}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           selectedCategories={selectedCategories}

@@ -114,8 +114,7 @@ function MenuContent({
     }
 
     if (userStatus.isPremium || userStatus.isAdmin) {
-      onTabChange('vendedores');
-      onClose();
+      window.location.href = '/vendedores';
       return;
     }
 
