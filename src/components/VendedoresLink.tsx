@@ -1,56 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
-
-interface CheckPremiumResponse {
-  isPremium: boolean;
-  isAdmin: boolean;
-}
-
-async function checkPremiumStatus(userId: string): Promise<boolean> {
-  try {
-    const response = await fetch('/api/check-premium', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId }),
-    });
-    const data: CheckPremiumResponse = await response.json();
-    return data.isPremium || data.isAdmin;
-  } catch {
-    return false;
-  }
-}
+import { usePremiumStatus } from '@/hooks/usePremiumStatus';
 
 export function VendedoresLink() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { isAuthenticated, hasPremiumAccess, loading } = usePremiumStatus();
   const [showModal, setShowModal] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
-  const [isCheckingPremium, setIsCheckingPremium] = useState(true);
-
-  useEffect(() => {
-    if (!isLoaded || !user) {
-      setIsCheckingPremium(false);
-      return;
-    }
-
-    checkPremiumStatus(user.id).then((result) => {
-      setIsPremium(result);
-      setIsCheckingPremium(false);
-    });
-  }, [user, isLoaded]);
 
   const handleClick = (e: React.MouseEvent) => {
     // Se não estiver logado, vai para login
-    if (!user) {
+    if (!isAuthenticated) {
       return; // Link normal funciona
     }
 
     // Se for premium, deixa navegar normalmente
-    if (isPremium) {
+    if (hasPremiumAccess) {
       return; // Link normal funciona
     }
 
@@ -71,12 +38,12 @@ export function VendedoresLink() {
     <>
       {/* Link normal */}
       <Link
-        href={user ? (isPremium ? '/vendedores' : '#') : '/sign-in'}
+        href={isAuthenticated ? (hasPremiumAccess ? '/vendedores' : '#') : '/sign-in'}
         onClick={handleClick}
         className="px-6 py-2 rounded-lg font-medium bg-surface border border-zinc-700 text-textMain hover:bg-zinc-800 transition-all text-sm"
       >
         Vendedores
-        {!isCheckingPremium && !isPremium && user && (
+        {!loading && !hasPremiumAccess && isAuthenticated && (
           <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
             Premium
           </span>

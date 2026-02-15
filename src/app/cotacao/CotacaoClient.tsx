@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight, Info, TrendingDown, Image as ImageIcon } from 'lucide-react';
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 import type { UserStatus } from '@/types';
 
 // Dados dos passos com URLs de imagem do Cloudinary
@@ -169,50 +170,16 @@ function ImageModal({ step, onClose }: { step: typeof STEPS_DATA[0] | null; onCl
   );
 }
 
-interface ExchangeRateData {
-  officialRate: number;
-  manualAdjustment: number;
-  effectiveRate: number;
-  updatedAt: string;
-  notes?: string;
-}
-
 interface CotacaoClientProps {
   userStatus: UserStatus;
 }
 
 export default function CotacaoClient({ userStatus }: CotacaoClientProps) {
-  const [rateData, setRateData] = useState<ExchangeRateData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Usar hook SWR com cache automático (compartilhado com CurrencyContext)
+  const { data: rateData, loading } = useExchangeRate();
   const [inputCNY, setInputCNY] = useState('');
   const [resultBRL, setResultBRL] = useState<number | null>(null);
   const [selectedStep, setSelectedStep] = useState<typeof STEPS_DATA[0] | null>(null);
-
-  useEffect(() => {
-    fetchRate();
-  }, []);
-
-  const fetchRate = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/exchange-rate');
-      if (res.ok) {
-        const data = await res.json();
-        setRateData(data);
-      }
-    } catch (error) {
-      console.error('Error fetching exchange rate:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCalculate = () => {
-    if (!rateData || !inputCNY) return;
-    const cny = parseFloat(inputCNY);
-    if (isNaN(cny)) return;
-    setResultBRL(cny / rateData.effectiveRate);
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9.]/g, '');
