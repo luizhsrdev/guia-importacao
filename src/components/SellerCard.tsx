@@ -40,37 +40,34 @@ export default function SellerCard({ seller, onEdit }: SellerCardProps) {
           : 'border-red-500/20 hover:border-red-500/50 hover:shadow-glow-danger'
       }`}
     >
-      {/* Menu de Três Pontos e Badge de Favorito */}
-      {!isAdminModeActive && (
-        <>
-          <ReportAndFavoriteMenu
-            itemId={seller.id}
-            itemType="seller"
-            isFavorite={isFavorite(seller.id)}
-            onToggleFavorite={async () => { await toggleFavorite(seller.id); }}
-            className="top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-          />
-          {isFavorite(seller.id) && <FavoriteBadge className="top-3 left-3 z-10" />}
-        </>
+      {/* Badge de Favorito */}
+      {!isAdminModeActive && isFavorite(seller.id) && (
+        <FavoriteBadge className="top-3 left-3 z-10" />
       )}
 
-      <div className="flex items-start justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-0.5 sm:mb-1 truncate">
-            {seller.name}
-          </h3>
+      {/* Header com nome, badge e menu */}
+      <div className="flex items-center justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
+        <h3 className="text-base sm:text-lg font-semibold text-text-primary truncate flex-1 min-w-0">
+          {seller.name}
+        </h3>
 
-          {seller.seller_categories && (
-            <p className="text-xs sm:text-sm text-text-secondary">
-              {seller.seller_categories.name}
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <span className={isGold ? 'badge-gold' : 'badge-danger'}>
             {isGold ? 'Verificado' : 'Blacklist'}
           </span>
+
+          {/* Menu de opções */}
+          {!isAdminModeActive && (
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <ReportAndFavoriteMenu
+                itemId={seller.id}
+                itemType="seller"
+                isFavorite={isFavorite(seller.id)}
+                onToggleFavorite={async () => { await toggleFavorite(seller.id); }}
+                className="relative"
+              />
+            </div>
+          )}
 
           {isAdminModeActive && onEdit && (
             <button
@@ -88,6 +85,13 @@ export default function SellerCard({ seller, onEdit }: SellerCardProps) {
           )}
         </div>
       </div>
+
+      {/* Categoria do vendedor */}
+      {seller.seller_categories && (
+        <p className="text-xs sm:text-sm text-text-secondary -mt-3 sm:-mt-4 mb-4 sm:mb-5">
+          {seller.seller_categories.name}
+        </p>
+      )}
 
       {seller.image_url && (
         <div className="mb-4 sm:mb-5">

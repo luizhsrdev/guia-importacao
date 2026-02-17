@@ -126,7 +126,7 @@ export default function ReportAndFavoriteMenu({
   return (
     <>
       {/* Menu de Três Pontos */}
-      <div className={`absolute ${className}`}>
+      <div className={className.includes('relative') ? className : `absolute ${className}`}>
         <button
           onClick={(e) => {
             e.stopPropagation();
