@@ -30,7 +30,7 @@ const STEPS_DATA = [
   {
     number: 4,
     title: 'Acesse a aba de recarga no seu Agente',
-    description: 'CSSBuy ou ACBuy → selecione o método CoinPal',
+    description: 'CSSBuy → selecione o método CoinPal',
     image: 'https://res.cloudinary.com/importacao/image/upload/v1770078469/step-4_qnbf48.png',
   },
   {
@@ -344,7 +344,7 @@ export default function CotacaoClient({ userStatus }: CotacaoClientProps) {
                 <p className="font-medium text-yellow-500 mb-1">Pré-requisitos</p>
                 <ul className="text-text-secondary space-y-1 text-xs sm:text-sm">
                   <li>• Conta verificada na Binance (maior de idade)</li>
-                  <li>• Conta em agente de compras (CSSBuy ou ACBuy)</li>
+                  <li>• Conta em agente de compras (CSSBuy)</li>
                   <li>• Mesma titularidade em todas as contas e pagamentos</li>
                 </ul>
               </div>
@@ -388,17 +388,6 @@ export default function CotacaoClient({ userStatus }: CotacaoClientProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Abrir CSSBuy
-              </a>
-              <a
-                href="https://www.acbuy.com/member/wallet"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-400 text-sm font-medium hover:bg-blue-500/20 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Abrir ACBuy
               </a>
             </div>
           </div>
