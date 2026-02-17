@@ -109,14 +109,14 @@ function MenuContent({
     onClose();
   };
 
-  const handleVendedoresClick = () => {
+  const handlePremiumNavigation = (path: string) => {
     if (!userStatus.isAuthenticated) {
       router.push('/sign-in');
       return;
     }
 
     if (userStatus.isPremium || userStatus.isAdmin) {
-      router.push('/vendedores');
+      router.push(path);
       onClose();
       return;
     }
@@ -131,7 +131,7 @@ function MenuContent({
     onClose();
   };
 
-  const isVendedoresLocked = !userStatus.isAuthenticated || (!userStatus.isPremium && !userStatus.isAdmin);
+  const isPremiumLocked = !userStatus.isAuthenticated || (!userStatus.isPremium && !userStatus.isAdmin);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -225,10 +225,10 @@ function MenuContent({
 
             {/* Vendedores */}
             <button
-              onClick={handleVendedoresClick}
+              onClick={() => handlePremiumNavigation('/vendedores')}
               className="relative flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >
-              {isVendedoresLocked && (
+              {isPremiumLocked && (
                 <span className="absolute top-2 right-2 tag-gold text-[8px] px-1.5 py-0.5">PRO</span>
               )}
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -237,6 +237,22 @@ function MenuContent({
                 </svg>
               </div>
               <span className="text-xs font-medium text-text-primary">Vendedores</span>
+            </button>
+
+            {/* Declaracao */}
+            <button
+              onClick={() => handlePremiumNavigation('/declaracao')}
+              className="relative flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
+            >
+              {isPremiumLocked && (
+                <span className="absolute top-2 right-2 tag-gold text-[8px] px-1.5 py-0.5">PRO</span>
+              )}
+              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-text-primary">Declaracao</span>
             </button>
 
             {/* Cotação */}
