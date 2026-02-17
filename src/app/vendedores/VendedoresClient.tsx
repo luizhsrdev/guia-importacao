@@ -2,8 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import SellerCard from '@/components/SellerCard';
+import { SellerFilters } from '@/components/SellerFilters';
 import { SellerFormModal } from '@/components/SellerFormModal';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+
+type SortOption = 'none' | 'alpha-asc' | 'alpha-desc';
 
 interface Seller {
   id: string;
@@ -28,9 +31,15 @@ interface VendedoresClientProps {
   sellerCategories: Array<{ id: string; name: string }>;
 }
 
+interface FiltersState {
+  search: string;
+  sortBy: SortOption;
+}
+
 export default function VendedoresClient({ sellers, sellerCategories }: VendedoresClientProps) {
   const { isAdminModeActive } = useAdminMode();
-  const [filterSellers, setFilterSellers] = useState<'all' | 'gold' | 'blacklist'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'gold' | 'blacklist'>('all');
+  const [filters, setFilters] = useState<FiltersState>({ search: '', sortBy: 'none' });
   const [editingSellerId, setEditingSellerId] = useState<string | undefined>();
   const [showSellerFormModal, setShowSellerFormModal] = useState(false);
 
@@ -53,46 +62,69 @@ export default function VendedoresClient({ sellers, sellerCategories }: Vendedor
     window.location.reload();
   };
 
+  const handleFilterChange = (newFilters: FiltersState) => {
+    setFilters(newFilters);
+  };
+
   const filteredSellers = useMemo(() => {
-    return sellers.filter((s) => {
-      if (filterSellers === 'all') return true;
-      return s.status === filterSellers;
-    });
-  }, [sellers, filterSellers]);
+    let result = sellers;
+
+    // Filtro por status (all, gold, blacklist)
+    if (filterStatus !== 'all') {
+      result = result.filter((s) => s.status === filterStatus);
+    }
+
+    // Filtro de busca por nome
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      result = result.filter((s) => s.name.toLowerCase().includes(searchLower));
+    }
+
+    // Ordenação alfabética
+    if (filters.sortBy === 'alpha-asc') {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    } else if (filters.sortBy === 'alpha-desc') {
+      result = [...result].sort((a, b) => b.name.localeCompare(a.name, 'pt-BR'));
+    }
+
+    return result;
+  }, [sellers, filterStatus, filters]);
 
   const goldCount = useMemo(() => sellers.filter((s) => s.status === 'gold').length, [sellers]);
   const blacklistCount = useMemo(() => sellers.filter((s) => s.status === 'blacklist').length, [sellers]);
 
+  // Contar dentro do filtro de status atual
+  const totalInCurrentStatus = useMemo(() => {
+    if (filterStatus === 'all') return sellers.length;
+    return filterStatus === 'gold' ? goldCount : blacklistCount;
+  }, [filterStatus, sellers.length, goldCount, blacklistCount]);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <header className="mb-8 sm:mb-10">
+      <header className="mb-6 sm:mb-8">
         <h1 className="section-title mb-2">
           Lista de Vendedores
         </h1>
-        <div className="mb-3">
-          <p className="text-text-secondary text-sm">
-            {sellers.length} vendedor{sellers.length !== 1 ? 'es' : ''} cadastrado{sellers.length !== 1 ? 's' : ''}
-          </p>
 
-          {isAdminModeActive && (
-            <button
-              onClick={handleAddSeller}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg bg-red-500/10 text-red-500 border border-red-500 font-medium text-sm hover:bg-red-500/20 transition-all mt-3"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Adicionar Vendedor
-            </button>
-          )}
-        </div>
+        {isAdminModeActive && (
+          <button
+            onClick={handleAddSeller}
+            className="flex items-center gap-2 h-9 px-4 rounded-lg bg-red-500/10 text-red-500 border border-red-500 font-medium text-sm hover:bg-red-500/20 transition-all mt-3"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Adicionar Vendedor
+          </button>
+        )}
       </header>
 
-      <div className="flex gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible scrollbar-hide">
+      {/* Filtros de status (tabs) */}
+      <div className="flex gap-2 sm:gap-3 mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible scrollbar-hide">
         <button
-          onClick={() => setFilterSellers('all')}
+          onClick={() => setFilterStatus('all')}
           className={`h-11 px-5 sm:px-6 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
-            filterSellers === 'all'
+            filterStatus === 'all'
               ? 'bg-primary text-white shadow-glow-md'
               : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated hover:border-border-emphasis shadow-sm'
           }`}
@@ -102,9 +134,9 @@ export default function VendedoresClient({ sellers, sellerCategories }: Vendedor
         </button>
 
         <button
-          onClick={() => setFilterSellers('gold')}
+          onClick={() => setFilterStatus('gold')}
           className={`h-11 px-5 sm:px-6 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
-            filterSellers === 'gold'
+            filterStatus === 'gold'
               ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 text-white shadow-glow-primary'
               : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated hover:border-border-emphasis shadow-sm'
           }`}
@@ -114,9 +146,9 @@ export default function VendedoresClient({ sellers, sellerCategories }: Vendedor
         </button>
 
         <button
-          onClick={() => setFilterSellers('blacklist')}
+          onClick={() => setFilterStatus('blacklist')}
           className={`h-11 px-5 sm:px-6 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
-            filterSellers === 'blacklist'
+            filterStatus === 'blacklist'
               ? 'bg-gradient-to-r from-red-500 to-red-400 text-white shadow-glow-danger'
               : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated hover:border-border-emphasis shadow-sm'
           }`}
@@ -125,6 +157,13 @@ export default function VendedoresClient({ sellers, sellerCategories }: Vendedor
           <span className="ml-2 text-xs opacity-70">{blacklistCount}</span>
         </button>
       </div>
+
+      {/* Barra de busca e ordenação */}
+      <SellerFilters
+        onFilterChange={handleFilterChange}
+        totalCount={totalInCurrentStatus}
+        filteredCount={filteredSellers.length}
+      />
 
       {filteredSellers.length === 0 ? (
         <div className="text-center py-20 bg-surface rounded-2xl border border-border">
@@ -147,7 +186,7 @@ export default function VendedoresClient({ sellers, sellerCategories }: Vendedor
             Nenhum vendedor encontrado
           </p>
           <p className="text-text-muted text-sm">
-            Selecione outro filtro
+            {filters.search ? 'Tente outra busca' : 'Selecione outro filtro'}
           </p>
         </div>
       ) : (
