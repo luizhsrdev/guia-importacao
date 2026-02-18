@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.35.5",
+    "@clerk/nextjs": "^6.37.5",
     "@supabase/supabase-js": "^2.84.0",
     "cloudinary": "^2.8.0",
     "dotenv": "^17.3.1",
