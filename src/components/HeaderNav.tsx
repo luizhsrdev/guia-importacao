@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Category } from '@/types';
 
 interface NavItem {
@@ -25,6 +27,11 @@ const ICONS = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
     </svg>
   ),
+  declaracao: (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  ),
 };
 
 interface HeaderNavProps {
@@ -46,9 +53,9 @@ export function HeaderNav({
   userStatus,
   onPremiumClick,
 }: HeaderNavProps) {
+  const router = useRouter();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isClosing, setIsClosing] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const [isFirstOpen, setIsFirstOpen] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -205,21 +212,21 @@ export function HeaderNav({
     return dropdownCategories.length > 0 && dropdownCategories.every((c) => selectedCategories.includes(c.id));
   };
 
-  const handleVendedoresClick = () => {
+  const handlePremiumNavigation = (path: string) => {
     if (!userStatus.isAuthenticated) {
-      window.location.href = '/sign-in';
+      router.push('/sign-in');
       return;
     }
 
     if (userStatus.isPremium || userStatus.isAdmin) {
-      onTabChange('vendedores');
+      router.push(path);
       return;
     }
 
     onPremiumClick();
   };
 
-  const isVendedoresLocked = !userStatus.isAuthenticated || (!userStatus.isPremium && !userStatus.isAdmin);
+  const isPremiumLocked = !userStatus.isAuthenticated || (!userStatus.isPremium && !userStatus.isAdmin);
 
   return (
     <nav ref={dropdownRef} className="flex items-center gap-0.5">
@@ -237,7 +244,7 @@ export function HeaderNav({
             onMouseLeave={handleMouseLeave}
           >
             <button
-              className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
+              className={`flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive || isDropdownOpen
                   ? 'bg-primary/10 text-primary border border-primary/30'
                   : hasCategories
@@ -345,45 +352,42 @@ export function HeaderNav({
         );
       })()}
 
-      {/* Cotação Link */}
-      <a
+      <Link
         href="/cotacao"
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+        className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span className="hidden lg:inline">Cotação</span>
-      </a>
+      </Link>
 
-      {/* Calculadora Link */}
-      <a
+      <Link
         href="/calculator"
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+        className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
         <span className="hidden lg:inline">Calculadora</span>
-      </a>
+      </Link>
 
-      {/* Ferramentas Link */}
-      <a
+      <Link
         href="/tools"
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+        className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 11-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 016.336-4.486l-3.276 3.276a3.004 3.004 0 002.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852z" />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.867 19.125h.008v.008h-.008v-.008z" />
         </svg>
         <span className="hidden lg:inline">Ferramentas</span>
-      </a>
+      </Link>
 
-      <div className="w-px h-5 bg-border mx-2" />
+      <div className="w-px h-5 bg-border mx-1" />
 
       <button
-        onClick={handleVendedoresClick}
-        className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
+        onClick={() => handlePremiumNavigation('/vendedores')}
+        className={`flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 ${
           activeTab === 'vendedores'
             ? 'bg-primary/10 text-primary'
             : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
@@ -391,7 +395,18 @@ export function HeaderNav({
       >
         {ICONS.sellers}
         <span className="hidden lg:inline">Vendedores</span>
-        {isVendedoresLocked && (
+        {isPremiumLocked && (
+          <span className="tag-gold text-[9px] px-1.5 h-4">Pro</span>
+        )}
+      </button>
+
+      <button
+        onClick={() => handlePremiumNavigation('/declaracao')}
+        className="flex items-center gap-1 h-9 px-2 rounded-lg text-sm font-medium transition-all duration-150 text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+      >
+        {ICONS.declaracao}
+        <span className="hidden lg:inline">Declaracao</span>
+        {isPremiumLocked && (
           <span className="tag-gold text-[9px] px-1.5 h-4">Pro</span>
         )}
       </button>

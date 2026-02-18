@@ -1,105 +1,104 @@
-import { useState, useEffect, useCallback } from 'react';
+'use client';
+
+import { useCallback, useMemo } from 'react';
+import useSWR from 'swr';
 import { useUser } from '@clerk/nextjs';
 import toast from 'react-hot-toast';
+import { fetcher } from '@/lib/fetcher';
+
+interface FavoritesResponse {
+  favorites: string[];
+}
+
+const FAVORITES_KEY = '/api/favorites';
 
 export function useFavorites() {
-  const { isSignedIn, user } = useUser();
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { isSignedIn } = useUser();
 
-  // Buscar favoritos do usuário
-  const fetchFavorites = useCallback(async () => {
-    if (!isSignedIn) {
-      setFavorites([]);
-      return;
+  // SWR para buscar favoritos com cache automático
+  const { data, error, isLoading, mutate } = useSWR<FavoritesResponse>(
+    isSignedIn ? FAVORITES_KEY : null, // Só busca se estiver logado
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // 1 minuto
     }
+  );
 
-    try {
-      const response = await fetch('/api/favorites');
-      if (response.ok) {
-        const data = await response.json();
-        setFavorites(data.favorites || []);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar favoritos:', error);
-    }
-  }, [isSignedIn]);
+  // Memoizar favorites para evitar re-renders desnecessários
+  const favorites = useMemo(() => data?.favorites ?? [], [data?.favorites]);
 
-  // Carregar favoritos quando usuário fizer login
-  useEffect(() => {
-    fetchFavorites();
-  }, [fetchFavorites]);
-
-  // Adicionar favorito
+  // Adicionar favorito com optimistic update
   const addFavorite = useCallback(async (productId: string) => {
     if (!isSignedIn) {
       toast.error('Faça login para favoritar produtos');
       return false;
     }
 
-    setLoading(true);
+    // Optimistic update
+    const previousData = data;
+    mutate({ favorites: [...favorites, productId] }, false);
 
     try {
-      const response = await fetch('/api/favorites', {
+      const response = await fetch(FAVORITES_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product_id: productId }),
       });
 
       if (response.ok) {
-        setFavorites(prev => [...prev, productId]);
         toast.success('Produto adicionado aos favoritos!');
+        mutate(); // Revalidar
         return true;
-      } else {
-        toast.error('Erro ao adicionar favorito');
-        return false;
       }
-    } catch (error) {
-      console.error('Erro ao adicionar favorito:', error);
+
+      // Rollback em caso de erro
+      mutate(previousData, false);
       toast.error('Erro ao adicionar favorito');
       return false;
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao adicionar favorito:', err);
+      mutate(previousData, false);
+      toast.error('Erro ao adicionar favorito');
+      return false;
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, data, favorites, mutate]);
 
-  // Remover favorito
+  // Remover favorito com optimistic update
   const removeFavorite = useCallback(async (productId: string) => {
     if (!isSignedIn) return false;
 
-    setLoading(true);
+    // Optimistic update
+    const previousData = data;
+    mutate({ favorites: favorites.filter(id => id !== productId) }, false);
 
     try {
-      const response = await fetch(`/api/favorites?product_id=${productId}`, {
+      const response = await fetch(`${FAVORITES_KEY}?product_id=${productId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setFavorites(prev => prev.filter(id => id !== productId));
         toast.success('Produto removido dos favoritos');
+        mutate(); // Revalidar
         return true;
-      } else {
-        toast.error('Erro ao remover favorito');
-        return false;
       }
-    } catch (error) {
-      console.error('Erro ao remover favorito:', error);
+
+      // Rollback em caso de erro
+      mutate(previousData, false);
       toast.error('Erro ao remover favorito');
       return false;
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao remover favorito:', err);
+      mutate(previousData, false);
+      toast.error('Erro ao remover favorito');
+      return false;
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, data, favorites, mutate]);
 
-  // Toggle favorito (adicionar ou remover)
+  // Toggle favorito
   const toggleFavorite = useCallback(async (productId: string) => {
     const isFavorited = favorites.includes(productId);
-
-    if (isFavorited) {
-      return await removeFavorite(productId);
-    } else {
-      return await addFavorite(productId);
-    }
+    return isFavorited ? removeFavorite(productId) : addFavorite(productId);
   }, [favorites, addFavorite, removeFavorite]);
 
   // Verificar se produto é favorito
@@ -109,7 +108,8 @@ export function useFavorites() {
 
   return {
     favorites,
-    loading,
+    loading: isLoading,
+    error,
     addFavorite,
     removeFavorite,
     toggleFavorite,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   SignInButton,
   SignedIn,
@@ -18,25 +19,22 @@ import { AdminToggleSlider } from '@/components/AdminToggleSlider';
 import { AdminReportsNotification } from '@/components/AdminReportsNotification';
 import { trackCategorySelection } from '@/lib/analytics';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import type { PublicProduct, Seller, Category, UserStatus } from '@/types';
+import type { PublicProduct, Category, UserStatus } from '@/types';
 
 const EXCHANGE_RATE_VISIBILITY_KEY = 'showExchangeRateOnHome';
 
 interface HomeWrapperProps {
   products: PublicProduct[];
-  sellers: Seller[];
   userStatus: UserStatus;
   productCategories: Category[];
-  sellerCategories: Array<{ id: string; name: string }>;
 }
 
 export function HomeWrapper({
   products,
-  sellers,
   userStatus,
   productCategories,
-  sellerCategories,
 }: HomeWrapperProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('produtos');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -94,7 +92,7 @@ export function HomeWrapper({
         <header className="sticky top-0 z-40 bg-background border-b border-border safe-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <Logo size="md" onClick={handleLogoClick} />
 
               <div className="hidden md:block">
@@ -189,10 +187,8 @@ export function HomeWrapper({
 
         <HomeContent
           products={products}
-          sellers={sellers}
           userStatus={userStatus}
           productCategories={productCategories}
-          sellerCategories={sellerCategories}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           selectedCategories={selectedCategories}
@@ -204,9 +200,7 @@ export function HomeWrapper({
         <PremiumUpgradeModal
           isOpen={showPremiumModal}
           onClose={() => setShowPremiumModal(false)}
-          onUpgrade={() => {
-            window.location.href = '/premium';
-          }}
+          onUpgrade={() => router.push('/premium')}
         />
 
         {userStatus.isAdmin && (

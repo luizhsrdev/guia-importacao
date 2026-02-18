@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useMemo } from 'react';
 import SellerCard from '@/components/SellerCard';
+import { SellerFilters } from '@/components/SellerFilters';
+import { SellerFormModal } from '@/components/SellerFormModal';
+import { useAdminMode } from '@/contexts/AdminModeContext';
+
+type SortOption = 'none' | 'alpha-asc' | 'alpha-desc';
 
 interface Seller {
   id: string;
@@ -24,127 +28,215 @@ interface Seller {
 
 interface VendedoresClientProps {
   sellers: Seller[];
+  sellerCategories: Array<{ id: string; name: string }>;
 }
 
-export default function VendedoresClient({ sellers }: VendedoresClientProps) {
-  const router = useRouter();
-  const [filter, setFilter] = useState<'all' | 'gold' | 'blacklist'>('all');
+interface FiltersState {
+  search: string;
+  sortBy: SortOption;
+}
 
-  const filteredSellers = sellers.filter((seller) => {
-    if (filter === 'all') return true;
-    return seller.status === filter;
-  });
+export default function VendedoresClient({ sellers, sellerCategories }: VendedoresClientProps) {
+  const { isAdminModeActive } = useAdminMode();
+  const [filterStatus, setFilterStatus] = useState<'all' | 'gold' | 'blacklist'>('all');
+  const [filters, setFilters] = useState<FiltersState>({ search: '', sortBy: 'none' });
+  const [editingSellerId, setEditingSellerId] = useState<string | undefined>();
+  const [showSellerFormModal, setShowSellerFormModal] = useState(false);
 
-  const goldCount = sellers.filter((s) => s.status === 'gold').length;
-  const blacklistCount = sellers.filter((s) => s.status === 'blacklist').length;
+  const handleAddSeller = () => {
+    setEditingSellerId(undefined);
+    setShowSellerFormModal(true);
+  };
+
+  const handleEditSeller = (sellerId: string) => {
+    setEditingSellerId(sellerId);
+    setShowSellerFormModal(true);
+  };
+
+  const handleCloseSellerFormModal = () => {
+    setShowSellerFormModal(false);
+    setEditingSellerId(undefined);
+  };
+
+  const handleSellerFormSuccess = () => {
+    window.location.reload();
+  };
+
+  const handleFilterChange = (newFilters: FiltersState) => {
+    setFilters(newFilters);
+  };
+
+  const filteredSellers = useMemo(() => {
+    let result = sellers;
+
+    // Filtro por status (all, gold, blacklist)
+    if (filterStatus !== 'all') {
+      result = result.filter((s) => s.status === filterStatus);
+    }
+
+    // Filtro de busca por nome
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      result = result.filter((s) => s.name.toLowerCase().includes(searchLower));
+    }
+
+    // Ordenação alfabética
+    if (filters.sortBy === 'alpha-asc') {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    } else if (filters.sortBy === 'alpha-desc') {
+      result = [...result].sort((a, b) => b.name.localeCompare(a.name, 'pt-BR'));
+    }
+
+    return result;
+  }, [sellers, filterStatus, filters]);
+
+  const goldCount = useMemo(() => sellers.filter((s) => s.status === 'gold').length, [sellers]);
+  const blacklistCount = useMemo(() => sellers.filter((s) => s.status === 'blacklist').length, [sellers]);
+
+  // Contar dentro do filtro de status atual
+  const totalInCurrentStatus = useMemo(() => {
+    if (filterStatus === 'all') return sellers.length;
+    return filterStatus === 'gold' ? goldCount : blacklistCount;
+  }, [filterStatus, sellers.length, goldCount, blacklistCount]);
 
   return (
-    <div>
-      <button
-        onClick={() => router.push('/')}
-        className="flex items-center gap-2 text-text-secondary hover:text-primary transition-colors mb-6"
-      >
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        Voltar para Produtos
-      </button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <header className="mb-6 sm:mb-8">
+        <h1 className="section-title mb-2">
+          Lista de Vendedores
+        </h1>
 
-      <div className="flex gap-3 mb-8 flex-wrap">
+        {isAdminModeActive && (
+          <button
+            onClick={handleAddSeller}
+            className="flex items-center gap-2 h-9 px-4 rounded-lg bg-red-500/10 text-red-500 border border-red-500 font-medium text-sm hover:bg-red-500/20 transition-all mt-3"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Adicionar Vendedor
+          </button>
+        )}
+      </header>
+
+      {/* Filtros de status (tabs) */}
+      <div className="flex gap-2 sm:gap-3 mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible scrollbar-hide">
         <button
-          onClick={() => setFilter('all')}
-          className={`px-6 py-3 rounded-md font-medium transition-all ${
-            filter === 'all'
-              ? 'btn-primary'
-              : 'btn-secondary'
+          onClick={() => setFilterStatus('all')}
+          className={`h-11 px-5 sm:px-6 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
+            filterStatus === 'all'
+              ? 'bg-primary text-white shadow-glow-md'
+              : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated hover:border-border-emphasis shadow-sm'
           }`}
         >
-          Todos ({sellers.length})
+          Todos
+          <span className="ml-2 text-xs opacity-70">{sellers.length}</span>
         </button>
+
         <button
-          onClick={() => setFilter('gold')}
-          className={`px-6 py-3 rounded-md font-medium transition-all ${
-            filter === 'gold'
-              ? 'bg-accent-gold text-background'
-              : 'btn-secondary'
+          onClick={() => setFilterStatus('gold')}
+          className={`h-11 px-5 sm:px-6 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
+            filterStatus === 'gold'
+              ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 text-white shadow-glow-primary'
+              : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated hover:border-border-emphasis shadow-sm'
           }`}
         >
-          Lista Dourada ({goldCount})
+          Verificados
+          <span className="ml-2 text-xs opacity-70">{goldCount}</span>
         </button>
+
         <button
-          onClick={() => setFilter('blacklist')}
-          className={`px-6 py-3 rounded-md font-medium transition-all ${
-            filter === 'blacklist'
-              ? 'btn-danger'
-              : 'btn-secondary'
+          onClick={() => setFilterStatus('blacklist')}
+          className={`h-11 px-5 sm:px-6 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200 ${
+            filterStatus === 'blacklist'
+              ? 'bg-gradient-to-r from-red-500 to-red-400 text-white shadow-glow-danger'
+              : 'bg-surface text-text-secondary border border-border hover:bg-surface-elevated hover:border-border-emphasis shadow-sm'
           }`}
         >
-          Blacklist ({blacklistCount})
+          Blacklist
+          <span className="ml-2 text-xs opacity-70">{blacklistCount}</span>
         </button>
       </div>
 
+      {/* Barra de busca e ordenação */}
+      <SellerFilters
+        onFilterChange={handleFilterChange}
+        totalCount={totalInCurrentStatus}
+        filteredCount={filteredSellers.length}
+      />
+
       {filteredSellers.length === 0 ? (
-        <div className="text-center py-16 bg-surface rounded-lg border border-border">
-          <svg
-            className="w-16 h-16 mx-auto mb-4 text-text-tertiary opacity-50"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-            />
-          </svg>
-          <p className="text-text-secondary text-lg">
-            Nenhum vendedor encontrado nesta categoria.
+        <div className="text-center py-20 bg-surface rounded-2xl border border-border">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-surface-elevated flex items-center justify-center">
+            <svg
+              className="w-6 h-6 text-text-muted"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+              />
+            </svg>
+          </div>
+          <p className="text-text-secondary font-medium mb-1">
+            Nenhum vendedor encontrado
+          </p>
+          <p className="text-text-muted text-sm">
+            {filters.search ? 'Tente outra busca' : 'Selecione outro filtro'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {filteredSellers.map((seller) => (
-            <SellerCard key={seller.id} seller={seller} />
+            <SellerCard
+              key={seller.id}
+              seller={seller}
+              onEdit={() => handleEditSeller(seller.id)}
+            />
           ))}
         </div>
       )}
 
-      <div className="mt-12 p-6 bg-surface-elevated border border-border rounded-lg">
-        <h3 className="text-text-primary font-semibold mb-2 flex items-center gap-2">
-          <svg
-            className="w-5 h-5 text-accent-blue"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          Aviso Importante
-        </h3>
-        <p className="text-text-secondary text-sm leading-relaxed">
-          Esta lista é baseada em experiências relatadas pela comunidade e nossa
-          análise. A <span className="text-accent-gold font-medium">Lista Dourada</span> contém vendedores com
-          histórico positivo, mas sempre faça sua própria pesquisa antes de
-          comprar. A <span className="text-danger font-medium">Blacklist</span> lista vendedores reportados por
-          práticas fraudulentas - evite completamente estes perfis.
-        </p>
-      </div>
+      <aside className="mt-10 sm:mt-12 p-5 sm:p-6 bg-gradient-to-br from-sky-500/5 to-blue-500/5 rounded-2xl border border-sky-500/20">
+        <div className="flex items-start gap-4">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-md">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-text-primary mb-1.5">
+              Aviso Importante
+            </h3>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Lista baseada em experiências da comunidade. Vendedores <span className="text-verified font-semibold">verificados</span> têm histórico positivo, mas sempre faça sua pesquisa. A <span className="text-red-500 dark:text-red-400 font-semibold">blacklist</span> contém vendedores com práticas fraudulentas reportadas.
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      {/* Modal de Edição de Vendedor */}
+      <SellerFormModal
+        isOpen={showSellerFormModal}
+        onClose={handleCloseSellerFormModal}
+        sellerId={editingSellerId}
+        categories={sellerCategories}
+        onSuccess={handleSellerFormSuccess}
+      />
     </div>
   );
 }

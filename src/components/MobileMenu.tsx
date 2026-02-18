@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -33,6 +34,7 @@ function MenuContent({
   showExchangeRateOnHome,
   onToggleExchangeRateVisibility,
 }: MenuContentProps) {
+  const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
   const { currency, effectiveRate, loading: rateLoading, setCurrency } = useCurrency();
   const { isAdminModeActive, toggleAdminMode } = useAdminMode();
@@ -107,14 +109,14 @@ function MenuContent({
     onClose();
   };
 
-  const handleVendedoresClick = () => {
+  const handlePremiumNavigation = (path: string) => {
     if (!userStatus.isAuthenticated) {
-      window.location.href = '/sign-in';
+      router.push('/sign-in');
       return;
     }
 
     if (userStatus.isPremium || userStatus.isAdmin) {
-      onTabChange('vendedores');
+      router.push(path);
       onClose();
       return;
     }
@@ -129,7 +131,7 @@ function MenuContent({
     onClose();
   };
 
-  const isVendedoresLocked = !userStatus.isAuthenticated || (!userStatus.isPremium && !userStatus.isAdmin);
+  const isPremiumLocked = !userStatus.isAuthenticated || (!userStatus.isPremium && !userStatus.isAdmin);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -223,10 +225,10 @@ function MenuContent({
 
             {/* Vendedores */}
             <button
-              onClick={handleVendedoresClick}
+              onClick={() => handlePremiumNavigation('/vendedores')}
               className="relative flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >
-              {isVendedoresLocked && (
+              {isPremiumLocked && (
                 <span className="absolute top-2 right-2 tag-gold text-[8px] px-1.5 py-0.5">PRO</span>
               )}
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -237,11 +239,27 @@ function MenuContent({
               <span className="text-xs font-medium text-text-primary">Vendedores</span>
             </button>
 
+            {/* Declaracao */}
+            <button
+              onClick={() => handlePremiumNavigation('/declaracao')}
+              className="relative flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
+            >
+              {isPremiumLocked && (
+                <span className="absolute top-2 right-2 tag-gold text-[8px] px-1.5 py-0.5">PRO</span>
+              )}
+              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-text-primary">Declaracao</span>
+            </button>
+
             {/* Cotação */}
             <button
               onClick={() => {
+                router.push('/cotacao');
                 onClose();
-                window.location.href = '/cotacao';
               }}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >
@@ -256,8 +274,8 @@ function MenuContent({
             {/* Calculadora */}
             <button
               onClick={() => {
+                router.push('/calculator');
                 onClose();
-                window.location.href = '/calculator';
               }}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >
@@ -272,8 +290,8 @@ function MenuContent({
             {/* Ferramentas */}
             <button
               onClick={() => {
+                router.push('/tools');
                 onClose();
-                window.location.href = '/tools';
               }}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-elevated active:scale-95 transition-transform"
             >

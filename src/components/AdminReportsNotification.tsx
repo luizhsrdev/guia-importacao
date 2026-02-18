@@ -1,35 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { fetcher } from '@/lib/fetcher';
+
+interface ReportCountResponse {
+  count: number;
+}
+
+const REPORT_COUNT_KEY = '/api/admin/reports/count';
 
 export function AdminReportsNotification() {
-  const [reportCount, setReportCount] = useState(0);
   const router = useRouter();
   const { isAdminModeActive } = useAdminMode();
 
-  const fetchReportCount = async () => {
-    try {
-      const response = await fetch('/api/admin/reports/count');
-      if (response.ok) {
-        const data = await response.json();
-        setReportCount(data.count || 0);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar contagem de reports:', error);
+  // SWR com refresh automático a cada 6 horas
+  const { data } = useSWR<ReportCountResponse>(
+    isAdminModeActive ? REPORT_COUNT_KEY : null, // Só busca se admin mode ativo
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 300000, // 5 minutos
+      refreshInterval: 21600000, // 6 horas
     }
-  };
+  );
 
-  useEffect(() => {
-    // Buscar imediatamente
-    fetchReportCount();
-
-    // Atualizar a cada 6 horas (21600000ms) - 3-4 vezes ao dia
-    const interval = setInterval(fetchReportCount, 21600000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const reportCount = data?.count ?? 0;
 
   const handleClick = () => {
     router.push('/admin/reported-products');

@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight, Info, TrendingDown, Image as ImageIcon } from 'lucide-react';
-import Link from 'next/link';
+import { GlobalHeader } from '@/components/GlobalHeader';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
+import type { UserStatus } from '@/types';
 
 // Dados dos passos com URLs de imagem do Cloudinary
 // Para adicionar imagens: faça upload no Cloudinary e substitua as URLs abaixo
@@ -28,7 +30,7 @@ const STEPS_DATA = [
   {
     number: 4,
     title: 'Acesse a aba de recarga no seu Agente',
-    description: 'CSSBuy ou ACBuy → selecione o método CoinPal',
+    description: 'CSSBuy → selecione o método CoinPal',
     image: 'https://res.cloudinary.com/importacao/image/upload/v1770078469/step-4_qnbf48.png',
   },
   {
@@ -168,46 +170,16 @@ function ImageModal({ step, onClose }: { step: typeof STEPS_DATA[0] | null; onCl
   );
 }
 
-interface ExchangeRateData {
-  officialRate: number;
-  manualAdjustment: number;
-  effectiveRate: number;
-  updatedAt: string;
-  notes?: string;
+interface CotacaoClientProps {
+  userStatus: UserStatus;
 }
 
-export default function CotacaoClient() {
-  const [rateData, setRateData] = useState<ExchangeRateData | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function CotacaoClient({ userStatus }: CotacaoClientProps) {
+  // Usar hook SWR com cache automático (compartilhado com CurrencyContext)
+  const { data: rateData, loading } = useExchangeRate();
   const [inputCNY, setInputCNY] = useState('');
   const [resultBRL, setResultBRL] = useState<number | null>(null);
   const [selectedStep, setSelectedStep] = useState<typeof STEPS_DATA[0] | null>(null);
-
-  useEffect(() => {
-    fetchRate();
-  }, []);
-
-  const fetchRate = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/exchange-rate');
-      if (res.ok) {
-        const data = await res.json();
-        setRateData(data);
-      }
-    } catch (error) {
-      console.error('Error fetching exchange rate:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCalculate = () => {
-    if (!rateData || !inputCNY) return;
-    const cny = parseFloat(inputCNY);
-    if (isNaN(cny)) return;
-    setResultBRL(cny / rateData.effectiveRate);
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9.]/g, '');
@@ -233,21 +205,10 @@ export default function CotacaoClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8 sm:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
-        {/* Back Link */}
-        <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Voltar
-          </Link>
-        </div>
+    <main className="min-h-screen bg-background">
+      <GlobalHeader userStatus={userStatus} />
 
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
@@ -383,7 +344,7 @@ export default function CotacaoClient() {
                 <p className="font-medium text-yellow-500 mb-1">Pré-requisitos</p>
                 <ul className="text-text-secondary space-y-1 text-xs sm:text-sm">
                   <li>• Conta verificada na Binance (maior de idade)</li>
-                  <li>• Conta em agente de compras (CSSBuy ou ACBuy)</li>
+                  <li>• Conta em agente de compras (CSSBuy)</li>
                   <li>• Mesma titularidade em todas as contas e pagamentos</li>
                 </ul>
               </div>
@@ -428,17 +389,6 @@ export default function CotacaoClient() {
                 </svg>
                 Abrir CSSBuy
               </a>
-              <a
-                href="https://www.acbuy.com/member/wallet"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-400 text-sm font-medium hover:bg-blue-500/20 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Abrir ACBuy
-              </a>
             </div>
           </div>
         </div>
@@ -447,6 +397,6 @@ export default function CotacaoClient() {
 
       {/* Modal de imagem para mobile/touch */}
       <ImageModal step={selectedStep} onClose={() => setSelectedStep(null)} />
-    </div>
+    </main>
   );
 }

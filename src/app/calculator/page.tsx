@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import CalculatorClient from './CalculatorClient';
+import { getCurrentUserStatus } from '@/lib/user-server';
 
 export const metadata: Metadata = {
   title: 'Calculadora de Custo de Importação | Guia Importação Xianyu',
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
   keywords: 'calculadora importação china, custo frete cssbuy, jd express calculadora, custo total xianyu',
 };
 
-export default function CalculatorPage() {
-  return <CalculatorClient />;
+export default async function CalculatorPage() {
+  const userStatus = await getCurrentUserStatus();
+  return <CalculatorClient userStatus={userStatus} />;
 }

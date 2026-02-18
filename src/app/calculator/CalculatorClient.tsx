@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
 import { Truck, Shield, Receipt, RefreshCw, Info, AlertTriangle, CheckCircle, ChevronDown, Check, ImageIcon, X } from 'lucide-react';
+import { GlobalHeader } from '@/components/GlobalHeader';
+import type { UserStatus } from '@/types';
 
 // Service fee levels
 const SERVICE_FEE_LEVELS = [
@@ -122,7 +123,11 @@ interface FormData {
   productAttributes: string[];
 }
 
-export default function CalculatorClient() {
+interface CalculatorClientProps {
+  userStatus: UserStatus;
+}
+
+export default function CalculatorClient({ userStatus }: CalculatorClientProps) {
   const [formData, setFormData] = useState<FormData>({
     productPrice: '',
     weightGrams: '',
@@ -381,21 +386,10 @@ export default function CalculatorClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8 sm:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
-        {/* Back Link */}
-        <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Voltar
-          </Link>
-        </div>
+    <main className="min-h-screen bg-background">
+      <GlobalHeader userStatus={userStatus} />
 
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
@@ -1159,6 +1153,6 @@ export default function CalculatorClient() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
